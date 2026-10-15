@@ -79,12 +79,19 @@
 
         <!-- ೨. ಡೆಲಿವರಿ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ -->
         <div id="dashboard-delivery" class="space-y-4 hidden page-section">
+            
+            <!-- ಟ್ಯಾಬ್ ಬಟನ್‌ಗಳು -->
+            <div class="flex gap-1 mb-2">
+                <button onclick="switchDeliveryTab('orders')" id="tab-orders" class="flex-1 bg-indigo-600 text-white py-2 rounded-xl text-[11px] font-bold">📦 ಹೊಸ ಆರ್ಡರ್‌ಗಳು</button>
+                <button onclick="switchDeliveryTab('payments')" id="tab-payments" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl text-[11px] font-bold">💳 ಪೇಮೆಂಟ್ಸ್</button>
+                <button onclick="switchDeliveryTab('returns')" id="tab-returns" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl text-[11px] font-bold">🔄 ರಿಟರ್ನ್ಸ್</button>
+            </div>
+
+            <!-- ಡಿಜಿಟಲ್ ID ಮತ್ತು ವರದಿ -->
             <div class="bg-white p-4 rounded-xl shadow space-y-3">
-                
-                <!-- ಡಿಜಿಟಲ್ ID ಮತ್ತು ವರದಿ -->
                 <div class="bg-indigo-50 p-3 rounded-xl text-center space-y-1">
                     <p id="delivery-id-badge" class="text-xs font-bold text-indigo-800 bg-indigo-200 inline-block px-3 py-1 rounded-full"></p>
-                    <h3 class="font-bold text-sm text-gray-800 pt-1">🛵 ಡೆಲಿವರಿ ಕಾರ್ಯಗಳು & ಇವತ್ತಿನ ವರದಿ</h3>
+                    <h3 class="font-bold text-sm text-gray-800 pt-1">🛵 ಡೆಲಿವರಿ ಕಾರ್ಯಗಳು & ವರದಿ</h3>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2 bg-gray-50 p-3 rounded-xl text-center border">
@@ -98,8 +105,24 @@
                     </div>
                 </div>
 
-                <h4 class="font-bold text-xs text-gray-700 pt-2">ಅಂಗಡಿಯಿಂದ ಡೆಲಿವರಿಗೆ ಬಂದಿರುವ ಆರ್ಡರ್‌ಗಳು:</h4>
-                <div id="delivery-orders-list" class="text-xs text-gray-600">ಯಾವುದೇ ಡೆಲಿವರಿ ಬಾಕಿ ಇಲ್ಲ.</div>
+                <!-- ಸೆಕ್ಷನ್ 1: ಹೊಸ ಆರ್ಡರ್‌ಗಳು -->
+                <div id="deliv-orders-section" class="space-y-2">
+                    <h4 class="font-bold text-xs text-gray-700 pt-1">ಅಂಗಡಿಯಿಂದ ಡೆಲಿವರಿಗೆ ಬಂದಿರುವ ಆರ್ಡರ್‌ಗಳು:</h4>
+                    <div id="delivery-orders-list" class="text-xs text-gray-600">ಯಾವುದೇ ಡೆಲಿವರಿ ಬಾಕಿ ಇಲ್ಲ.</div>
+                </div>
+
+                <!-- ಸೆಕ್ಷನ್ 2: ಪೇಮೆಂಟ್ಸ್ -->
+                <div id="deliv-payments-section" class="space-y-2 hidden">
+                    <h4 class="font-bold text-xs text-gray-700 pt-1">ಪೇಮೆಂಟ್ಸ್ & ಕಲೆಕ್ಷನ್ ವಿವರ:</h4>
+                    <div id="delivery-payments-list" class="text-xs text-gray-600">ಯಾವುದೇ ಪೇಮೆಂಟ್ ಬಾಕಿ ಇಲ್ಲ.</div>
+                </div>
+
+                <!-- ಸೆಕ್ಷನ್ 3: ರಿಟರ್ನ್ಸ್ -->
+                <div id="deliv-returns-section" class="space-y-2 hidden">
+                    <h4 class="font-bold text-xs text-gray-700 pt-1">ಗ್ರಾಹಕರಿಂದ ಬಂದ ರಿಟರ್ನ್ ವಿನಂತಿಗಳು:</h4>
+                    <div id="delivery-returns-list" class="text-xs text-gray-600">ಯಾವುದೇ ರಿಟರ್ನ್ ಇಲ್ಲ.</div>
+                </div>
+
             </div>
         </div>
 
@@ -126,6 +149,19 @@
 
         function closeImageModal() {
             document.getElementById('image-modal').classList.add('hidden');
+        }
+
+        function switchDeliveryTab(tab) {
+            ['orders', 'payments', 'returns'].forEach(t => {
+                document.getElementById(`deliv-${t}-section`).classList.add('hidden');
+                document.getElementById(`tab-${t}`).className = "flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl text-[11px] font-bold";
+            });
+            document.getElementById(`deliv-${tab}-section`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}`).className = "flex-1 bg-indigo-600 text-white py-2 rounded-xl text-[11px] font-bold";
+            
+            if (tab === 'orders') renderDeliveryOrders();
+            if (tab === 'payments') renderDeliveryPayments();
+            if (tab === 'returns') renderDeliveryReturns();
         }
 
         function checkLogin() {
@@ -181,23 +217,14 @@
                 return;
             }
 
-            // 4 ಅಂಕಿಯ ಡಿಜಿಟಲ್ ID ಸೃಷ್ಟಿ
             let deliveryId = Math.floor(1000 + Math.random() * 9000);
 
             compressImage(selfieFile, function(selfieUrl) {
                 compressImage(aadharFront, function(frontUrl) {
                     compressImage(aadharBack, function(backUrl) {
                         currentDelivery = { 
-                            name, 
-                            phone, 
-                            district, 
-                            taluk, 
-                            city, 
-                            pincode, 
-                            deliveryId,
-                            selfie: selfieUrl,
-                            aadharFront: frontUrl,
-                            aadharBack: backUrl
+                            name, phone, district, taluk, city, pincode, deliveryId,
+                            selfie: selfieUrl, aadharFront: frontUrl, aadharBack: backUrl
                         };
                         localStorage.setItem('currentDelivery', JSON.stringify(currentDelivery));
                         showModal("ಯಶಸ್ವಿ!", `ಡೆಲಿವರಿ ಬಾಯ್ ಖಾತೆ ಸೃಷ್ಟಿಯಾಗಿದೆ!<br><b>ನಿಮ್ಮ 4 ಅಂಕಿಯ ಡಿಜಿಟಲ್ ID: ${deliveryId}</b>`, "🛵");
@@ -217,9 +244,7 @@
             let dDiv = document.getElementById('delivery-orders-list');
             let savedOrders = JSON.parse(localStorage.getItem('market_orders')) || [];
             
-            // ಅಂಗಡಿಯಿಂದ ಪ್ಯಾಕಿಂಗ್ ಮುಗಿದು ಡೆಲಿವರಿಗೆ ಬಂದಿರುವ ಆರ್ಡರ್‌ಗಳು
-            let readyOrders = savedOrders.filter(o => o.packingReady);
-
+            let readyOrders = savedOrders.filter(o => o.packingReady && !o.delivered);
             let deliveredOrders = savedOrders.filter(o => o.delivered);
             let totalAmount = deliveredOrders.reduce((sum, ord) => sum + (ord.totalAmount || 0), 0);
             let commission = Math.round(totalAmount * 0.10);
@@ -252,17 +277,12 @@
                     <div class="text-[11px] text-gray-700 space-y-0.5 pt-1">
                         <p><b>ಗ್ರಾಹಕರು:</b> ${o.customerName} (<a href="tel:${o.phone}" class="text-blue-600 underline font-bold">📞 ${o.phone}</a>)</p>
                         <p><b>ವಿಳಾಸ:</b> ${o.city}, ${o.taluk} (Pin: ${o.pincode})</p>
-                        <p><b>ಪಾವತಿ ಸ್ಥಿತಿ:</b> <span class="font-bold ${o.delivered ? 'text-green-600' : 'text-orange-600'}">${o.delivered ? 'ಪಾವತಿ ಯಶಸ್ವಿ (Success)' : 'ಪೇಮೆಂಟ್ ಪೆಂಡಿಂಗ್ (Cash Pending)'}</span></p>
                     </div>
 
                     <div class="flex gap-2 pt-1 flex-wrap">
                         <a href="https://maps.google.com/?q=${encodeURIComponent(o.address)}" target="_blank" class="w-full text-center bg-indigo-600 text-white py-1.5 rounded-lg text-xs font-bold shadow">🗺️ ಜಿಪಿಎಸ್ ಮ್ಯಾಪ್ ರೂಟ್ (GPS Route)</a>
                         
-                        ${!o.delivered ? `
-                            <button onclick="markDelivered(${o.id})" class="w-full bg-green-600 text-white py-2 rounded-lg text-xs font-bold shadow">✅ ಡೆಲಿವರಿ ಮುಗಿಯಿತು & ಪೇಮೆಂಟ್ ಕನ್ಫರ್ಮ್ (OK)</button>
-                        ` : `
-                            <p class="w-full text-center text-green-700 font-bold text-xs py-1">✨ ಡೆಲಿವರಿ ಪೂರ್ಣಗೊಂಡಿದೆ!</p>
-                        `}
+                        <button onclick="markDelivered(${o.id})" class="w-full bg-green-600 text-white py-2 rounded-lg text-xs font-bold shadow">✅ ಡೆಲಿವರಿ ಮುಗಿಯಿತು & ಪೇಮೆಂಟ್ ಕನ್ಫರ್ಮ್ (OK)</button>
                     </div>
                 </div>
             `).join('');
@@ -273,11 +293,52 @@
             let o = savedOrders.find(x => x.id === id);
             if (o) {
                 o.delivered = true;
+                o.packingReady = true;
                 o.status = 'ಡೆಲಿವರಿ ಯಶಸ್ವಿಯಾಗಿದೆ (Payment & Delivery Success)';
                 localStorage.setItem('market_orders', JSON.stringify(savedOrders));
                 renderDeliveryOrders();
-                showModal("ಯಶಸ್ವಿ!", "ಡೆಲಿವರಿ ಮುಗಿದಿದೆ ಮತ್ತು ಪೇಮೆಂಟ್ ಸಕ್ಸೆಸ್ ಆಗಿದೆ!", "💰");
+                showModal("ಯಶಸ್ವಿ!", "ಡೆಲಿವರಿ ಯಶಸ್ವಿಯಾಗಿದೆ! ಗ್ರಾಹಕರಿಗೆ ಮತ್ತು ಅಂಗಡಿಗೆ ಸಂದೇಶ ಕಳುಹಿಸಲಾಗಿದೆ.", "💰");
             }
+        }
+
+        function renderDeliveryPayments() {
+            let pDiv = document.getElementById('delivery-payments-list');
+            let savedOrders = JSON.parse(localStorage.getItem('market_orders')) || [];
+            let deliveredOrders = savedOrders.filter(o => o.delivered);
+
+            if (deliveredOrders.length === 0) {
+                pDiv.innerHTML = "<p class='text-gray-500 text-xs mt-2'>ಯಾವುದೇ ಪೇಮೆಂಟ್ಸ್ ಇಲ್ಲ.</p>";
+                return;
+            }
+
+            pDiv.innerHTML = deliveredOrders.map(o => `
+                <div class="border p-3 rounded-xl bg-green-50 mb-3 space-y-1">
+                    <p class="font-bold text-xs text-indigo-700">ಆರ್ಡರ್ ID: ${o.id}</p>
+                    <p class="text-[11px] text-gray-700"><b>ಗ್ರಾಹಕರು:</b> ${o.customerName}</p>
+                    <p class="text-[11px] text-gray-700"><b>ಮೊತ್ತ:</b> ₹${o.totalAmount} (${o.paymentMethod})</p>
+                    <p class="text-[11px] text-green-700 font-bold">✨ ಪೇಮೆಂಟ್ ಯಶಸ್ವಿ (Payment Success)</p>
+                </div>
+            `).join('');
+        }
+
+        function renderDeliveryReturns() {
+            let rDiv = document.getElementById('delivery-returns-list');
+            let savedOrders = JSON.parse(localStorage.getItem('market_orders')) || [];
+            let returnOrders = savedOrders.filter(o => o.isReturned);
+
+            if (returnOrders.length === 0) {
+                rDiv.innerHTML = "<p class='text-gray-500 text-xs mt-2'>ಯಾವುದೇ ರಿಟರ್ನ್ ವಿನಂತಿಗಳಿಲ್ಲ.</p>";
+                return;
+            }
+
+            rDiv.innerHTML = returnOrders.map(o => `
+                <div class="border p-3 rounded-xl bg-red-50 mb-3 space-y-1">
+                    <p class="font-bold text-xs text-red-700">ರಿಟರ್ನ್ ಆರ್ಡರ್ ID: ${o.id}</p>
+                    <p class="text-[11px] text-gray-700"><b>ಗ್ರಾಹಕರು:</b> ${o.customerName} (${o.phone})</p>
+                    <p class="text-[11px] text-gray-700"><b>ಸ್ಥಳ:</b> ${o.city}, ${o.taluk}</p>
+                    <p class="text-[11px] text-red-600 font-bold">ವಸ್ತು ವಾಪಸ್ ಪಡೆಯಲಾಗಿದೆ.</p>
+                </div>
+            `).join('');
         }
 
         checkLogin();
