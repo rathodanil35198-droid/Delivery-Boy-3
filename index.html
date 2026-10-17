@@ -43,7 +43,7 @@
     <main class="container mx-auto p-4 max-w-md">
 
         <!-- ೧. ಲಾಗಿನ್ / ನೋಂದಣಿ ಪೇಜ್ (ಹೊಸ & ಹಳೆಯ ಲಾಗಿನ್) -->
-        <div id="auth-screen" class="bg-white p-6 rounded-2xl shadow-lg space-y-4 page-section">
+        <div id="auth-screen" class="bg-white p-6 rounded-2xl shadow-lg space-y-4">
             <div class="flex border-b pb-2 gap-2">
                 <button type="button" onclick="switchAuthMode('new')" id="auth-tab-new" class="flex-1 bg-indigo-600 text-white py-2 rounded-xl text-xs font-bold cursor-pointer">ಹೊಸ ನೋಂದಣಿ</button>
                 <button type="button" onclick="switchAuthMode('old')" id="auth-tab-old" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl text-xs font-bold cursor-pointer">ಹಳೆಯ ಲಾಗಿನ್ (ID)</button>
@@ -97,7 +97,7 @@
         </div>
 
         <!-- ೨. ಡೆಲಿವರಿ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ -->
-        <div id="dashboard-delivery" class="space-y-4 hidden page-section">
+        <div id="dashboard-delivery" class="space-y-4 hidden">
             
             <!-- ಟ್ಯಾಬ್ ಬಟನ್‌ಗಳು -->
             <div class="flex gap-1 mb-2">
@@ -219,16 +219,21 @@
         }
 
         function checkLogin() {
+            let authScreen = document.getElementById('auth-screen');
+            let dashScreen = document.getElementById('dashboard-delivery');
+            let userInfo = document.getElementById('user-info');
+            let headerAvatar = document.getElementById('header-avatar');
+
             if (!currentDelivery) {
-                document.getElementById('auth-screen').classList.remove('hidden');
-                document.getElementById('dashboard-delivery').classList.add('hidden');
-                document.getElementById('user-info').classList.add('hidden');
-                document.getElementById('header-avatar').classList.add('hidden');
+                authScreen.classList.remove('hidden');
+                dashScreen.classList.add('hidden');
+                userInfo.classList.add('hidden');
+                headerAvatar.classList.add('hidden');
             } else {
-                document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('dashboard-delivery').classList.remove('hidden');
-                document.getElementById('user-info').classList.remove('hidden');
-                document.getElementById('header-avatar').classList.remove('hidden');
+                authScreen.classList.add('hidden');
+                dashScreen.classList.remove('hidden');
+                userInfo.classList.remove('hidden');
+                headerAvatar.classList.remove('hidden');
                 
                 document.getElementById('logged-user-name').innerText = `${currentDelivery.name} (ID: ${currentDelivery.deliveryId})`;
                 document.getElementById('delivery-id-badge').innerText = `ಡಿಜಿಟಲ್ ID: ${currentDelivery.deliveryId}`;
@@ -295,8 +300,10 @@
                         localStorage.setItem('all_delivery_boys', JSON.stringify(allBoys));
 
                         localStorage.setItem('currentDelivery', JSON.stringify(currentDelivery));
-                        showModal("ಯಶಸ್ವಿ!", `ಡೆಲಿವರಿ ಬಾಯ್ ಖಾತೆ ಸೃಷ್ಟಿಯಾಗಿದೆ!<br><b>ನಿಮ್ಮ 4 ಅಂಕಿಯ ಡಿಜಿಟಲ್ ID: ${deliveryId}</b>`, "🛵");
-                        checkLogin();
+                        
+                        showModal("ಯಶಸ್ವಿ!", `ಡೆಲಿವರಿ ಬಾಯ್ ಖಾತೆ ಸೃಷ್ಟಿಯಾಗಿದೆ!<br><b>ನಿಮ್ಮ 4 ಅಂಕಿಯ ಡಿಜಿಟಲ್ ID: ${deliveryId}</b>`, "🛵", () => {
+                            checkLogin();
+                        });
                     });
                 });
             });
@@ -319,8 +326,10 @@
 
             currentDelivery = foundBoy;
             localStorage.setItem('currentDelivery', JSON.stringify(currentDelivery));
-            showModal("ಯಶಸ್ವಿ!", `ಸ್ವಾಗತ ${foundBoy.name}! ನಿಮ್ಮ ಖಾತೆಗೆ ಯಶಸ್ವಿಯಾಗಿ ಲಾಗಿನ್ ಆಗಲಾಗಿದೆ.`, "✅");
-            checkLogin();
+            
+            showModal("ಯಶಸ್ವಿ!", `ಸ್ವಾಗತ ${foundBoy.name}! ನಿಮ್ಮ ಖಾತೆಗೆ ಯಶಸ್ವಿಯಾಗಿ ಲಾಗಿನ್ ಆಗಲಾಗಿದೆ.`, "✅", () => {
+                checkLogin();
+            });
         }
 
         function logout() {
@@ -330,6 +339,7 @@
         }
 
         function renderDeliveryOrders() {
+            if (!currentDelivery) return;
             let dDiv = document.getElementById('delivery-orders-list');
             let savedOrders = JSON.parse(localStorage.getItem('market_orders')) || [];
             
@@ -340,7 +350,6 @@
             document.getElementById('today-total-orders').innerText = deliveredOrders.length;
             document.getElementById('today-commission').innerText = `₹${commission}`;
 
-            // ಸ್ಪರ್ಧಾತ್ಮಕ ವ್ಯವಸ್ಥೆ: ಪ್ಯಾಕಿಂಗ್ ಆಗಿರುವ ಆರ್ಡರ್‌ಗಳಲ್ಲಿ (ಯಾರೂ ಸ್ವೀಕರಿಸದವು OR ಈ ಡೆಲಿವರಿ ಬಾಯ್ ಸ್ವೀಕರಿಸಿದವು) ಮಾತ್ರ ಕಾಣಿಸಬೇಕು
             let availableOrders = savedOrders.filter(o => (o.statusStep >= 2 || o.packingReady) && !o.delivered && !o.cancelled);
             let myLiveOrders = availableOrders.filter(o => o.acceptedBy === currentDelivery.deliveryId || !o.acceptedBy);
 
@@ -378,7 +387,6 @@
                         <div class="flex gap-2 pt-1 flex-wrap">
                             <a href="https://maps.google.com/?q=${encodeURIComponent(o.address)}" target="_blank" class="w-full text-center bg-indigo-600 text-white py-1.5 rounded-lg text-xs font-bold shadow">🗺️ ಜಿಪಿಎಸ್ ಮ್ಯಾಪ್ ರೂಟ್ (GPS Route)</a>
                             
-                            <!-- ಒಮ್ಮೆ ಯಾರಾದರೂ 'ಪಿಕಪ್ ತಗೊಳ್ಳಿ' ಒತ್ತಿದರೆ, ಅದು ಅವರಿಗೆ ಲಾಕ್ ಆಗುತ್ತದೆ ಮತ್ತು ಇತರರಿಗೆ ತಕ್ಷಣ ಮಾಯವಾಗುತ್ತದೆ -->
                             ${!o.acceptedBy ? `
                                 <button type="button" onclick="acceptAndPickupOrder(${o.id})" class="w-full bg-amber-500 text-gray-900 py-2 rounded-lg text-xs font-bold shadow cursor-pointer">📦 ಅಂಗಡಿಯಿಂದ ಪ್ಯಾಕಿಂಗ್ ಆಗಿದೆ - ಪಿಕಪ್ ತಗೊಳ್ಳಿ (Accept & Pickup)</button>
                             ` : isAcceptedByMe && !isPickedUp ? `
@@ -458,6 +466,7 @@
         }
 
         function renderDeliveryHistory() {
+            if (!currentDelivery) return;
             let hDiv = document.getElementById('delivery-history-list');
             let savedOrders = JSON.parse(localStorage.getItem('market_orders')) || [];
             let currentTime = Date.now();
@@ -486,6 +495,7 @@
         }
 
         function renderDeliveryPayments() {
+            if (!currentDelivery) return;
             let pDiv = document.getElementById('delivery-payments-list');
             let savedOrders = JSON.parse(localStorage.getItem('market_orders')) || [];
             let deliveredOrders = savedOrders.filter(o => o.acceptedBy === currentDelivery.deliveryId && o.delivered);
