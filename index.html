@@ -29,75 +29,20 @@
     <!-- ಹೆಡರ್ -->
     <header class="bg-indigo-700 text-white p-4 shadow-md flex justify-between items-center sticky top-0 z-40">
         <div class="flex items-center gap-2">
-            <div id="header-avatar" class="w-8 h-8 rounded-full bg-indigo-500 border border-white overflow-hidden hidden">
-                <img id="header-selfie-img" src="" class="w-full h-full object-cover">
+            <div id="header-avatar" class="w-8 h-8 rounded-full bg-indigo-500 border border-white overflow-hidden">
+                <img id="header-selfie-img" src="https://via.placeholder.com/150" class="w-full h-full object-cover">
             </div>
             <h1 class="text-sm font-bold">🛵 ಡೆಲಿವರಿ ಬಾಯ್ ಆಪ್</h1>
         </div>
-        <div id="user-info" class="text-xs hidden items-center gap-2">
-            <span id="logged-user-name" class="font-semibold"></span>
-            <button type="button" onclick="logout()" class="bg-red-500 px-2 py-1 rounded text-[10px] cursor-pointer">ಲಾಗ್‌ಔಟ್</button>
+        <div id="user-info" class="text-xs flex items-center gap-2">
+            <span id="logged-user-name" class="font-semibold">ಅನಿಲ್ ರಾಥೋಡ್ (ID: 4821)</span>
         </div>
     </header>
 
     <main class="container mx-auto p-4 max-w-md">
 
-        <!-- ೧. ಲಾಗಿನ್ / ನೋಂದಣಿ ಪೇಜ್ -->
-        <div id="auth-screen" class="bg-white p-6 rounded-2xl shadow-lg space-y-4">
-            <div class="flex border-b pb-2 gap-2">
-                <button type="button" onclick="switchAuthMode('new')" id="auth-tab-new" class="flex-1 bg-indigo-600 text-white py-2 rounded-xl text-xs font-bold cursor-pointer">ಹೊಸ ನೋಂದಣಿ</button>
-                <button type="button" onclick="switchAuthMode('old')" id="auth-tab-old" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl text-xs font-bold cursor-pointer">ಹಳೆಯ ಲಾಗಿನ್ (ID)</button>
-            </div>
-
-            <!-- ಹೊಸ ನೋಂದಣಿ ಫಾರ್ಮ್ -->
-            <div id="form-new" class="space-y-3 text-xs">
-                <h2 class="text-sm font-bold text-gray-800">ಹೊಸ ಡೆಲಿವರಿ ಬಾಯ್ ನೋಂದಣಿ</h2>
-                <div>
-                    <label class="block font-medium text-gray-700">ನಿಮ್ಮ ಹೆಸರು</label>
-                    <input type="text" id="reg-name" placeholder="ಹೆಸರು ನಮೂದಿಸಿ" class="w-full p-2 border rounded-lg text-sm mt-1">
-                </div>
-                <div>
-                    <label class="block font-medium text-gray-700">ಮೊಬೈಲ್ ನಂಬರ್</label>
-                    <input type="tel" id="reg-phone" placeholder="10 ಅಂಕಿಯ ನಂಬರ್" maxlength="10" class="w-full p-2 border rounded-lg text-sm mt-1">
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="reg-district" placeholder="ಜಿಲ್ಲೆ" class="p-2 border rounded-lg text-sm" value="ಯಾದಗಿರಿ">
-                    <input type="text" id="reg-taluk" placeholder="ತಾಲೂಕು" class="p-2 border rounded-lg text-sm" value="ಶಹಾಪುರ">
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="reg-city" placeholder="ಊರು / ಗ್ರಾಮ" class="p-2 border rounded-lg text-sm" value="ಶಹಾಪುರ">
-                    <input type="text" id="reg-pincode" placeholder="ಪಿನ್ ಕೋಡ್" maxlength="6" class="p-2 border rounded-lg text-sm" value="585223">
-                </div>
-
-                <div>
-                    <label class="block font-medium text-gray-700 mb-1">ಸೆಲ್ಫಿ ಫೋಟೋ (Selfie)</label>
-                    <input type="file" id="reg-selfie" accept="image/*" capture="user" class="w-full p-1 border rounded-lg text-xs">
-                </div>
-                <div>
-                    <label class="block font-medium text-gray-700 mb-1">ಮುಂಭಾಗ (Front)</label>
-                    <input type="file" id="reg-aadhar-front" accept="image/*" capture="environment" class="w-full p-1 border rounded-lg text-xs">
-                </div>
-                <div>
-                    <label class="block font-medium text-gray-700 mb-1">ಹಿಂಭಾಗ (Back)</label>
-                    <input type="file" id="reg-aadhar-back" accept="image/*" capture="environment" class="w-full p-1 border rounded-lg text-xs">
-                </div>
-
-                <button type="button" onclick="registerDelivery()" class="w-full bg-indigo-600 text-white py-2.5 rounded-xl font-bold text-sm shadow cursor-pointer">ಖಾತೆ ಸೃಷ್ಟಿಸಿ & 4 ಅಂಕಿಯ ID ಪಡೆದುಕೊಳ್ಳಿ</button>
-            </div>
-
-            <!-- ಹಳೆಯ ಲಾಗಿನ್ ಫಾರ್ಮ್ -->
-            <div id="form-old" class="space-y-3 text-xs hidden">
-                <h2 class="text-sm font-bold text-gray-800">ಹಳೆಯ ಡೆಲಿವರಿ ಬಾಯ್ ಲಾಗಿನ್</h2>
-                <div>
-                    <label class="block font-medium text-gray-700">ನಿಮ್ಮ 4 ಅಂಕಿಯ ಡಿಜಿಟಲ್ ID ನಮೂದಿಸಿ</label>
-                    <input type="tel" id="login-id-input" placeholder="ಉದಾ: 4821" maxlength="4" class="w-full p-3 border rounded-lg text-base mt-1 text-center font-bold tracking-widest">
-                </div>
-                <button type="button" onclick="loginWithId()" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold text-sm shadow cursor-pointer">ಲಾಗಿನ್ ಆಗಿ (Login)</button>
-            </div>
-        </div>
-
-        <!-- ೨. ಡೆಲಿವರಿ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ -->
-        <div id="dashboard-delivery" class="space-y-4 hidden">
+        <!-- ಡೆಲಿವರಿ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ (ನೇರವಾಗಿ ಕಾಣಿಸುವುದು) -->
+        <div id="dashboard-delivery" class="space-y-4">
             
             <!-- ಟ್ಯಾಬ್ ಬಟನ್‌ಗಳು -->
             <div class="flex gap-1 mb-2">
@@ -110,10 +55,10 @@
             <div class="bg-white p-4 rounded-xl shadow space-y-3">
                 <div class="bg-indigo-50 p-3 rounded-xl flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <img id="dash-selfie-img" src="" class="w-12 h-12 rounded-full object-cover border-2 border-indigo-600 shadow">
+                        <img id="dash-selfie-img" src="https://via.placeholder.com/150" class="w-12 h-12 rounded-full object-cover border-2 border-indigo-600 shadow">
                         <div>
-                            <p id="delivery-id-badge" class="text-xs font-bold text-indigo-800 bg-indigo-200 inline-block px-3 py-0.5 rounded-full"></p>
-                            <h3 id="dash-delivery-name" class="font-bold text-sm text-gray-800 mt-0.5"></h3>
+                            <p id="delivery-id-badge" class="text-xs font-bold text-indigo-800 bg-indigo-200 inline-block px-3 py-0.5 rounded-full">ಡಿಜಿಟಲ್ ID: 4821</p>
+                            <h3 id="dash-delivery-name" class="font-bold text-sm text-gray-800 mt-0.5">ಅನಿಲ್ ರಾಥೋಡ್</h3>
                         </div>
                     </div>
                 </div>
@@ -159,7 +104,14 @@
     </main>
 
     <script>
-        let currentDelivery = JSON.parse(localStorage.getItem('currentDelivery')) || null;
+        // ನೇರವಾಗಿ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗಾಗಿ ಡಿಫಾಲ್ಟ್ ಡೆಲಿವರಿ ಬಾಯ್ ವಿವರಗಳು
+        let currentDelivery = {
+            name: "ಅನಿಲ್ ರಾಥೋಡ್",
+            deliveryId: "4821",
+            phone: "9353444070",
+            city: "ಶಹಾಪುರ",
+            taluk: "ಶಹಾಪುರ"
+        };
 
         function showModal(title, message, icon = '🎉', callback = null) {
             document.getElementById('modal-title').innerText = title;
@@ -186,20 +138,6 @@
             document.getElementById('image-modal').classList.add('hidden');
         }
 
-        function switchAuthMode(mode) {
-            if (mode === 'new') {
-                document.getElementById('form-new').classList.remove('hidden');
-                document.getElementById('form-old').classList.add('hidden');
-                document.getElementById('auth-tab-new').className = "flex-1 bg-indigo-600 text-white py-2 rounded-xl text-xs font-bold cursor-pointer";
-                document.getElementById('auth-tab-old').className = "flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl text-xs font-bold cursor-pointer";
-            } else {
-                document.getElementById('form-new').classList.add('hidden');
-                document.getElementById('form-old').classList.remove('hidden');
-                document.getElementById('auth-tab-old').className = "flex-1 bg-indigo-600 text-white py-2 rounded-xl text-xs font-bold cursor-pointer";
-                document.getElementById('auth-tab-new').className = "flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl text-xs font-bold cursor-pointer";
-            }
-        }
-
         function switchDeliveryTab(tab) {
             ['orders', 'history', 'payments', 'returns'].forEach(t => {
                 let sec = document.getElementById(`deliv-${t}-section`);
@@ -218,143 +156,7 @@
             if (tab === 'returns') renderDeliveryReturns();
         }
 
-        function checkLogin() {
-            let authScreen = document.getElementById('auth-screen');
-            let dashScreen = document.getElementById('dashboard-delivery');
-            let userInfo = document.getElementById('user-info');
-            let headerAvatar = document.getElementById('header-avatar');
-
-            if (!currentDelivery) {
-                authScreen.classList.remove('hidden');
-                dashScreen.classList.add('hidden');
-                userInfo.classList.add('hidden');
-                headerAvatar.classList.add('hidden');
-            } else {
-                authScreen.classList.add('hidden');
-                dashScreen.classList.remove('hidden');
-                userInfo.classList.remove('hidden');
-                headerAvatar.classList.remove('hidden');
-                
-                document.getElementById('logged-user-name').innerText = `${currentDelivery.name} (ID: ${currentDelivery.deliveryId})`;
-                document.getElementById('delivery-id-badge').innerText = `ಡಿಜಿಟಲ್ ID: ${currentDelivery.deliveryId}`;
-                document.getElementById('dash-delivery-name').innerText = currentDelivery.name;
-                
-                if (currentDelivery.selfie) {
-                    document.getElementById('header-selfie-img').src = currentDelivery.selfie;
-                    document.getElementById('dash-selfie-img').src = currentDelivery.selfie;
-                }
-                renderDeliveryOrders();
-            }
-        }
-
-        function compressImage(file, callback) {
-            if (!file) {
-                callback("");
-                return;
-            }
-            let reader = new FileReader();
-            reader.onload = function (e) {
-                let img = new Image();
-                img.onload = function () {
-                    let canvas = document.createElement('canvas');
-                    let ctx = canvas.getContext('2d');
-                    canvas.width = 150;
-                    canvas.height = 150;
-                    ctx.drawImage(img, 0, 0, 150, 150);
-                    callback(canvas.toDataURL('image/jpeg', 0.5));
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function registerDelivery() {
-            let name = document.getElementById('reg-name').value.trim();
-            let phone = document.getElementById('reg-phone').value.trim();
-            let district = document.getElementById('reg-district').value.trim();
-            let taluk = document.getElementById('reg-taluk').value.trim();
-            let city = document.getElementById('reg-city').value.trim();
-            let pincode = document.getElementById('reg-pincode').value.trim();
-            let selfieFile = document.getElementById('reg-selfie').files[0];
-            let aadharFront = document.getElementById('reg-aadhar-front').files[0];
-            let aadharBack = document.getElementById('reg-aadhar-back').files[0];
-
-            if (!name || !phone || phone.length < 10) {
-                alert('ದಯವಿಟ್ಟು ಸರಿಯಾದ ಹೆಸರು ಮತ್ತು 10 ಅಂಕಿಯ ಮೊಬೈಲ್ ನಂಬರ್ ಹಾಕಿ!');
-                return;
-            }
-
-            if (!selfieFile || !aadharFront || !aadharBack) {
-                alert('ದಯವಿಟ್ಟು ಸೆಲ್ಫಿ ಮತ್ತು ಆಧಾರ್ ಮುಂಭಾಗ ಹಾಗೂ ಹಿಂಭಾಗದ ಫೋಟೋಗಳನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ!');
-                return;
-            }
-
-            let deliveryId = Math.floor(1000 + Math.random() * 9000).toString();
-
-            compressImage(selfieFile, function(selfieUrl) {
-                compressImage(aadharFront, function(frontUrl) {
-                    compressImage(aadharBack, function(backUrl) {
-                        currentDelivery = { 
-                            name, phone, district, taluk, city, pincode, deliveryId,
-                            selfie: selfieUrl || '', 
-                            aadharFront: frontUrl || '', 
-                            aadharBack: backUrl || ''
-                        };
-                        
-                        let allBoys = JSON.parse(localStorage.getItem('all_delivery_boys')) || [];
-                        allBoys.push(currentDelivery);
-                        localStorage.setItem('all_delivery_boys', JSON.stringify(allBoys));
-                        localStorage.setItem('currentDelivery', JSON.stringify(currentDelivery));
-                        
-                        showModal("ಯಶಸ್ವಿ!", `ಖಾತೆ ಸೃಷ್ಟಿಯಾಗಿದೆ!<br><br><b>ನಿಮ್ಮ 4 ಅಂಕಿಯ ಡಿಜಿಟಲ್ ID: <span style="color:red; font-size:18px;">${deliveryId}</span></b><br><br>ಈ ID ಯನ್ನು ನೆನಪಿನಲ್ಲಿಟ್ಟುಕೊಳ್ಳಿ. ಮುಂದಿನ ಹೊಸ ಲಾಗಿನ್‌ಗೆ ಇದು ಬೇಕಾಗುತ್ತದೆ!`, "🛵", () => {
-                            checkLogin();
-                        });
-                    });
-                });
-            });
-        }
-
-        function loginWithId() {
-            let inputId = document.getElementById('login-id-input').value.trim();
-            if (!inputId || inputId.length !== 4) {
-                alert('ದಯವಿಟ್ಟು ಸರಿಯಾದ 4 ಅಂಕಿಯ ಡಿಜಿಟಲ್ ID ನಮೂದಿಸಿ!');
-                return;
-            }
-
-            let allBoys = JSON.parse(localStorage.getItem('all_delivery_boys')) || [];
-            let foundBoy = allBoys.find(b => b.deliveryId === inputId);
-
-            if (!foundBoy) {
-                // ಯಾವುದೇ ಕಾರಣಕ್ಕೂ ಲಾಗಿನ್ ನಿಲ್ಲಬಾರದು: ಒಂದು ವೇಳೆ ಐಡಿ ಲಿಸ್ಟ್‌ನಲ್ಲಿ ಸಿಗದಿದ್ದರೂ ಹೊಸ ಅಥವಾ ಪ್ರವೇಶಿಸಿದ ಐಡಿಯೊಂದಿಗೆ ಲಾಗಿನ್ ನೀಡುವುದು
-                foundBoy = allBoys.length > 0 ? allBoys[allBoys.length - 1] : {
-                    name: "ಡೆಲಿವರಿ ಬಾಯ್",
-                    phone: "9999999999",
-                    district: "ಯಾದಗಿರಿ",
-                    taluk: "ಶಹಾಪುರ",
-                    city: "ಶಹಾಪುರ",
-                    pincode: "585223",
-                    deliveryId: inputId,
-                    selfie: ""
-                };
-                foundBoy.deliveryId = inputId;
-            }
-
-            currentDelivery = foundBoy;
-            localStorage.setItem('currentDelivery', JSON.stringify(currentDelivery));
-            
-            showModal("ಯಶಸ್ವಿ!", `ಸ್ವಾಗತ ${foundBoy.name}! ನಿಮ್ಮ 4 ಅಂಕಿಯ ID (${inputId}) ಯಶಸ್ವಿಯಾಗಿ ಲಾಗಿನ್ ಆಗಿದೆ.`, "✅", () => {
-                checkLogin();
-            });
-        }
-
-        function logout() {
-            localStorage.removeItem('currentDelivery');
-            currentDelivery = null;
-            checkLogin();
-        }
-
         function renderDeliveryOrders() {
-            if (!currentDelivery) return;
             let dDiv = document.getElementById('delivery-orders-list');
             let savedOrders = JSON.parse(localStorage.getItem('market_orders')) || [];
             
@@ -481,7 +283,6 @@
         }
 
         function renderDeliveryHistory() {
-            if (!currentDelivery) return;
             let hDiv = document.getElementById('delivery-history-list');
             let savedOrders = JSON.parse(localStorage.getItem('market_orders')) || [];
             let currentTime = Date.now();
@@ -510,7 +311,6 @@
         }
 
         function renderDeliveryPayments() {
-            if (!currentDelivery) return;
             let pDiv = document.getElementById('delivery-payments-list');
             let savedOrders = JSON.parse(localStorage.getItem('market_orders')) || [];
             let deliveredOrders = savedOrders.filter(o => o.acceptedBy === currentDelivery.deliveryId && o.delivered);
@@ -535,7 +335,6 @@
         }
 
         function renderDeliveryReturns() {
-            if (!currentDelivery) return;
             let rDiv = document.getElementById('delivery-returns-list');
             let savedOrders = JSON.parse(localStorage.getItem('market_orders')) || [];
             let returnOrders = savedOrders.filter(o => o.returned && !o.returnPickedUp);
@@ -573,7 +372,8 @@
             }
         }
 
-        checkLogin();
+        // ಆಪ್ ಓಪನ್ ಆದ ತಕ್ಷಣ ಆರ್ಡರ್‌ಗಳನ್ನು ಲೋಡ್ ಮಾಡುವುದು
+        renderDeliveryOrders();
     </script>
 </body>
 </html>
