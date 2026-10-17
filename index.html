@@ -136,20 +136,15 @@
     <script>
         let currentDelivery = JSON.parse(localStorage.getItem('currentDelivery')) || null;
 
-        function showModal(title, message, icon = '🎉', callback = null) {
+        function showModal(title, message, icon = '🎉') {
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-message').innerHTML = message;
             document.getElementById('modal-icon').innerText = icon;
             document.getElementById('custom-modal').classList.remove('hidden');
-            window.modalCallback = callback;
         }
 
         function closeModal() {
             document.getElementById('custom-modal').classList.add('hidden');
-            if (typeof window.modalCallback === 'function') {
-                window.modalCallback();
-                window.modalCallback = null;
-            }
         }
 
         function zoomImage(src) {
@@ -189,7 +184,7 @@
                 document.getElementById('dashboard-delivery').classList.remove('hidden');
                 document.getElementById('user-info').classList.remove('hidden');
                 document.getElementById('logged-user-name').innerText = `${currentDelivery.name} (ID: ${currentDelivery.deliveryId})`;
-                document.getElementById('delivery-id-badge').innerText = `ಡಿಜಿಟಲ್ ID: ${currentDelivery.deliveryId}`;
+                document.getElementById('delivery-id-badge',).innerText = `ಡಿಜಿಟಲ್ ID: ${currentDelivery.deliveryId}`;
                 renderDeliveryOrders();
             }
         }
@@ -275,47 +270,42 @@
                 return;
             }
 
-            dDiv.innerHTML = readyOrders.map(o => {
-                let isPickedUp = (o.statusStep >= 3);
-                return `
-                    <div class="border p-3 rounded-xl bg-teal-50 mb-3 space-y-2">
-                        <div class="flex justify-between items-center border-b pb-1">
-                            <span class="font-bold text-xs text-indigo-700">ಆರ್ಡರ್ ID: ${o.id}</span>
-                            <span class="text-[10px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-bold">ಪಾವತಿ: ${o.paymentMethod}</span>
-                        </div>
-
-                        ${o.items.map(i => `
-                            <div class="flex gap-2 items-center">
-                                <img src="${i.frontPhoto}" onclick="zoomImage('${i.frontPhoto}')" class="w-12 h-12 object-cover rounded border cursor-pointer">
-                                <div>
-                                    <p class="font-bold text-xs">${i.name} (${i.size}) x${i.quantity}</p>
-                                    <p class="text-[11px] text-green-600 font-bold">₹${i.discPrice * i.quantity}</p>
-                                </div>
-                            </div>
-                        `).join('')}
-
-                        <div class="text-[11px] text-gray-700 space-y-0.5 pt-1">
-                            <p><b>ಗ್ರಾಹಕರು:</b> ${o.customerName} (<a href="tel:${o.phone}" class="text-blue-600 underline font-bold">📞 ${o.phone}</a>)</p>
-                            <p><b>ವಿಳಾಸ:</b> ${o.city}, ${o.taluk} (Pin: ${o.pincode})</p>
-                        </div>
-
-                        <div class="flex gap-2 pt-1 flex-wrap">
-                            <a href="https://maps.google.com/?q=${encodeURIComponent(o.address)}" target="_blank" class="w-full text-center bg-indigo-600 text-white py-1.5 rounded-lg text-xs font-bold shadow">🗺️ ಜಿಪಿಎಸ್ ಮ್ಯಾಪ್ ರೂಟ್ (GPS Route)</a>
-                            
-                            <!-- ಪಿಕಪ್ ಬಟನ್: ಒಮ್ಮೆ ಒತ್ತಿದರೆ ಈ ಆರ್ಡರ್‌ಗೆ ಇದು ಶಾಶ್ವತವಾಗಿ ಮಾಯವಾಗುತ್ತದೆ -->
-                            ${!isPickedUp ? `
-                                <button type="button" onclick="pickupOrder(${o.id})" class="w-full bg-amber-500 text-gray-900 py-2 rounded-lg text-xs font-bold shadow cursor-pointer">📦 ಅಂಗಡಿಯಿಂದ ಪ್ಯಾಕಿಂಗ್ ಆಗಿದೆ - ಪಿಕಪ್ ತಗೊಳ್ಳಿ (Pickup)</button>
-                            ` : ''}
-
-                            <!-- ಡೆಲಿವರಿ ಮುಗಿಯಿತು ಬಟನ್ -->
-                            <button type="button" onclick="markDelivered(${o.id})" class="w-full bg-green-600 text-white py-2 rounded-lg text-xs font-bold shadow cursor-pointer">✅ ಡೆಲಿವರಿ ಮುಗಿಯಿತು & ಡೆಲಿವರಿ ತಲುಪಿದೆ</button>
-
-                            <!-- ಕ್ಯಾನ್ಸಲ್ ಬಟನ್ -->
-                            <button type="button" onclick="cancelDeliveryOrder(${o.id})" class="w-full bg-red-500 text-white py-1.5 rounded-lg text-xs font-bold shadow cursor-pointer">❌ ಆರ್ಡರ್ ಕ್ಯಾನ್ಸಲ್ ಮಾಡಿ (Cancel)</button>
-                        </div>
+            dDiv.innerHTML = readyOrders.map(o => `
+                <div class="border p-3 rounded-xl bg-teal-50 mb-3 space-y-2">
+                    <div class="flex justify-between items-center border-b pb-1">
+                        <span class="font-bold text-xs text-indigo-700">ಆರ್ಡರ್ ID: ${o.id}</span>
+                        <span class="text-[10px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-bold">ಪಾವತಿ: ${o.paymentMethod}</span>
                     </div>
-                `;
-            }).join('');
+
+                    ${o.items.map(i => `
+                        <div class="flex gap-2 items-center">
+                            <img src="${i.frontPhoto}" onclick="zoomImage('${i.frontPhoto}')" class="w-12 h-12 object-cover rounded border cursor-pointer">
+                            <div>
+                                <p class="font-bold text-xs">${i.name} (${i.size}) x${i.quantity}</p>
+                                <p class="text-[11px] text-green-600 font-bold">₹${i.discPrice * i.quantity}</p>
+                            </div>
+                        </div>
+                    `).join('')}
+
+                    <div class="text-[11px] text-gray-700 space-y-0.5 pt-1">
+                        <p><b>ಗ್ರಾಹಕರು:</b> ${o.customerName} (<a href="tel:${o.phone}" class="text-blue-600 underline font-bold">📞 ${o.phone}</a>)</p>
+                        <p><b>ವಿಳಾಸ:</b> ${o.city}, ${o.taluk} (Pin: ${o.pincode})</p>
+                    </div>
+
+                    <div class="flex gap-2 pt-1 flex-wrap">
+                        <a href="https://maps.google.com/?q=${encodeURIComponent(o.address)}" target="_blank" class="w-full text-center bg-indigo-600 text-white py-1.5 rounded-lg text-xs font-bold shadow">🗺️ ಜಿಪಿಎಸ್ ಮ್ಯಾಪ್ ರೂಟ್ (GPS Route)</a>
+                        
+                        <!-- ಪಿಕಪ್ ತಗೊಳ್ಳಿ ಬಟನ್ (ಶಾಪ್ ಹತ್ರ ಹೋಗಿ ಪಿಕಪ್ ಸ್ವೀಕರಿಸಲು) -->
+                        <button type="button" onclick="pickupOrder(${o.id})" class="w-full bg-amber-500 text-gray-900 py-2 rounded-lg text-xs font-bold shadow cursor-pointer">📦 ಅಂಗಡಿಯಿಂದ ಪ್ಯಾಕಿಂಗ್ ಆಗಿದೆ - ಪಿಕಪ್ ತಗೊಳ್ಳಿ (Pickup)</button>
+
+                        <!-- ಡೆಲಿವರಿ ಮುಗಿಯಿತು ಬಟನ್ -->
+                        <button type="button" onclick="markDelivered(${o.id})" class="w-full bg-green-600 text-white py-2 rounded-lg text-xs font-bold shadow cursor-pointer">✅ ಡೆಲಿವರಿ ಮುಗಿಯಿತು & ಡೆಲಿವರಿ ತಲುಪಿದೆ</button>
+
+                        <!-- ಕ್ಯಾನ್ಸಲ್ ಬಟನ್ (ಗ್ರಾಹಕರು ಬೇಡ ಅಂದರೆ ಡೆಲಿವರಿ ಬಾಯ್ ಕ್ಯಾನ್ಸಲ್ ಮಾಡಲು) -->
+                        <button type="button" onclick="cancelDeliveryOrder(${o.id})" class="w-full bg-red-500 text-white py-1.5 rounded-lg text-xs font-bold shadow cursor-pointer">❌ ಆರ್ಡರ್ ಕ್ಯಾನ್ಸಲ್ ಮಾಡಿ (Cancel)</button>
+                    </div>
+                </div>
+            `).join('');
         }
 
         function pickupOrder(id) {
@@ -327,9 +317,7 @@
                 o.status = o.statusText;
                 localStorage.setItem('market_orders', JSON.stringify(savedOrders));
                 renderDeliveryOrders();
-                showModal("ಯಶಸ್ವಿ!", "ಪಿಕಪ್ ಸ್ವೀಕರಿಸಲಾಗಿದೆ! ಗ್ರಾಹಕರಿಗೆ ಹಾಗೂ ಅಂಗಡಿ ಮಾಲೀಕರಿಗೆ 3ನೇ ಹಂತದ ಸ್ಟೇಟಸ್ ಅಪ್‌ಡೇಟ್ ಆಗಿದೆ.", "🛵", () => {
-                    renderDeliveryOrders();
-                });
+                showModal("ಯಶಸ್ವಿ!", "ಪಿಕಪ್ ಸ್ವೀಕರಿಸಲಾಗಿದೆ! ಗ್ರಾಹಕರಿಗೆ ಹಾಗೂ ಅಂಗಡಿ ಮಾಲೀಕರಿಗೆ 3ನೇ ಹಂತದ ಸ್ಟೇಟಸ್ ಅಪ್‌ಡೇಟ್ ಆಗಿದೆ.", "🛵");
             }
         }
 
@@ -367,6 +355,7 @@
             let currentTime = Date.now();
             let oneMonthMs = 30 * 24 * 60 * 60 * 1000;
 
+            // ಡೆಲಿವರಿ ಆದ ಅಥವಾ ಕ್ಯಾನ್ಸಲ್ ಆದ ಹಾಗೂ 1 ತಿಂಗಳ ಒಳಗಿನ ಆರ್ಡರ್‌ಗಳು ಮಾತ್ರ
             let historyOrders = savedOrders.filter(o => (o.delivered || o.cancelled) && (currentTime - (o.deliveredTime || o.orderTime || currentTime)) <= oneMonthMs);
 
             historyOrders.reverse();
