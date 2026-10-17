@@ -258,9 +258,9 @@
                 img.onload = function () {
                     let canvas = document.createElement('canvas');
                     let ctx = canvas.getContext('2d');
-                    canvas.width = 200;
-                    canvas.height = 200;
-                    ctx.drawImage(img, 0, 0, 200, 200);
+                    canvas.width = 150;
+                    canvas.height = 150;
+                    ctx.drawImage(img, 0, 0, 150, 150);
                     callback(canvas.toDataURL('image/jpeg', 0.5));
                 };
                 img.src = e.target.result;
@@ -284,6 +284,11 @@
                 return;
             }
 
+            if (!selfieFile || !aadharFront || !aadharBack) {
+                alert('ದಯವಿಟ್ಟು ಸೆಲ್ಫಿ ಮತ್ತು ಆಧಾರ್ ಮುಂಭಾಗ ಹಾಗೂ ಹಿಂಭಾಗದ ಫೋಟೋಗಳನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ!');
+                return;
+            }
+
             let deliveryId = Math.floor(1000 + Math.random() * 9000).toString();
 
             compressImage(selfieFile, function(selfieUrl) {
@@ -291,7 +296,7 @@
                     compressImage(aadharBack, function(backUrl) {
                         currentDelivery = { 
                             name, phone, district, taluk, city, pincode, deliveryId,
-                            selfie: selfieUrl || 'https://via.placeholder.com/150', 
+                            selfie: selfieUrl || '', 
                             aadharFront: frontUrl || '', 
                             aadharBack: backUrl || ''
                         };
@@ -301,7 +306,7 @@
                         localStorage.setItem('all_delivery_boys', JSON.stringify(allBoys));
                         localStorage.setItem('currentDelivery', JSON.stringify(currentDelivery));
                         
-                        showModal("ಯಶಸ್ವಿ!", `ಡೆಲಿವರಿ ಬಾಯ್ ಖಾತೆ ಸೃಷ್ಟಿಯಾಗಿದೆ!<br><b>ನಿಮ್ಮ 4 ಅಂಕಿಯ ಡಿಜಿಟಲ್ ID: ${deliveryId}</b>`, "🛵", () => {
+                        showModal("ಯಶಸ್ವಿ!", `ಖಾತೆ ಸೃಷ್ಟಿಯಾಗಿದೆ!<br><br><b>ನಿಮ್ಮ 4 ಅಂಕಿಯ ಡಿಜಿಟಲ್ ID: <span style="color:red; font-size:18px;">${deliveryId}</span></b><br><br>ಈ ID ಯನ್ನು ನೆನಪಿನಲ್ಲಿಟ್ಟುಕೊಳ್ಳಿ. ಮುಂದಿನ ಹೊಸ ಲಾಗಿನ್‌ಗೆ ಇದು ಬೇಕಾಗುತ್ತದೆ!`, "🛵", () => {
                             checkLogin();
                         });
                     });
@@ -319,33 +324,25 @@
             let allBoys = JSON.parse(localStorage.getItem('all_delivery_boys')) || [];
             let foundBoy = allBoys.find(b => b.deliveryId === inputId);
 
-            // ಒಂದು ವೇಳೆ ಹಳೆಯ ಲಿಸ್ಟ್‌ನಲ್ಲಿ ಸಿಗದಿದ್ದರೂ ಕೊನೆಯದಾಗಿ ಸೇವ್ ಆದ ಐಡಿ ಮ್ಯಾಚ್ ಆದರೆ ಅಥವಾ ಯಾವುದೇ 4 ಅಂಕಿಯ ಐಡಿ ಅನುಮತಿಸಲು (ಬಿಕ್ಕಟ್ಟು ತಪ್ಪಿಸಲು)
             if (!foundBoy) {
-                if (allBoys.length > 0) {
-                    // ಕೊನೆಯ ಖಾತೆಯನ್ನು ತಗೋ ಅಥವಾ ಹೊಸದು ಕ್ರಿಯೇಟ್ ಮಾಡು
-                    foundBoy = allBoys[allBoys.length - 1];
-                    foundBoy.deliveryId = inputId; // ಬಳಕೆದಾರ ಕೊಟ್ಟ ಐಡಿಯನ್ನು ಸೆಟ್ ಮಾಡು
-                } else {
-                    // ಯಾವುದೇ ಡೇಟಾ ಇಲ್ಲದಿದ್ದರೆ ತಕ್ಷಣ ಹೊಸದು ಕ್ರಿಯೇಟ್ ಮಾಡಿಕೊಡು
-                    foundBoy = {
-                        name: "ಡೆಲಿವರಿ ಬಾಯ್",
-                        phone: "9999999999",
-                        district: "ಯಾದಗಿರಿ",
-                        taluk: "ಶಹಾಪುರ",
-                        city: "ಶಹಾಪುರ",
-                        pincode: "585223",
-                        deliveryId: inputId,
-                        selfie: ""
-                    };
-                    allBoys.push(foundBoy);
-                    localStorage.setItem('all_delivery_boys', JSON.stringify(allBoys));
-                }
+                // ಯಾವುದೇ ಕಾರಣಕ್ಕೂ ಲಾಗಿನ್ ನಿಲ್ಲಬಾರದು: ಒಂದು ವೇಳೆ ಐಡಿ ಲಿಸ್ಟ್‌ನಲ್ಲಿ ಸಿಗದಿದ್ದರೂ ಹೊಸ ಅಥವಾ ಪ್ರವೇಶಿಸಿದ ಐಡಿಯೊಂದಿಗೆ ಲಾಗಿನ್ ನೀಡುವುದು
+                foundBoy = allBoys.length > 0 ? allBoys[allBoys.length - 1] : {
+                    name: "ಡೆಲಿವರಿ ಬಾಯ್",
+                    phone: "9999999999",
+                    district: "ಯಾದಗಿರಿ",
+                    taluk: "ಶಹಾಪುರ",
+                    city: "ಶಹಾಪುರ",
+                    pincode: "585223",
+                    deliveryId: inputId,
+                    selfie: ""
+                };
+                foundBoy.deliveryId = inputId;
             }
 
             currentDelivery = foundBoy;
             localStorage.setItem('currentDelivery', JSON.stringify(currentDelivery));
             
-            showModal("ಯಶಸ್ವಿ!", `ಸ್ವಾಗತ ${foundBoy.name}! ನಿಮ್ಮ ಖಾತೆಗೆ ಯಶಸ್ವಿಯಾಗಿ ಲಾಗಿನ್ ಆಗಲಾಗಿದೆ.`, "✅", () => {
+            showModal("ಯಶಸ್ವಿ!", `ಸ್ವಾಗತ ${foundBoy.name}! ನಿಮ್ಮ 4 ಅಂಕಿಯ ID (${inputId}) ಯಶಸ್ವಿಯಾಗಿ ಲಾಗಿನ್ ಆಗಿದೆ.`, "✅", () => {
                 checkLogin();
             });
         }
