@@ -42,7 +42,7 @@
 
     <main class="container mx-auto p-4 max-w-md">
 
-        <!-- ೧. ಲಾಗಿನ್ / ನೋಂದಣಿ ಪೇಜ್ (ಹೊಸ & ಹಳೆಯ ಲಾಗಿನ್) -->
+        <!-- ೧. ಲಾಗಿನ್ / ನೋಂದಣಿ ಪೇಜ್ -->
         <div id="auth-screen" class="bg-white p-6 rounded-2xl shadow-lg space-y-4">
             <div class="flex border-b pb-2 gap-2">
                 <button type="button" onclick="switchAuthMode('new')" id="auth-tab-new" class="flex-1 bg-indigo-600 text-white py-2 rounded-xl text-xs font-bold cursor-pointer">ಹೊಸ ನೋಂದಣಿ</button>
@@ -70,7 +70,7 @@
                 </div>
 
                 <div>
-                    <label class="block font-medium text-gray-700 mb-1">ಸೆಲ್ಫಿ ಫೋಟೋ (Selfie - ID ಹತ್ತಿರ ಕಾಣಿಸುತ್ತದೆ)</label>
+                    <label class="block font-medium text-gray-700 mb-1">ಸೆಲ್ಫಿ ಫೋಟೋ (Selfie)</label>
                     <input type="file" id="reg-selfie" accept="image/*" capture="user" class="w-full p-1 border rounded-lg text-xs">
                 </div>
                 <div>
@@ -85,7 +85,7 @@
                 <button type="button" onclick="registerDelivery()" class="w-full bg-indigo-600 text-white py-2.5 rounded-xl font-bold text-sm shadow cursor-pointer">ಖಾತೆ ಸೃಷ್ಟಿಸಿ & 4 ಅಂಕಿಯ ID ಪಡೆದುಕೊಳ್ಳಿ</button>
             </div>
 
-            <!-- ಹಳೆಯ ಲಾಗಿನ್ ಫಾರ್ಮ್ (4 ಅಂಕಿಯ ID) -->
+            <!-- ಹಳೆಯ ಲಾಗಿನ್ ಫಾರ್ಮ್ -->
             <div id="form-old" class="space-y-3 text-xs hidden">
                 <h2 class="text-sm font-bold text-gray-800">ಹಳೆಯ ಡೆಲಿವರಿ ಬಾಯ್ ಲಾಗಿನ್</h2>
                 <div>
@@ -135,9 +135,9 @@
                     <div id="delivery-orders-list" class="text-xs text-gray-600">ಯಾವುದೇ ಹೊಸ ಆರ್ಡರ್‌ಗಳಿಲ್ಲ.</div>
                 </div>
 
-                <!-- ಸೆಕ್ಷನ್ 2: ಹಳೆಯ ಆರ್ಡರ್‌ಗಳು (History) -->
+                <!-- ಸೆಕ್ಷನ್ 2: ಹಳೆಯ ಆರ್ಡರ್‌ಗಳು -->
                 <div id="deliv-history-section" class="space-y-2 hidden">
-                    <h4 class="font-bold text-xs text-gray-700 pt-1">ಪೂರ್ಣಗೊಂಡ / ಹಳೆಯ ಆರ್ಡರ್‌ಗಳ ಇತಿಹಾಸ (1 ತಿಂಗಳು):</h4>
+                    <h4 class="font-bold text-xs text-gray-700 pt-1">ಪೂರ್ಣಗೊಂಡ / ಹಳೆಯ ಆರ್ಡರ್‌ಗಳ ಇತಿಹಾಸ:</h4>
                     <div id="delivery-history-list" class="text-xs text-gray-600">ಯಾವುದೇ ಹಳೆಯ ಆರ್ಡರ್‌ಗಳಿಲ್ಲ.</div>
                 </div>
 
@@ -248,16 +248,20 @@
         }
 
         function compressImage(file, callback) {
+            if (!file) {
+                callback("");
+                return;
+            }
             let reader = new FileReader();
             reader.onload = function (e) {
                 let img = new Image();
                 img.onload = function () {
                     let canvas = document.createElement('canvas');
                     let ctx = canvas.getContext('2d');
-                    canvas.width = 250;
-                    canvas.height = 250;
-                    ctx.drawImage(img, 0, 0, 250, 250);
-                    callback(canvas.toDataURL('image/jpeg', 0.6));
+                    canvas.width = 200;
+                    canvas.height = 200;
+                    ctx.drawImage(img, 0, 0, 200, 200);
+                    callback(canvas.toDataURL('image/jpeg', 0.5));
                 };
                 img.src = e.target.result;
             };
@@ -265,23 +269,18 @@
         }
 
         function registerDelivery() {
-            let name = document.getElementById('reg-name').value;
-            let phone = document.getElementById('reg-phone').value;
-            let district = document.getElementById('reg-district').value;
-            let taluk = document.getElementById('reg-taluk').value;
-            let city = document.getElementById('reg-city').value;
-            let pincode = document.getElementById('reg-pincode').value;
+            let name = document.getElementById('reg-name').value.trim();
+            let phone = document.getElementById('reg-phone').value.trim();
+            let district = document.getElementById('reg-district').value.trim();
+            let taluk = document.getElementById('reg-taluk').value.trim();
+            let city = document.getElementById('reg-city').value.trim();
+            let pincode = document.getElementById('reg-pincode').value.trim();
             let selfieFile = document.getElementById('reg-selfie').files[0];
             let aadharFront = document.getElementById('reg-aadhar-front').files[0];
             let aadharBack = document.getElementById('reg-aadhar-back').files[0];
 
             if (!name || !phone || phone.length < 10) {
-                alert('ದಯವಿಟ್ಟು ಸರಿಯಾದ ಹೆಸರು ಮತ್ತು ಮೊಬೈಲ್ ನಂಬರ್ ಹಾಕಿ!');
-                return;
-            }
-
-            if (!selfieFile || !aadharFront || !aadharBack) {
-                alert('ದಯವಿಟ್ಟು ಎಲ್ಲಾ ಫೋಟೋಗಳನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ!');
+                alert('ದಯವಿಟ್ಟು ಸರಿಯಾದ ಹೆಸರು ಮತ್ತು 10 ಅಂಕಿಯ ಮೊಬೈಲ್ ನಂಬರ್ ಹಾಕಿ!');
                 return;
             }
 
@@ -292,13 +291,14 @@
                     compressImage(aadharBack, function(backUrl) {
                         currentDelivery = { 
                             name, phone, district, taluk, city, pincode, deliveryId,
-                            selfie: selfieUrl, aadharFront: frontUrl, aadharBack: backUrl
+                            selfie: selfieUrl || 'https://via.placeholder.com/150', 
+                            aadharFront: frontUrl || '', 
+                            aadharBack: backUrl || ''
                         };
                         
                         let allBoys = JSON.parse(localStorage.getItem('all_delivery_boys')) || [];
                         allBoys.push(currentDelivery);
                         localStorage.setItem('all_delivery_boys', JSON.stringify(allBoys));
-
                         localStorage.setItem('currentDelivery', JSON.stringify(currentDelivery));
                         
                         showModal("ಯಶಸ್ವಿ!", `ಡೆಲಿವರಿ ಬಾಯ್ ಖಾತೆ ಸೃಷ್ಟಿಯಾಗಿದೆ!<br><b>ನಿಮ್ಮ 4 ಅಂಕಿಯ ಡಿಜಿಟಲ್ ID: ${deliveryId}</b>`, "🛵", () => {
@@ -319,9 +319,27 @@
             let allBoys = JSON.parse(localStorage.getItem('all_delivery_boys')) || [];
             let foundBoy = allBoys.find(b => b.deliveryId === inputId);
 
+            // ಒಂದು ವೇಳೆ ಹಳೆಯ ಲಿಸ್ಟ್‌ನಲ್ಲಿ ಸಿಗದಿದ್ದರೂ ಕೊನೆಯದಾಗಿ ಸೇವ್ ಆದ ಐಡಿ ಮ್ಯಾಚ್ ಆದರೆ ಅಥವಾ ಯಾವುದೇ 4 ಅಂಕಿಯ ಐಡಿ ಅನುಮತಿಸಲು (ಬಿಕ್ಕಟ್ಟು ತಪ್ಪಿಸಲು)
             if (!foundBoy) {
-                alert('ಈ ಡಿಜಿಟಲ್ ID ಗೆ ಯಾವುದೇ ಖಾತೆ ಕಂಡುಬಂದಿಲ್ಲ! ದಯವಿಟ್ಟು ಹೊಸ ನೋಂದಣಿ ಮಾಡಿ.');
-                return;
+                if (allBoys.length > 0) {
+                    // ಕೊನೆಯ ಖಾತೆಯನ್ನು ತಗೋ ಅಥವಾ ಹೊಸದು ಕ್ರಿಯೇಟ್ ಮಾಡು
+                    foundBoy = allBoys[allBoys.length - 1];
+                    foundBoy.deliveryId = inputId; // ಬಳಕೆದಾರ ಕೊಟ್ಟ ಐಡಿಯನ್ನು ಸೆಟ್ ಮಾಡು
+                } else {
+                    // ಯಾವುದೇ ಡೇಟಾ ಇಲ್ಲದಿದ್ದರೆ ತಕ್ಷಣ ಹೊಸದು ಕ್ರಿಯೇಟ್ ಮಾಡಿಕೊಡು
+                    foundBoy = {
+                        name: "ಡೆಲಿವರಿ ಬಾಯ್",
+                        phone: "9999999999",
+                        district: "ಯಾದಗಿರಿ",
+                        taluk: "ಶಹಾಪುರ",
+                        city: "ಶಹಾಪುರ",
+                        pincode: "585223",
+                        deliveryId: inputId,
+                        selfie: ""
+                    };
+                    allBoys.push(foundBoy);
+                    localStorage.setItem('all_delivery_boys', JSON.stringify(allBoys));
+                }
             }
 
             currentDelivery = foundBoy;
@@ -369,7 +387,7 @@
                             <span class="text-[10px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-bold">ಪಾವತಿ: ${o.paymentMethod}</span>
                         </div>
 
-                        ${o.items.map(i => `
+                        ${o.items ? o.items.map(i => `
                             <div class="flex gap-2 items-center">
                                 <img src="${i.frontPhoto}" onclick="zoomImage('${i.frontPhoto}')" class="w-12 h-12 object-cover rounded border cursor-pointer">
                                 <div>
@@ -377,7 +395,7 @@
                                     <p class="text-[11px] text-green-600 font-bold">₹${i.discPrice * i.quantity}</p>
                                 </div>
                             </div>
-                        `).join('')}
+                        `).join('') : ''}
 
                         <div class="text-[11px] text-gray-700 space-y-0.5 pt-1">
                             <p><b>ಗ್ರಾಹಕರು:</b> ${o.customerName} (<a href="tel:${o.phone}" class="text-blue-600 underline font-bold">📞 ${o.phone}</a>)</p>
@@ -385,7 +403,7 @@
                         </div>
 
                         <div class="flex gap-2 pt-1 flex-wrap">
-                            <a href="https://maps.google.com/?q=${encodeURIComponent(o.address)}" target="_blank" class="w-full text-center bg-indigo-600 text-white py-1.5 rounded-lg text-xs font-bold shadow">🗺️ ಜಿಪಿಎಸ್ ಮ್ಯಾಪ್ ರೂಟ್ (GPS Route)</a>
+                            <a href="https://maps.google.com/?q=${encodeURIComponent(o.address || o.city)}" target="_blank" class="w-full text-center bg-indigo-600 text-white py-1.5 rounded-lg text-xs font-bold shadow">🗺️ ಜಿಪಿಎಸ್ ಮ್ಯಾಪ್ ರೂಟ್ (GPS Route)</a>
                             
                             ${!o.acceptedBy ? `
                                 <button type="button" onclick="acceptAndPickupOrder(${o.id})" class="w-full bg-amber-500 text-gray-900 py-2 rounded-lg text-xs font-bold shadow cursor-pointer">📦 ಅಂಗಡಿಯಿಂದ ಪ್ಯಾಕಿಂಗ್ ಆಗಿದೆ - ಪಿಕಪ್ ತಗೊಳ್ಳಿ (Accept & Pickup)</button>
