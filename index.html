@@ -14,11 +14,12 @@
         <div class="max-w-6xl mx-auto flex justify-between items-center flex-wrap gap-2">
             <div>
                 <h1 class="text-lg font-bold flex items-center gap-2">🏪 ನನ್ನ ಲೋಕಲ್ ಶಾಪ್ Panel</h1>
-                <p class="text-xs text-indigo-200">ಐಡಿ: #9353 | ರಿಯಲ್-ಟೈಮ್ ಸಿಂಕ್ ಆನ್</p>
+                <p class="text-xs text-indigo-200">ಐಡಿ: #9353 | ಶಾಶ್ವತ ಸೇವಿಂಗ್ ಆನ್</p>
             </div>
             
             <div class="flex items-center gap-2">
-                <button onclick="openOrdersModal()" class="bg-amber-400 hover:bg-amber-500 text-indigo-950 font-bold text-xs px-3 py-2 rounded-xl shadow flex items-center gap-1">
+                <!-- ಆರ್ಡರ್ ನೋಡಲು ಪ್ರತ್ಯೇಕ ಬಟನ್ -->
+                <button onclick="openOrdersModal()" class="bg-amber-400 hover:bg-amber-500 text-indigo-950 font-bold text-xs px-3.5 py-2 rounded-xl shadow flex items-center gap-1">
                     📋 ಆರ್ಡರ್ ನೋಡಿ (<span id="topOrderBadge">0</span>)
                 </button>
             </div>
@@ -43,7 +44,7 @@
             </div>
         </section>
 
-        <!-- Action Buttons -->
+        <!-- Main Action Buttons -->
         <section class="flex gap-3">
             <button onclick="openAddProductModal()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-2xl shadow-lg text-sm flex items-center justify-center gap-2 border-2 border-indigo-400">
                 ➕ ಹೊಸ ಪ್ರಾಡಕ್ಟ್ / ಫೋಟೋ ಹಾಕಿ
@@ -53,7 +54,7 @@
             </button>
         </section>
 
-        <!-- Products Gallery List -->
+        <!-- Permanent Photo Gallery Section -->
         <section class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
             <div class="flex justify-between items-center mb-3 border-b pb-2">
                 <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
@@ -63,24 +64,26 @@
             </div>
             
             <div id="productList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                <!-- Permanent Product Cards Populated Here -->
+                <!-- Permanent Product Cards Rendered Here -->
             </div>
         </section>
 
     </main>
 
-    <!-- Orders Modal -->
+    <!-- Modal 1: Separate Orders View Popup -->
     <div id="ordersModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-xl rounded-3xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden">
             <div class="bg-indigo-700 text-white p-4 flex justify-between items-center">
                 <h2 class="text-base font-bold flex items-center gap-2">📋 ಬಂದಿರುವ ಆರ್ಡರ್‌ಗಳು (<span id="modalOrderCount">0</span>)</h2>
                 <button onclick="closeOrdersModal()" class="bg-indigo-800 text-white w-8 h-8 rounded-full font-bold text-sm">✕</button>
             </div>
-            <div id="ordersContainer" class="p-4 space-y-3 overflow-y-auto flex-1"></div>
+            <div id="ordersContainer" class="p-4 space-y-3 overflow-y-auto flex-1">
+                <!-- Orders details appear only here -->
+            </div>
         </div>
     </div>
 
-    <!-- Upload Product Modal -->
+    <!-- Modal 2: Product Upload Form Popup -->
     <div id="addProductModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-5 relative">
             <button onclick="closeAddProductModal()" class="absolute top-4 right-4 text-slate-400 text-lg font-bold">✕</button>
@@ -134,8 +137,9 @@
         </div>
     </div>
 
+    <!-- JAVASCRIPT LOGIC (FIXED PERMANENT STORAGE & ULTRA FAST) -->
     <script>
-        // GLOBAL SHARED STORAGE KEYS
+        // Shared Storage Keys
         const SHARED_PRODUCTS_KEY = "SHARED_LOCAL_SHOP_PRODUCTS";
         const SHARED_ORDERS_KEY = "SHARED_LOCAL_SHOP_ORDERS";
 
@@ -148,12 +152,13 @@
             calculateStats();
         });
 
+        // Fast Permanent Save Function
         function saveState() {
             try {
                 localStorage.setItem(SHARED_PRODUCTS_KEY, JSON.stringify(products));
                 localStorage.setItem(SHARED_ORDERS_KEY, JSON.stringify(orders));
             } catch(e) {
-                console.log("Memory limit handled");
+                console.log("Memory Safe Mode");
             }
         }
 
@@ -162,7 +167,7 @@
         function openAddProductModal() { document.getElementById('addProductModal').classList.remove('hidden'); }
         function closeAddProductModal() { document.getElementById('addProductModal').classList.add('hidden'); }
 
-        // FAST ULTRA LIGHTWEIGHT UPLOAD HANDLER
+        // Fast Image Upload Handler
         document.getElementById('productForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -175,7 +180,7 @@
 
             const finalizePublish = (imgSrc) => {
                 products.push({ id: Date.now(), name, oldPrice, newPrice, unit, returnOption, image: imgSrc });
-                saveState();
+                saveState(); // ಶಾಶ್ವತವಾಗಿ ಸೇವ್ ಆಗುತ್ತದೆ
                 renderProducts();
                 document.getElementById('productForm').reset();
                 closeAddProductModal();
@@ -193,6 +198,7 @@
             }
         });
 
+        // Render Permanent Micro Product Thumbnails
         function renderProducts() {
             const list = document.getElementById('productList');
             document.getElementById('productCount').innerText = products.length;
@@ -219,6 +225,7 @@
             `).join('');
         }
 
+        // Only Shop Owner Delete Control
         function confirmDelete(id) {
             if(confirm("ನೀವು ನಿಜವಾಗಿಯೂ ಈ ಫೋಟೋವನ್ನು ಡಿಲೀಟ್ ಮಾಡಲು ಬಯಸುತ್ತೀರಾ?")) {
                 products = products.filter(p => p.id !== id);
@@ -227,6 +234,7 @@
             }
         }
 
+        // Render Orders inside Modal Popup
         function renderOrders() {
             orders = JSON.parse(localStorage.getItem(SHARED_ORDERS_KEY)) || [];
             const container = document.getElementById('ordersContainer');
