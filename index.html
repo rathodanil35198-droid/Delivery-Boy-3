@@ -3,29 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ಲೋಕಲ್ ಶಾಪಿಂಗ್ - Customer App</title>
+    <title>ಲೋಕಲ್ ಮಾರ್ಕೆಟ್ ಶಾಪಿಂಗ್ - Customer App</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .map-route {
-            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-            background-size: 16px 16px;
-        }
-    </style>
 </head>
-<body class="bg-slate-100 font-sans min-h-screen pb-20">
+<body class="bg-slate-100 font-sans min-h-screen text-slate-800 pb-24">
 
-    <!-- Header Navigation -->
-    <header class="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-40">
+    <!-- Header & Cart Count Badge -->
+    <header class="bg-indigo-700 text-white p-4 shadow-lg sticky top-0 z-40">
         <div class="max-w-md mx-auto flex justify-between items-center">
             <div>
-                <h1 class="text-lg font-black tracking-wide">🛍️ ಲೋಕಲ್ ಮಾರ್ಕೆಟ್ ಶಾಪಿಂಗ್</h1>
+                <h1 class="text-lg font-bold flex items-center gap-2">🛍️ ಲೋಕಲ್ ಮಾರ್ಕೆಟ್ ಶಾಪಿಂಗ್</h1>
                 <p class="text-[11px] text-indigo-200">ನಿಮ್ಮ ಹತ್ತಿರದ ಅಂಗಡಿಗಳಿಂದ 30 ನಿಮಿಷದಲ್ಲಿ ಡೆಲಿವರಿ</p>
             </div>
             
-            <!-- Cart Button -->
-            <button onclick="openCartModal()" class="relative bg-indigo-700 hover:bg-indigo-800 p-2.5 rounded-2xl shadow">
-                🛒 <span id="cartBadge" class="absolute -top-1 -right-1 bg-amber-400 text-indigo-950 text-[10px] font-black px-1.5 py-0.5 rounded-full">0</span>
+            <button onclick="openCartModal()" class="relative bg-indigo-800 hover:bg-indigo-900 p-2.5 rounded-2xl shadow transition-all">
+                🛒
+                <span id="cartBadge" class="absolute -top-1 -right-1 bg-amber-400 text-indigo-950 text-[10px] font-black px-1.5 py-0.5 rounded-full border border-white">0</span>
             </button>
         </div>
     </header>
@@ -33,50 +27,216 @@
     <main class="max-w-md mx-auto p-4 space-y-4">
 
         <!-- Banner -->
-        <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl p-4 text-white shadow-md">
-            <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-bold">⚡ ಫ್ಲ್ಯಾಶ್ ಡೆಲಿವರಿ</span>
-            <h2 class="text-base font-bold mt-1">ಸ್ಥಳೀಯ ಅಂಗಡಿಗಳಿಂದ ನೇರ ಖರೀದಿ!</h2>
-            <p class="text-xs text-indigo-100 mt-0.5">ಅಂಗಡಿಯವರು ಹಾಕಿದ ಇತ್ತೀಚಿನ ಆಫರ್ ಫೋಟೋಗಳು ಇಲ್ಲಿವೆ.</p>
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-5 rounded-3xl shadow-md">
+            <span class="text-[10px] bg-white/20 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">⚡ ಫ್ಲ್ಯಾಶ್ ಡೆಲಿವರಿ</span>
+            <h2 class="text-lg font-bold mt-2">ಸ್ಥಳೀಯ ಅಂಗಡಿಗಳಿಂದ ನೇರ ಖರೀದಿ!</h2>
+            <p class="text-xs text-purple-100 mt-0.5">ಅಂಗಡಿಯವರು ಹಾಕಿದ ಇತ್ತೀಚಿನ ಆಫರ್ ಫೋಟೋಗಳು ಇಲ್ಲಿವೆ.</p>
         </div>
 
-        <!-- Search Bar -->
+        <!-- Search Box -->
         <div class="relative">
-            <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="🔍 ಬಟ್ಟೆ, ಚಪ್ಪಲಿ, ದಿನಸಿ ಹುಡುಕಿ..." class="w-full p-3 pl-4 rounded-2xl border bg-white text-xs outline-none shadow-sm focus:ring-2 focus:ring-indigo-500">
+            <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="🔍 ಬಟ್ಟೆ, ಚಪ್ಪಲಿ, ದಿನಸಿ ಹುಡುಕಿ..." class="w-full p-3.5 pl-4 border rounded-2xl text-xs bg-white shadow-sm outline-none focus:ring-2 focus:ring-indigo-500">
         </div>
 
-        <!-- Dynamic Product Grid (Flipkart Style Cards) -->
-        <div>
-            <h3 class="text-xs font-bold text-slate-700 mb-2 flex justify-between items-center">
-                <span>🔥 ಲೈವ್ ಲಭ್ಯವಿರುವ ಸಾಮಗ್ರಿಗಳು</span>
-                <span id="liveItemsCount" class="text-[10px] bg-slate-200 px-2 py-0.5 rounded-full">0 Item</span>
-            </h3>
+        <!-- Live Products List Container -->
+        <div class="flex justify-between items-center border-b pb-2 pt-1">
+            <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1">🔥 ಲೈವ್ ಲಭ್ಯವಿರುವ ಸಾಮಗ್ರಿಗಳು</h3>
+            <span id="itemCountBadge" class="text-xs bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-full">0 Item</span>
+        </div>
 
-            <div id="customerProductGrid" class="grid grid-cols-2 gap-3">
-                <!-- Syncs with Shop Owner uploaded products -->
-            </div>
+        <!-- Grid Container for Uploaded Items -->
+        <div id="customerProductGrid" class="grid grid-cols-2 gap-3">
+            <!-- Uploaded Shop Products Populate Here Automatically -->
         </div>
 
     </main>
 
+
     <!-- ========================================== -->
-    <!-- MODAL 1: CART & CHECKOUT                   -->
+    <!-- MODAL: ಕಾರ್ಟ್ & ಆರ್ಡರ್ ಮಾಡುವ ಪಾಪ್-ಅಪ್     -->
     <!-- ========================================== -->
-    <div id="cartModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center">
-        <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl p-5 max-h-[85vh] flex flex-col">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h2 class="font-bold text-sm text-slate-800">🛒 ನಿಮ್ಮ ಕಾರ್ಟ್ (Your Cart)</h2>
-                <button onclick="closeCartModal()" class="text-slate-400 font-bold">✕</button>
+    <div id="cartModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+            
+            <div class="bg-indigo-700 text-white p-4 flex justify-between items-center">
+                <h2 class="text-base font-bold flex items-center gap-2">🛒 ನಿಮ್ಮ ಕಾರ್ಟ್ (Checkout)</h2>
+                <button onclick="closeCartModal()" class="bg-indigo-800 text-white w-7 h-7 rounded-full font-bold text-xs flex items-center justify-center">✕</button>
             </div>
 
-            <div id="cartItemsList" class="my-3 overflow-y-auto flex-1 space-y-2">
-                <!-- Cart Items -->
+            <div id="cartItemsContainer" class="p-4 space-y-3 overflow-y-auto flex-1">
+                <!-- Cart Items Render Here -->
             </div>
 
-            <div class="border-t pt-3 space-y-3">
-                <div class="flex justify-between text-xs font-bold">
-                    <span>ಒಟ್ಟು ಮೊತ್ತ (Total Amount):</span>
-                    <span id="cartTotal" class="text-indigo-600 text-sm">₹0</span>
+            <!-- Order Form & Checkout Button -->
+            <div class="p-4 bg-slate-50 border-t space-y-3">
+                <div class="flex justify-between font-bold text-sm text-slate-900">
+                    <span>ಒಟ್ಟು ನೀಡಬೇಕಾದ ಮೊತ್ತ:</span>
+                    <span id="cartTotalAmount" class="text-indigo-700 font-black">₹0</span>
                 </div>
 
-                <form onsubmit="placeOrder(event)" class="space-y-2">
-                    <input type="text" id="custName" required placeholder="ನಿಮ್ಮ ಹೆಸರು" class="w-full p-2 border rounded-xl
+                <form id="orderCheckoutForm" onsubmit="handlePlaceOrder(event)" class="space-y-2">
+                    <input type="text" id="custName" required placeholder="ನಿಮ್ಮ ಹೆಸರು" class="w-full p-2.5 border rounded-xl text-xs outline-none bg-white">
+                    <input type="tel" id="custPhone" required placeholder="ಮೊಬೈಲ್ ನಂಬರ್" class="w-full p-2.5 border rounded-xl text-xs outline-none bg-white">
+                    <input type="text" id="custAddress" required placeholder="ಡೆಲಿವರಿ ವಿಳಾಸ (ಅಡ್ರೆಸ್)" class="w-full p-2.5 border rounded-xl text-xs outline-none bg-white">
+
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs transition-all shadow-md">
+                        🚀 ಆರ್ಡರ್ ಕನ್ಫರ್ಮ್ ಮಾಡಿ (Cash On Delivery)
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- JAVASCRIPT LOGIC (CONNECTED ecosystem) -->
+    <script>
+        // Shared Storage Keys matching Shop Owner App
+        const STORE_KEY_PRODUCTS = "LOCAL_SHOP_ULTIMATE_PRODUCTS_V5";
+        const STORE_KEY_ORDERS = "LOCAL_SHOP_ULTIMATE_ORDERS_V5";
+
+        let allProducts = [];
+        let cart = [];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadShopProducts();
+        });
+
+        // Load Products Directly Uploaded By Shop Owners
+        function loadShopProducts() {
+            allProducts = JSON.parse(localStorage.getItem(STORE_KEY_PRODUCTS)) || [];
+            renderCustomerGrid(allProducts);
+        }
+
+        function renderCustomerGrid(items) {
+            const grid = document.getElementById('customerProductGrid');
+            document.getElementById('itemCountBadge').innerText = `${items.length} Item${items.length === 1 ? '' : 's'}`;
+
+            if(items.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-12 bg-white rounded-3xl border p-6">
+                        <p class="text-3xl mb-2">🏪</p>
+                        <p class="text-xs font-bold text-slate-700">ಯಾವುದೇ ಸಾಮಗ್ರಿಗಳು ಲಭ್ಯವಿಲ್ಲ</p>
+                        <p class="text-[10px] text-slate-400 mt-1">ಅಂಗಡಿಯವರು ಸಾಮಗ್ರಿ ಅಪ್‌ಲೋಡ್ ಮಾಡಿದ ತಕ್ಷಣ ಇಲ್ಲಿ ಪ್ರದರ್ಶನಗೊಳ್ಳುತ್ತವೆ.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = items.map(item => `
+                <div class="bg-white border rounded-2xl p-2.5 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="relative mb-2">
+                            <img src="${item.image}" class="w-full h-28 object-cover rounded-xl bg-slate-50 border">
+                            <span class="absolute top-1.5 right-1.5 text-[8px] ${item.returnOption === 'ರಿಟರ್ನ್ ಇದೆ' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'} font-bold px-1.5 py-0.5 rounded-md">
+                                ${item.returnOption}
+                            </span>
+                        </div>
+                        <h4 class="font-bold text-xs text-slate-800 line-clamp-1">${item.name}</h4>
+                        <p class="text-[10px] text-slate-400 mb-1">${item.unit}</p>
+                        <div class="flex items-center gap-1.5">
+                            ${item.oldPrice ? `<span class="line-through text-[10px] text-slate-400">₹${item.oldPrice}</span>` : ''}
+                            <span class="text-indigo-700 font-bold text-sm">₹${item.newPrice}</span>
+                        </div>
+                    </div>
+                    <button onclick="addToCart(${item.id})" class="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[11px] py-2 rounded-xl shadow-sm transition-all flex items-center justify-center gap-1">
+                        🛒 ಕಾರ್ಟ್‌ಗೆ ಸೇರಿಸಿ
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Live Search Filter Function
+        function filterProducts() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allProducts.filter(p => p.name.toLowerCase().includes(query));
+            renderCustomerGrid(filtered);
+        }
+
+        // Cart Logic
+        function addToCart(productId) {
+            const item = allProducts.find(p => p.id === productId);
+            if(item) {
+                cart.push(item);
+                updateCartUI();
+                alert(`✅ "${item.name}" ಕಾರ್ಟ್‌ಗೆ ಸೇರಿದೆ!`);
+            }
+        }
+
+        function updateCartUI() {
+            document.getElementById('cartBadge').innerText = cart.length;
+            const container = document.getElementById('cartItemsContainer');
+            
+            if(cart.length === 0) {
+                container.innerHTML = `<p class="text-center text-xs text-slate-400 py-6">ನಿಮ್ಮ ಕಾರ್ಟ್ ಖಾಲಿಯಾಗಿದೆ</p>`;
+                document.getElementById('cartTotalAmount').innerText = "₹0";
+                return;
+            }
+
+            const total = cart.reduce((sum, item) => sum + Number(item.newPrice), 0);
+            document.getElementById('cartTotalAmount').innerText = `₹${total}`;
+
+            container.innerHTML = cart.map((item, idx) => `
+                <div class="flex justify-between items-center border-b pb-2 text-xs">
+                    <div class="flex items-center gap-2">
+                        <img src="${item.image}" class="w-10 h-10 rounded-lg object-cover border">
+                        <div>
+                            <p class="font-bold text-slate-800">${item.name}</p>
+                            <p class="text-[10px] text-slate-400">${item.unit}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-indigo-700">₹${item.newPrice}</span>
+                        <button onclick="removeFromCart(${idx})" class="text-red-500 font-bold text-xs">✕</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
+
+        function openCartModal() { document.getElementById('cartModal').classList.remove('hidden'); updateCartUI(); }
+        function closeCartModal() { document.getElementById('cartModal').classList.add('hidden'); }
+
+        // Place Order - Transmits Directly to Shop Owner App
+        function handlePlaceOrder(e) {
+            e.preventDefault();
+            if(cart.length === 0) {
+                alert("❌ ನಿಮ್ಮ ಕಾರ್ಟ್ ಖಾಲಿಯಾಗಿದೆ!");
+                return;
+            }
+
+            const name = document.getElementById('custName').value;
+            const phone = document.getElementById('custPhone').value;
+            const address = document.getElementById('custAddress').value;
+
+            const existingOrders = JSON.parse(localStorage.getItem(STORE_KEY_ORDERS)) || [];
+
+            const totalAmount = cart.reduce((sum, item) => sum + Number(item.newPrice), 0);
+            const itemsList = cart.map(i => `${i.name} (${i.unit})`).join(', ');
+
+            const newOrderObj = {
+                id: Math.floor(100 + Math.random() * 900),
+                customer: `${name} (${address})`,
+                phone: phone,
+                item: itemsList,
+                amount: totalAmount,
+                statusStep: 1
+            };
+
+            existingOrders.push(newOrderObj);
+            localStorage.setItem(STORE_KEY_ORDERS, JSON.stringify(existingOrders));
+
+            alert(`🎉 ಧನ್ಯವಾದಗಳು ${name}!\nನಿಮ್ಮ ಆರ್ಡರ್ ಯಶಸ್ವಿಯಾಗಿ ಸಲ್ಲಿಕೆಯಾಗಿದೆ.\nಅಂಗಡಿಯವರು ತಕ್ಷಣ ನಿಮ್ಮ ಸಾಮಗ್ರಿಯನ್ನು ಪ್ಯಾಕ್ ಮಾಡಿ ಕಳುಹಿಸಲಿದ್ದಾರೆ.`);
+
+            cart = [];
+            updateCartUI();
+            document.getElementById('orderCheckoutForm').reset();
+            closeCartModal();
+        }
+    </script>
+</body>
+</html>
