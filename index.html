@@ -2,378 +2,124 @@
 <html lang="kn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ಶಹಾಪುರ ಮಾರ್ಕೆಟ್ - ಡೆಲಿವರಿ ಬಾಯ್ ಆಪ್</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ಶಹಾಪುರ ಮಾರ್ಕೆಟ್ - ಡೆಲಿವರಿ ಬಾಯ್ ಆ್ಯಪ್</title>
+    <style>
+        :root {
+            --primary-yellow: #ffd814;
+            --dark-bg: #131921;
+            --light-gray: #f2f2f2;
+            --green-success: #2e7d32;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-gray);
+            color: #111;
+            padding-bottom: 40px;
+        }
+
+        header {
+            background-color: var(--dark-bg);
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 16px;
+            color: var(--primary-yellow);
+        }
+
+        .card-box {
+            padding: 16px;
+            background: white;
+            margin: 10px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .order-card {
+            background: #fffde7;
+            border: 1px solid #fbc02d;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .btn-action {
+            background: #ffc107;
+            border: none;
+            padding: 8px 12px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 12px;
+            border-radius: 4px;
+            margin-top: 6px;
+        }
+
+        .btn-success {
+            background: var(--green-success);
+            color: white;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 font-sans pb-20">
+<body>
 
-    <!-- ಫೋಟೋ ಜೂಮ್ ಪಾಪ್‌ಅಪ್ -->
-    <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-80 z-50 hidden flex items-center justify-center p-4">
-        <div class="relative bg-white p-2 rounded-2xl max-w-sm w-full text-center">
-            <button type="button" onclick="closeImageModal()" class="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full font-bold cursor-pointer">✕</button>
-            <img id="zoomed-img" src="" class="w-full h-96 object-contain rounded-xl">
-        </div>
-    </div>
-
-    <!-- ಸಕ್ಸಸ್ ಪಾಪ್‌ಅಪ್ -->
-    <div id="custom-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full text-center space-y-3">
-            <div id="modal-icon" class="text-4xl">🎉</div>
-            <h3 id="modal-title" class="text-lg font-bold text-gray-800">ಯಶಸ್ವಿ!</h3>
-            <p id="modal-message" class="text-xs text-gray-600"></p>
-            <button type="button" onclick="closeModal()" class="w-full bg-indigo-600 text-white py-2 rounded-xl font-bold text-xs cursor-pointer">ಸರಿ (OK)</button>
-        </div>
-    </div>
-
-    <!-- ಹೆಡರ್ -->
-    <header class="bg-indigo-700 text-white p-4 shadow-md flex justify-between items-center sticky top-0 z-40">
-        <div class="flex items-center gap-2">
-            <div id="header-avatar" class="w-8 h-8 rounded-full bg-indigo-500 border border-white overflow-hidden">
-                <img id="header-selfie-img" src="https://via.placeholder.com/150" class="w-full h-full object-cover">
-            </div>
-            <h1 class="text-sm font-bold">🛵 ಡೆಲಿವರಿ ಬಾಯ್ ಆಪ್</h1>
-        </div>
-        <div id="user-info" class="text-xs flex items-center gap-2">
-            <span id="logged-user-name" class="font-semibold">ಅನಿಲ್ ರಾಥೋಡ್ (ID: 4821)</span>
-        </div>
+    <header>
+        <h1>🛵 ಡೆಲಿವರಿ ಬಾಯ್ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್</h1>
     </header>
 
-    <main class="container mx-auto p-4 max-w-md">
-
-        <!-- ಡೆಲಿವರಿ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ (ನೇರವಾಗಿ ಕಾಣಿಸುವುದು) -->
-        <div id="dashboard-delivery" class="space-y-4">
-            
-            <!-- ಟ್ಯಾಬ್ ಬಟನ್‌ಗಳು -->
-            <div class="flex gap-1 mb-2">
-                <button type="button" onclick="switchDeliveryTab('orders')" id="tab-orders" class="flex-1 bg-indigo-600 text-white py-2 rounded-xl text-[11px] font-bold cursor-pointer">📦 ಹೊಸ ಆರ್ಡರ್‌ಗಳು</button>
-                <button type="button" onclick="switchDeliveryTab('history')" id="tab-history" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl text-[11px] font-bold cursor-pointer">📜 ಹಳೆಯ ಆರ್ಡರ್‌ಗಳು</button>
-                <button type="button" onclick="switchDeliveryTab('payments')" id="tab-payments" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl text-[11px] font-bold cursor-pointer">💳 ಪೇಮೆಂಟ್ಸ್</button>
-                <button type="button" onclick="switchDeliveryTab('returns')" id="tab-returns" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl text-[11px] font-bold cursor-pointer">🔄 ರಿಟರ್ನ್ಸ್</button>
-            </div>
-
-            <div class="bg-white p-4 rounded-xl shadow space-y-3">
-                <div class="bg-indigo-50 p-3 rounded-xl flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <img id="dash-selfie-img" src="https://via.placeholder.com/150" class="w-12 h-12 rounded-full object-cover border-2 border-indigo-600 shadow">
-                        <div>
-                            <p id="delivery-id-badge" class="text-xs font-bold text-indigo-800 bg-indigo-200 inline-block px-3 py-0.5 rounded-full">ಡಿಜಿಟಲ್ ID: 4821</p>
-                            <h3 id="dash-delivery-name" class="font-bold text-sm text-gray-800 mt-0.5">ಅನಿಲ್ ರಾಥೋಡ್</h3>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2 bg-gray-50 p-3 rounded-xl text-center border">
-                    <div>
-                        <p class="text-[10px] text-gray-600 font-semibold">ಒಟ್ಟು ಡೆಲಿವರಿಗಳು</p>
-                        <p id="today-total-orders" class="text-lg font-bold text-indigo-700">0</p>
-                    </div>
-                    <div>
-                        <p class="text-[10px] text-gray-600 font-semibold">ಗಳಿಕೆ ಕಮಿಷನ್ (10%)</p>
-                        <p id="today-commission" class="text-lg font-bold text-green-700">₹0</p>
-                    </div>
-                </div>
-
-                <!-- ಸೆಕ್ಷನ್ 1: ಹೊಸ ಆರ್ಡರ್‌ಗಳು -->
-                <div id="deliv-orders-section" class="space-y-2">
-                    <h4 class="font-bold text-xs text-gray-700 pt-1">ಅಂಗಡಿಯಿಂದ ಪ್ಯಾಕ್ ಆಗಿರುವ ಲೈವ್ ಆರ್ಡರ್‌ಗಳು:</h4>
-                    <div id="delivery-orders-list" class="text-xs text-gray-600">ಯಾವುದೇ ಹೊಸ ಆರ್ಡರ್‌ಗಳಿಲ್ಲ.</div>
-                </div>
-
-                <!-- ಸೆಕ್ಷನ್ 2: ಹಳೆಯ ಆರ್ಡರ್‌ಗಳು -->
-                <div id="deliv-history-section" class="space-y-2 hidden">
-                    <h4 class="font-bold text-xs text-gray-700 pt-1">ಪೂರ್ಣಗೊಂಡ / ಹಳೆಯ ಆರ್ಡರ್‌ಗಳ ಇತಿಹಾಸ:</h4>
-                    <div id="delivery-history-list" class="text-xs text-gray-600">ಯಾವುದೇ ಹಳೆಯ ಆರ್ಡರ್‌ಗಳಿಲ್ಲ.</div>
-                </div>
-
-                <!-- ಸೆಕ್ಷನ್ 3: ಪೇಮೆಂಟ್ಸ್ -->
-                <div id="deliv-payments-section" class="space-y-2 hidden">
-                    <h4 class="font-bold text-xs text-gray-700 pt-1">ಪೇಮೆಂಟ್ಸ್ & ಕಲೆಕ್ಷನ್ ವಿವರ:</h4>
-                    <div id="delivery-payments-list" class="text-xs text-gray-600">ಯಾವುದೇ ಪೇಮೆಂಟ್ ಬಾಕಿ ಇಲ್ಲ.</div>
-                </div>
-
-                <!-- ಸೆಕ್ಷನ್ 4: ರಿಟರ್ನ್ಸ್ -->
-                <div id="deliv-returns-section" class="space-y-2 hidden">
-                    <h4 class="font-bold text-xs text-gray-700 pt-1">ಗ್ರಾಹಕರಿಂದ ಬಂದ ರಿಟರ್ನ್ ವಿನಂತಿಗಳು:</h4>
-                    <div id="delivery-returns-list" class="text-xs text-gray-600">ಯಾವುದೇ ರಿಟರ್ನ್ ಇಲ್ಲ.</div>
-                </div>
-
-            </div>
+    <div class="card-box">
+        <h3 style="font-size: 15px; margin-bottom: 12px; color:#0d47a1;">📦 ಡೆಲಿವರಿ ಮಾಡಲು ಇರಲ್ಪಡುವ ಆರ್ಡರ್‌ಗಳು:</h3>
+        <div id="delivery-orders-container">
+            <p style="color:#666; font-size:13px;">ಯಾವುದೇ ಹೊಸ ಆರ್ಡರ್‌ಗಳಿಲ್ಲ.</p>
         </div>
-
-    </main>
+    </div>
 
     <script>
-        // ನೇರವಾಗಿ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗಾಗಿ ಡಿಫಾಲ್ಟ್ ಡೆಲಿವರಿ ಬಾಯ್ ವಿವರಗಳು
-        let currentDelivery = {
-            name: "ಅನಿಲ್ ರಾಥೋಡ್",
-            deliveryId: "4821",
-            phone: "9353444070",
-            city: "ಶಹಾಪುರ",
-            taluk: "ಶಹಾಪುರ"
+        let allOrders = JSON.parse(localStorage.getItem('ar_all_orders')) || [];
+
+        window.onload = function() {
+            renderDeliveryData();
         };
 
-        function showModal(title, message, icon = '🎉', callback = null) {
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-message').innerHTML = message;
-            document.getElementById('modal-icon').innerText = icon;
-            document.getElementById('custom-modal').classList.remove('hidden');
-            window.modalCallback = callback;
-        }
-
-        function closeModal() {
-            document.getElementById('custom-modal').classList.add('hidden');
-            if (typeof window.modalCallback === 'function') {
-                window.modalCallback();
-                window.modalCallback = null;
-            }
-        }
-
-        function zoomImage(src) {
-            document.getElementById('zoomed-img').src = src;
-            document.getElementById('image-modal').classList.remove('hidden');
-        }
-
-        function closeImageModal() {
-            document.getElementById('image-modal').classList.add('hidden');
-        }
-
-        function switchDeliveryTab(tab) {
-            ['orders', 'history', 'payments', 'returns'].forEach(t => {
-                let sec = document.getElementById(`deliv-${t}-section`);
-                let btn = document.getElementById(`tab-${t}`);
-                if (sec) sec.classList.add('hidden');
-                if (btn) btn.className = "flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl text-[11px] font-bold cursor-pointer";
-            });
-            let activeSec = document.getElementById(`deliv-${tab}-section`);
-            let activeBtn = document.getElementById(`tab-${tab}`);
-            if (activeSec) activeSec.classList.remove('hidden');
-            if (activeBtn) activeBtn.className = "flex-1 bg-indigo-600 text-white py-2 rounded-xl text-[11px] font-bold cursor-pointer";
+        function renderDeliveryData() {
+            let dCont = document.getElementById('delivery-orders-container');
+            dCont.innerHTML = allOrders.length === 0 ? '<p style="color:#666; font-size:13px;">ಯಾವುದೇ ಆರ್ಡರ್‌ಗಳಿಲ್ಲ.</p>' : '';
             
-            if (tab === 'orders') renderDeliveryOrders();
-            if (tab === 'history') renderDeliveryHistory();
-            if (tab === 'payments') renderDeliveryPayments();
-            if (tab === 'returns') renderDeliveryReturns();
-        }
-
-        function renderDeliveryOrders() {
-            let dDiv = document.getElementById('delivery-orders-list');
-            let savedOrders = JSON.parse(localStorage.getItem('market_orders')) || [];
-            
-            let deliveredOrders = savedOrders.filter(o => o.delivered && o.acceptedBy === currentDelivery.deliveryId);
-            let totalAmount = deliveredOrders.reduce((sum, ord) => sum + (ord.total || ord.totalAmount || 0), 0);
-            let commission = Math.round(totalAmount * 0.10);
-
-            document.getElementById('today-total-orders').innerText = deliveredOrders.length;
-            document.getElementById('today-commission').innerText = `₹${commission}`;
-
-            let availableOrders = savedOrders.filter(o => (o.statusStep >= 2 || o.packingReady) && !o.delivered && !o.cancelled);
-            let myLiveOrders = availableOrders.filter(o => o.acceptedBy === currentDelivery.deliveryId || !o.acceptedBy);
-
-            if (myLiveOrders.length === 0) {
-                dDiv.innerHTML = "<p class='text-gray-500 text-xs mt-2'>ಯಾವುದೇ ಹೊಸ ಡೆಲಿವರಿ ಆರ್ಡರ್‌ಗಳಿಲ್ಲ.</p>";
-                return;
-            }
-
-            dDiv.innerHTML = myLiveOrders.map(o => {
-                let isAcceptedByMe = (o.acceptedBy === currentDelivery.deliveryId);
-                let isPickedUp = (o.statusStep >= 3);
-
-                return `
-                    <div class="border p-3 rounded-xl bg-teal-50 mb-3 space-y-2">
-                        <div class="flex justify-between items-center border-b pb-1">
-                            <span class="font-bold text-xs text-indigo-700">ಆರ್ಡರ್ ID: ${o.id}</span>
-                            <span class="text-[10px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-bold">ಪಾವತಿ: ${o.paymentMethod}</span>
-                        </div>
-
-                        ${o.items ? o.items.map(i => `
-                            <div class="flex gap-2 items-center">
-                                <img src="${i.frontPhoto}" onclick="zoomImage('${i.frontPhoto}')" class="w-12 h-12 object-cover rounded border cursor-pointer">
-                                <div>
-                                    <p class="font-bold text-xs">${i.name} (${i.size}) x${i.quantity}</p>
-                                    <p class="text-[11px] text-green-600 font-bold">₹${i.discPrice * i.quantity}</p>
-                                </div>
-                            </div>
-                        `).join('') : ''}
-
-                        <div class="text-[11px] text-gray-700 space-y-0.5 pt-1">
-                            <p><b>ಗ್ರಾಹಕರು:</b> ${o.customerName} (<a href="tel:${o.phone}" class="text-blue-600 underline font-bold">📞 ${o.phone}</a>)</p>
-                            <p><b>ವಿಳಾಸ:</b> ${o.city}, ${o.taluk} (Pin: ${o.pincode})</p>
-                        </div>
-
-                        <div class="flex gap-2 pt-1 flex-wrap">
-                            <a href="https://maps.google.com/?q=${encodeURIComponent(o.address || o.city)}" target="_blank" class="w-full text-center bg-indigo-600 text-white py-1.5 rounded-lg text-xs font-bold shadow">🗺️ ಜಿಪಿಎಸ್ ಮ್ಯಾಪ್ ರೂಟ್ (GPS Route)</a>
-                            
-                            ${!o.acceptedBy ? `
-                                <button type="button" onclick="acceptAndPickupOrder(${o.id})" class="w-full bg-amber-500 text-gray-900 py-2 rounded-lg text-xs font-bold shadow cursor-pointer">📦 ಅಂಗಡಿಯಿಂದ ಪ್ಯಾಕಿಂಗ್ ಆಗಿದೆ - ಪಿಕಪ್ ತಗೊಳ್ಳಿ (Accept & Pickup)</button>
-                            ` : isAcceptedByMe && !isPickedUp ? `
-                                <button type="button" onclick="pickupOrder(${o.id})" class="w-full bg-amber-600 text-white py-2 rounded-lg text-xs font-bold shadow cursor-pointer">🛵 ಪಿಕಪ್ ಕನ್ಫರ್ಮ್ ಮಾಡಿ (Confirm Pickup)</button>
-                            ` : ''}
-
-                            ${isAcceptedByMe ? `
-                                <button type="button" onclick="markDelivered(${o.id})" class="w-full bg-green-600 text-white py-2 rounded-lg text-xs font-bold shadow cursor-pointer">✅ ಡೆಲಿವರಿ ಮುಗಿಯಿತು & ಡೆಲಿವರಿ ತಲುಪಿದೆ</button>
-                                <button type="button" onclick="cancelDeliveryOrder(${o.id})" class="w-full bg-red-500 text-white py-1.5 rounded-lg text-xs font-bold shadow cursor-pointer">❌ ಆರ್ಡರ್ ಕ್ಯಾನ್ಸಲ್ ಮಾಡಿ (Cancel)</button>
-                            ` : ''}
+            allOrders.forEach((ord, index) => {
+                dCont.innerHTML += `
+                    <div class="order-card">
+                        <strong>ಗ್ರಾಹಕರು: ${ord.customerName}</strong><br>
+                        ವಸ್ತು: ${ord.title} (₹${ord.amount})<br>
+                        ಪ್ರಸ್ತುತ ಸ್ಥಿತಿ: <span style="color:green; font-weight:bold;">${ord.status}</span><br>
+                        <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">
+                            <button class="btn-action" onclick="deliveryAction(${index}, 'ಡೆಲಿವರಿ ಬಾಯ್ ಪಿಕಪ್ ಮಾಡಿದ್ದಾರೆ, 2 ರಿಂದ 3 ಗಂಟೆಯ ಒಳಗೆ ತಲುಪುತ್ತದೆ')">ಪಿಕಪ್ ಮಾಡಿ</button>
+                            <button class="btn-action btn-success" onclick="deliveryAction(${index}, 'ಡೆಲಿವರಿ ಸಕ್ಸಸ್‌ಫುಲ್ ಆಗಿದೆ')">ಡೆಲಿವರಿ ಮುಗಿಯಿತು</button>
                         </div>
                     </div>
                 `;
-            }).join('');
+            });
         }
 
-        function acceptAndPickupOrder(id) {
-            let savedOrders = JSON.parse(localStorage.getItem('market_orders')) || [];
-            let o = savedOrders.find(x => x.id === id);
-            if (o) {
-                if (o.acceptedBy) {
-                    alert('ಕ್ಷಮಿಸಿ! ಈ ಆರ್ಡರ್ ಅನ್ನು ಈಗಾಗಲೇ ಬೇರೆ ಡೆಲಿವರಿ ಬಾಯ್ ಸ್ವೀಕರಿಸಿದ್ದಾರೆ.');
-                    renderDeliveryOrders();
-                    return;
-                }
-                o.acceptedBy = currentDelivery.deliveryId;
-                o.acceptedByName = currentDelivery.name;
-                o.statusStep = 3;
-                o.statusText = '3. ಡೆಲಿವರಿಗೆ ಕಳುಹಿಸಲಾಗಿದೆ - 2 ರಿಂದ 3 ಗಂಟೆಯಲ್ಲಿ ಡೆಲಿವರಿ ಆಗುತ್ತದೆ';
-                o.status = o.statusText;
-                localStorage.setItem('market_orders', JSON.stringify(savedOrders));
-                renderDeliveryOrders();
-                showModal("ಯಶಸ್ವಿ!", "ನೀವು ಈ ಆರ್ಡರ್ ಅನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಸ್ವೀಕರಿಸಿದ್ದೀರಿ!", "🛵");
-            }
+        function deliveryAction(index, status) {
+            allOrders[index].status = status;
+            localStorage.setItem('ar_all_orders', JSON.stringify(allOrders));
+            renderDeliveryData();
+            alert("ಡೆಲಿವರಿ ಸ್ಥಿತಿ ಯಶಸ್ವಿಯಾಗಿ ಅಪ್‌ಡೇಟ್ ಆಗಿದೆ!");
         }
-
-        function pickupOrder(id) {
-            let savedOrders = JSON.parse(localStorage.getItem('market_orders')) || [];
-            let o = savedOrders.find(x => x.id === id);
-            if (o) {
-                o.statusStep = 3;
-                o.statusText = '3. ಡೆಲಿವರಿಗೆ ಕಳುಹಿಸಲಾಗಿದೆ - 2 ರಿಂದ 3 ಗಂಟೆಯಲ್ಲಿ ಡೆಲಿವರಿ ಆಗುತ್ತದೆ';
-                o.status = o.statusText;
-                localStorage.setItem('market_orders', JSON.stringify(savedOrders));
-                renderDeliveryOrders();
-                showModal("ಯಶಸ್ವಿ!", "ಪಿಕಪ್ ಕನ್ಫರ್ಮ್ ಆಗಿದೆ!", "🛵");
-            }
-        }
-
-        function markDelivered(id) {
-            let savedOrders = JSON.parse(localStorage.getItem('market_orders')) || [];
-            let o = savedOrders.find(x => x.id === id);
-            if (o) {
-                o.delivered = true;
-                o.deliveredTime = Date.now();
-                o.statusStep = 4;
-                o.statusText = '4. ಡೆಲಿವರಿ ತಲುಪಿದೆ - ಪೇಮೆಂಟ್ ಪೆಂಡಿಂಗ್ (ಅಂಗಡಿ ಮಾಲೀಕರು ಚೆಕ್ ಮಾಡಬೇಕು)';
-                o.status = o.statusText;
-                localStorage.setItem('market_orders', JSON.stringify(savedOrders));
-                renderDeliveryOrders();
-                showModal("ಯಶಸ್ವಿ!", "ಡೆಲಿವರಿ ಯಶಸ್ವಿಯಾಗಿ ತಲುಪಿದೆ!", "💰");
-            }
-        }
-
-        function cancelDeliveryOrder(id) {
-            if (!confirm('ಖಂಡಿತವಾಗಿ ನೀವು ಈ ಆರ್ಡರ್ ಅನ್ನು ಕ್ಯಾನ್ಸಲ್ ಮಾಡಲು ಬಯಸುತ್ತೀರಾ?')) return;
-            let savedOrders = JSON.parse(localStorage.getItem('market_orders')) || [];
-            let o = savedOrders.find(x => x.id === id);
-            if (o) {
-                o.cancelled = true;
-                o.acceptedBy = null;
-                o.statusText = '❌ ಡೆಲಿವರಿ ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ (Cancelled)';
-                localStorage.setItem('market_orders', JSON.stringify(savedOrders));
-                renderDeliveryOrders();
-                showModal("ಕ್ಯಾನ್ಸಲ್", "ಆರ್ಡರ್ ಕ್ಯಾನ್ಸಲ್ ಮಾಡಲಾಗಿದೆ.", "❌");
-            }
-        }
-
-        function renderDeliveryHistory() {
-            let hDiv = document.getElementById('delivery-history-list');
-            let savedOrders = JSON.parse(localStorage.getItem('market_orders')) || [];
-            let currentTime = Date.now();
-            let oneMonthMs = 30 * 24 * 60 * 60 * 1000;
-
-            let historyOrders = savedOrders.filter(o => o.acceptedBy === currentDelivery.deliveryId && (o.delivered || o.cancelled) && (currentTime - (o.deliveredTime || o.orderTime || currentTime)) <= oneMonthMs);
-
-            historyOrders.reverse();
-
-            if (historyOrders.length === 0) {
-                hDiv.innerHTML = "<p class='text-gray-500 text-xs mt-2'>ಯಾವುದೇ ಹಳೆಯ ಆರ್ಡರ್‌ಗಳಿಲ್ಲ.</p>";
-                return;
-            }
-
-            hDiv.innerHTML = historyOrders.map(o => `
-                <div class="border p-3 rounded-xl bg-gray-50 mb-3 space-y-1 shadow-sm">
-                    <p class="font-bold text-xs text-indigo-700">ಆರ್ಡರ್ ID: ${o.id} ${o.cancelled ? '<span class="text-red-600">(ಕ್ಯಾನ್ಸಲ್)</span>' : ''}</p>
-                    <p class="text-[11px] text-gray-700"><b>ಗ್ರಾಹಕರು:</b> ${o.customerName} (${o.phone})</p>
-                    <p class="text-[11px] text-gray-700"><b>ಸ್ಥಳ:</b> ${o.city}, ${o.taluk}</p>
-                    <p class="text-[11px] text-gray-700"><b>ಮೊತ್ತ:</b> ₹${o.total || o.totalAmount || 0} (${o.paymentMethod})</p>
-                    <p class="text-[11px] font-bold ${o.paymentSuccess ? 'text-green-700' : 'text-orange-600'}">
-                        ${o.paymentSuccess ? '✨ ಪೇಮೆಂಟ್ ಯಶಸ್ವಿ (Success)' : '⏳ ಪೇಮೆಂಟ್ ಪೆಂಡಿಂಗ್'}
-                    </p>
-                </div>
-            `).join('');
-        }
-
-        function renderDeliveryPayments() {
-            let pDiv = document.getElementById('delivery-payments-list');
-            let savedOrders = JSON.parse(localStorage.getItem('market_orders')) || [];
-            let deliveredOrders = savedOrders.filter(o => o.acceptedBy === currentDelivery.deliveryId && o.delivered);
-
-            deliveredOrders.reverse();
-
-            if (deliveredOrders.length === 0) {
-                pDiv.innerHTML = "<p class='text-gray-500 text-xs mt-2'>ಯಾವುದೇ ಪೇಮೆಂಟ್ಸ್ ಇಲ್ಲ.</p>";
-                return;
-            }
-
-            pDiv.innerHTML = deliveredOrders.map(o => `
-                <div class="border p-3 rounded-xl ${o.paymentSuccess ? 'bg-green-50' : 'bg-orange-50'} mb-3 space-y-1">
-                    <p class="font-bold text-xs text-indigo-700">ಆರ್ಡರ್ ID: ${o.id}</p>
-                    <p class="text-[11px] text-gray-700"><b>ಗ್ರಾಹಕರು:</b> ${o.customerName}</p>
-                    <p class="text-[11px] text-gray-700"><b>ಮೊತ್ತ:</b> ₹${o.total || o.totalAmount} (${o.paymentMethod})</p>
-                    <p class="text-[11px] font-bold ${o.paymentSuccess ? 'text-green-700' : 'text-orange-600'}">
-                        ${o.paymentSuccess ? '✨ ಪೇಮೆಂಟ್ ಯಶಸ್ವಿ (Success)' : '⏳ ಪೇಮೆಂಟ್ ಪೆಂಡಿಂಗ್ (ಅಂಗಡಿ ಮಾಲೀಕರು ಸಕ್ಸಸ್ ಮಾಡಬೇಕು)'}
-                    </p>
-                </div>
-            `).join('');
-        }
-
-        function renderDeliveryReturns() {
-            let rDiv = document.getElementById('delivery-returns-list');
-            let savedOrders = JSON.parse(localStorage.getItem('market_orders')) || [];
-            let returnOrders = savedOrders.filter(o => o.returned && !o.returnPickedUp);
-
-            returnOrders.reverse();
-
-            if (returnOrders.length === 0) {
-                rDiv.innerHTML = "<p class='text-gray-500 text-xs mt-2'>ಯಾವುದೇ ರಿಟರ್ನ್ ವಿನಂತಿಗಳಿಲ್ಲ.</p>";
-                return;
-            }
-
-            rDiv.innerHTML = returnOrders.map(o => `
-                <div class="border p-3 rounded-xl bg-red-50 mb-3 space-y-2">
-                    <p class="font-bold text-xs text-red-700">ರಿಟರ್ನ್ ಆರ್ಡರ್ ID: ${o.id}</p>
-                    <p class="text-[11px] text-gray-700"><b>ಗ್ರಾಹಕರು:</b> ${o.customerName} (<a href="tel:${o.phone}" class="text-blue-600 underline font-bold">📞 ${o.phone}</a>)</p>
-                    <p class="text-[11px] text-gray-700"><b>ಕಾರಣ:</b> ${o.returnReason}</p>
-                    <p class="text-[11px] text-gray-700"><b>ಸ್ಥಳ:</b> ${o.city}, ${o.taluk}</p>
-                    
-                    <button type="button" onclick="pickupReturn(${o.id})" class="w-full bg-red-600 text-white py-2 rounded-lg text-xs font-bold shadow cursor-pointer">🔄 ಪಿಕಪ್ ಸ್ವೀಕರಿಸಲಾಗಿದೆ (Pickup OK)</button>
-                </div>
-            `).join('');
-        }
-
-        function pickupReturn(id) {
-            let savedOrders = JSON.parse(localStorage.getItem('market_orders')) || [];
-            let o = savedOrders.find(x => x.id === id);
-            if (o) {
-                o.returnPickedUp = true;
-                o.statusStep = 4;
-                o.statusText = '🔄 ರಿಟರ್ನ್ ಪಿಕಪ್ ಸ್ವೀಕರಿಸಲಾಗಿದೆ - ಅಂಗಡಿಗೆ ತಲುಪಿದೆ';
-                o.status = o.statusText;
-                localStorage.setItem('market_orders', JSON.stringify(savedOrders));
-                renderDeliveryReturns();
-                showModal("ಯಶಸ್ವಿ!", "ರಿಟರ್ನ್ ಪಿಕಪ್ ಸ್ವೀಕರಿಸಲಾಗಿದೆ!", "🔄");
-            }
-        }
-
-        // ಆಪ್ ಓಪನ್ ಆದ ತಕ್ಷಣ ಆರ್ಡರ್‌ಗಳನ್ನು ಲೋಡ್ ಮಾಡುವುದು
-        renderDeliveryOrders();
     </script>
 </body>
 </html>
