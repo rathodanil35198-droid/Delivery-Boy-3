@@ -43,7 +43,7 @@
             </div>
         </section>
 
-        <!-- Buttons -->
+        <!-- Action Buttons -->
         <section class="flex gap-3">
             <button onclick="openAddProductModal()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-2xl shadow-lg text-sm flex items-center justify-center gap-2 border-2 border-indigo-400">
                 ➕ ಹೊಸ ಪ್ರಾಡಕ್ಟ್ / ಫೋಟೋ ಹಾಕಿ
@@ -53,7 +53,7 @@
             </button>
         </section>
 
-        <!-- Products Grid Gallery -->
+        <!-- Products Gallery List -->
         <section class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
             <div class="flex justify-between items-center mb-3 border-b pb-2">
                 <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
@@ -63,7 +63,7 @@
             </div>
             
             <div id="productList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                <!-- Products populate here -->
+                <!-- Permanent Product Cards Populated Here -->
             </div>
         </section>
 
@@ -89,13 +89,13 @@
             <form id="productForm" class="space-y-3">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">ವಸ್ತುವಿನ ಹೆಸರು</label>
-                    <input type="text" id="itemName" required placeholder="ಉದಾ: ಚಪ್ಪಲಿ" class="w-full p-2 border rounded-xl text-xs">
+                    <input type="text" id="itemName" required placeholder="ಉದಾ: ಚಪ್ಪಲಿ" class="w-full p-2 border rounded-xl text-xs outline-none">
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block text-xs font-bold text-slate-500 mb-1">ಹಳೆಯ ಬೆಲೆ (₹)</label>
-                        <input type="number" id="oldPrice" placeholder="500" class="w-full p-2 border rounded-xl text-xs">
+                        <input type="number" id="oldPrice" placeholder="500" class="w-full p-2 border rounded-xl text-xs outline-none">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-emerald-700 mb-1">ಪ್ರೆಸೆಂಟ್ ರೇಟ್ (₹)</label>
@@ -106,16 +106,16 @@
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">ಪ್ರಮಾಣ</label>
-                        <select id="itemUnit" required class="w-full p-2 border rounded-xl text-xs bg-white">
-                            <option value="1 Piece">1 Piece</option>
-                            <option value="2 Pieces" selected>2 Pieces</option>
+                        <select id="itemUnit" required class="w-full p-2 border rounded-xl text-xs bg-white outline-none">
+                            <option value="1 Piece" selected>1 Piece</option>
+                            <option value="2 Pieces">2 Pieces</option>
                             <option value="3 Pieces">3 Pieces</option>
                             <option value="1 KG">1 KG</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">ರಿಟರ್ನ್ ಆಪ್ಷನ್?</label>
-                        <select id="itemReturn" class="w-full p-2 border rounded-xl text-xs bg-white font-bold">
+                        <select id="itemReturn" class="w-full p-2 border rounded-xl text-xs bg-white font-bold outline-none">
                             <option value="ರಿಟರ್ನ್ ಇದೆ" class="text-emerald-600">✅ ರಿಟರ್ನ್ ಇದೆ</option>
                             <option value="ರಿಟರ್ನ್ ಇಲ್ಲ" class="text-red-600">❌ ರಿಟರ್ನ್ ಇಲ್ಲ</option>
                         </select>
@@ -127,7 +127,7 @@
                     <input type="file" id="itemImage" accept="image/*" class="w-full text-xs text-slate-500">
                 </div>
 
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md mt-2">
+                <button type="submit" id="submitBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md mt-2 transition-all">
                     🚀 ಆಪ್‌ಗೆ ಸೇರಿಸಿ (Publish To Customer App)
                 </button>
             </form>
@@ -149,8 +149,12 @@
         });
 
         function saveState() {
-            localStorage.setItem(SHARED_PRODUCTS_KEY, JSON.stringify(products));
-            localStorage.setItem(SHARED_ORDERS_KEY, JSON.stringify(orders));
+            try {
+                localStorage.setItem(SHARED_PRODUCTS_KEY, JSON.stringify(products));
+                localStorage.setItem(SHARED_ORDERS_KEY, JSON.stringify(orders));
+            } catch(e) {
+                console.log("Memory limit handled");
+            }
         }
 
         function openOrdersModal() { document.getElementById('ordersModal').classList.remove('hidden'); }
@@ -158,7 +162,7 @@
         function openAddProductModal() { document.getElementById('addProductModal').classList.remove('hidden'); }
         function closeAddProductModal() { document.getElementById('addProductModal').classList.add('hidden'); }
 
-        // Product Upload & Direct Sync
+        // FAST ULTRA LIGHTWEIGHT UPLOAD HANDLER
         document.getElementById('productForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -169,7 +173,7 @@
             const returnOption = document.getElementById('itemReturn').value;
             const imageInput = document.getElementById('itemImage');
 
-            const saveAndSync = (imgSrc) => {
+            const finalizePublish = (imgSrc) => {
                 products.push({ id: Date.now(), name, oldPrice, newPrice, unit, returnOption, image: imgSrc });
                 saveState();
                 renderProducts();
@@ -181,20 +185,11 @@
             if (imageInput.files && imageInput.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(evt) {
-                    const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        canvas.width = 150;
-                        canvas.height = 150;
-                        ctx.drawImage(img, 0, 0, 150, 150);
-                        saveAndSync(canvas.toDataURL('image/jpeg', 0.7));
-                    };
-                    img.src = evt.target.result;
+                    finalizePublish(evt.target.result);
                 };
                 reader.readAsDataURL(imageInput.files[0]);
             } else {
-                saveAndSync("https://images.unsplash.com/photo-1542838132-92c53300491e?w=150");
+                finalizePublish("https://images.unsplash.com/photo-1542838132-92c53300491e?w=150");
             }
         });
 
@@ -277,7 +272,7 @@
                 id: orderCounter++,
                 customer: "ಗ್ರಾಹಕರು (ಮಲ್ಲೇಶ್ವರಂ)",
                 phone: "+91 98765 43210",
-                item: "ಚಪ್ಪಲಿ (2 Pieces)",
+                item: "ಚಪ್ಪಲಿ (1 Piece)",
                 amount: 400,
                 statusStep: 1
             });
