@@ -2,12 +2,14 @@
 <html lang="kn">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ನಮ್ಮ ಶಾಪುರ್ - ಡೆಲಿವರಿ ಬಾಯ್ ಆಪ್</title>
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ನಮ್ಮ ಶಾಪುರ್ - ಡೆಲಿವರಿ ಬಾಯ್ ಆಪ್ | Delivery App</title>
+  <link rel="icon" type="image/png" sizes="192x192" href="AR_Taxi_Booking_Go_Fast_512x512.png">
+
+  <!-- Firebase SDKs -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, updateDoc, doc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAm3HFKu101wex1b025-zJZ2BJ_o1Xvw",
@@ -23,61 +25,419 @@
 
     window.db = db;
     window.collection = collection;
+    window.addDoc = addDoc;
     window.onSnapshot = onSnapshot;
     window.updateDoc = updateDoc;
     window.doc = doc;
+    window.query = query;
+    window.orderBy = orderBy;
+    window.serverTimestamp = serverTimestamp;
   </script>
 
   <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #f4f6f8; padding: 10px; }
-    .container { max-width: 450px; margin: auto; background: white; padding: 15px; border-radius: 10px; }
-    header { background: #fb8c00; color: white; padding: 10px; text-align: center; border-radius: 6px; }
-    .order-box { border: 1px solid #ffb74d; background: #fff8e1; padding: 10px; border-radius: 6px; margin-top: 10px; }
-    .btn { background: #4caf50; color: white; border: none; padding: 8px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+    :root { --primary: #fb8c00; --success: #4caf50; --danger: #e53935; --dark: #212121; --bg: #f4f6f8; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--dark); padding: 10px; padding-bottom: 30px; }
+
+    .container { max-width: 480px; margin: 0 auto; background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    header { background: var(--primary); color: white; padding: 12px; text-align: center; border-radius: 8px; margin-bottom: 12px; }
+
+    /* Duty Switch */
+    .duty-bar { display: flex; justify-content: space-between; align-items: center; background: #fff3e0; padding: 10px; border-radius: 8px; border: 1px solid #ffe0b2; margin-bottom: 12px; }
+    .duty-btn { padding: 6px 14px; border: none; border-radius: 20px; font-weight: bold; cursor: pointer; color: white; font-size: 0.8rem; }
+    .duty-on { background: var(--success); }
+    .duty-off { background: var(--danger); }
+
+    /* ID Card */
+    .id-card { background: linear-gradient(135deg, #fb8c00, #f57c00); color: white; padding: 12px; border-radius: 10px; display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
+    .id-card img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; }
+
+    /* Navigation Tabs */
+    .nav-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
+    .tab-btn { flex: 1; padding: 10px 4px; border: 1px solid #ddd; background: #f8f9fa; border-radius: 6px; font-weight: bold; font-size: 0.75rem; cursor: pointer; text-align: center; }
+    .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+    /* Stats Grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
+    .stat-card { background: #f1f8e9; border: 1px solid #c8e6c9; padding: 8px; border-radius: 6px; text-align: center; }
+    .stat-card h5 { font-size: 0.7rem; color: #33691e; }
+    .stat-card p { font-size: 0.9rem; font-weight: bold; color: #1b5e20; margin-top: 2px; }
+
+    /* Form UI */
+    .form-group { margin-bottom: 10px; }
+    label { display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 3px; }
+    input, select { width: 100%; padding: 9px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.85rem; }
+
+    .btn { width: 100%; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; background: var(--primary); font-size: 0.85rem; }
+    .btn-success { background: var(--success); }
+    .btn-danger { background: var(--danger); }
+
+    .order-box { border-left: 4px solid var(--primary); background: #fff; border: 1px solid #e0e0e0; border-left-width: 5px; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 0.8rem; }
+    
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; }
+    .modal-box { background: white; padding: 20px; border-radius: 10px; max-width: 350px; text-align: center; }
   </style>
 </head>
 <body>
+
+  <!-- ID Popup Modal -->
+  <div id="successModal" class="modal">
+    <div class="modal-box">
+      <h3 style="color:var(--success)">🎉 ನೋಂದಣಿ ಯಶಸ್ವಿಯಾಗಿದೆ!</h3>
+      <p style="margin: 8px 0; font-size:0.85rem;">ನಿಮ್ಮ 4-ಡಿಜಿಟ್ ಡೆಲಿವರಿ ಐಡಿ:</p>
+      <div id="popup-id" style="font-size: 1.5rem; font-weight: bold; color: var(--primary); background: #fff3e0; padding: 8px; border-radius: 6px;">0000</div>
+      <button class="btn btn-success" style="margin-top:12px;" onclick="closeSuccessModal()">ಮುಂದೆ ಹೋಗಿ</button>
+    </div>
+  </div>
 
   <div class="container">
     <header>
       <h2>🛵 ಡೆಲಿವರಿ ಬಾಯ್ ಪ್ಯಾನಲ್</h2>
     </header>
 
-    <h3>📦 ಡೆಲಿವರಿಯಾಗಬೇಕಾದ ಆರ್ಡರ್‌ಗಳು</h3>
-    <div id="deliveryList"></div>
+    <!-- Registration / Login Section -->
+    <div id="loginSection">
+      <h3 style="font-size:0.95rem; margin-bottom:10px;">🔐 ಡೆಲಿವರಿ ಬಾಯ್ ನೋಂದಣಿ</h3>
+      <form onsubmit="registerDeliveryBoy(event)">
+        <div class="form-group"><label>ಹೆಸರು:</label><input type="text" id="dbName" required></div>
+        <div class="form-group"><label>ತಂದೆಯ ಹೆಸರು:</label><input type="text" id="dbFatherName" required></div>
+        <div class="form-group"><label>ಮೊಬೈಲ್ ನಂಬರ್:</label><input type="tel" id="dbPhone" required></div>
+        <div style="display:flex; gap:6px;">
+          <div class="form-group" style="flex:1;"><label>ಜಿಲ್ಲೆ:</label><input type="text" id="dbDistrict" value="ಯಾದಗಿರಿ" required></div>
+          <div class="form-group" style="flex:1;"><label>ತಾಲೂಕು:</label><input type="text" id="dbTaluk" value="ಶಹಾಪುರ" required></div>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <div class="form-group" style="flex:1;"><label>ಊರು:</label><input type="text" id="dbVillage" required></div>
+          <div class="form-group" style="flex:1;"><label>ಪಿನ್‌ಕೋಡ್:</label><input type="text" id="dbPincode" value="585223" required></div>
+        </div>
+        
+        <div class="form-group">
+          <label>ಆಧಾರ್ ಕಾರ್ಡ್ ಫ್ರಂಟ್ (ಮುಂಭಾಗ):</label>
+          <input type="file" accept="image/*" capture="environment" id="aadhaarFront" required>
+        </div>
+        <div class="form-group">
+          <label>ಆಧಾರ್ ಕಾರ್ಡ್ ಬ್ಯಾಕ್ (ಹಿಂಭಾಗ):</label>
+          <input type="file" accept="image/*" capture="environment" id="aadhaarBack" required>
+        </div>
+        <div class="form-group">
+          <label>ಡೆಲಿವರಿ ಬಾಯ್ ಸೆಲ್ಫಿ ಫೋಟೋ:</label>
+          <input type="file" accept="image/*" capture="user" id="dbSelfie" required>
+        </div>
+
+        <button type="submit" class="btn btn-success" id="btnRegister">ಖಾತೆ ಸೃಷ್ಟಿಸಿ & ಲಾಗಿನ್ ಮಾಡಿ</button>
+      </form>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div id="dashboardSection" style="display:none;">
+      
+      <!-- Duty Switch Bar -->
+      <div class="duty-bar">
+        <span style="font-size:0.85rem; font-weight:bold;">ಡ್ಯೂಟಿ ಸ್ಟೇಟಸ್:</span>
+        <button id="dutyBtn" class="duty-btn duty-on" onclick="toggleDuty()">ONLINE (ಆನ್)</button>
+      </div>
+
+      <!-- ID Card Box -->
+      <div class="id-card">
+        <img id="displaySelfie" src="https://via.placeholder.com/100">
+        <div>
+          <h4 id="displayName">--</h4>
+          <p style="font-size:0.75rem;">ಫೋನ್: <span id="displayPhone">--</span></p>
+          <p style="font-size:0.75rem;">ID: <b id="displayId">0000</b></p>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h5>ತಿಂಗಳ ಆರ್ಡರ್ (ರಿಟರ್ನ್ 5%)</h5>
+          <p id="monthlyStats">0 (Ret: 0)</p>
+        </div>
+        <div class="stat-card">
+          <h5>ಇಂದಿನ ಕಲೆಕ್ಷನ್</h5>
+          <p id="dailyEarnings">₹0 (0 Orders)</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('tabNew', this)">📦 ಹೊಸ ಆರ್ಡರ್</button>
+        <button class="tab-btn" onclick="switchTab('tabHistory', this)">📜 ಹಳೆಯ ಆರ್ಡರ್</button>
+        <button class="tab-btn" onclick="switchTab('tabPayments', this)">💳 ಪೇಮೆಂಟ್ಸ್</button>
+      </div>
+
+      <!-- TAB 1: NEW ORDERS -->
+      <div id="tabNew">
+        <div id="newOrdersList"></div>
+      </div>
+
+      <!-- TAB 2: ORDER HISTORY -->
+      <div id="tabHistory" style="display:none;">
+        <div id="historyOrdersList"></div>
+      </div>
+
+      <!-- TAB 3: PAYMENTS -->
+      <div id="tabPayments" style="display:none;">
+        <div id="paymentOrdersList"></div>
+      </div>
+
+    </div>
   </div>
 
   <script>
+    let deliveryBoy = JSON.parse(localStorage.getItem('my_delivery_boy_session')) || null;
+    let isOnline = true;
+
     window.addEventListener('DOMContentLoaded', () => {
-      window.onSnapshot(window.collection(window.db, "orders"), (snap) => {
-        let tasks = [];
-        snap.forEach(d => {
-          let o = d.data();
-          if (o.status === 'PACKING') tasks.push({ docId: d.id, ...o });
-        });
-        renderDeliveryTasks(tasks);
-      });
+      if (deliveryBoy) {
+        renderIDCard();
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('dashboardSection').style.display = 'block';
+        startRealtimeOrders();
+      }
     });
 
-    function renderDeliveryTasks(tasks) {
-      const list = document.getElementById('deliveryList');
-      if (tasks.length === 0) {
-        list.innerHTML = '<p style="margin-top:10px;">ಯಾವುದೇ ಡೆಲಿವರಿ ಟಾಸ್ಕ್ ಇಲ್ಲ.</p>';
+    function convertFileFast(file) {
+      return new Promise((resolve) => {
+        if (!file) { resolve(''); return; }
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (e) => {
+          const img = new Image();
+          img.src = e.target.result;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const maxDim = 300;
+            let w = img.width, h = img.height;
+            if (w > h && w > maxDim) { h *= maxDim / w; w = maxDim; } else if (h > maxDim) { w *= maxDim / h; h = maxDim; }
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', 0.4));
+          };
+        };
+        reader.onerror = () => resolve('');
+      });
+    }
+
+    async function registerDeliveryBoy(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnRegister');
+      btn.innerText = "ನೋಂದಣಿಯಾಗುತ್ತಿದೆ..."; btn.disabled = true;
+
+      const selfieFile = document.getElementById('dbSelfie').files[0];
+      const frontFile = document.getElementById('aadhaarFront').files[0];
+      const backFile = document.getElementById('aadhaarBack').files[0];
+
+      const selfieBase64 = await convertFileFast(selfieFile);
+      const frontBase64 = await convertFileFast(frontFile);
+      const backBase64 = await convertFileFast(backFile);
+
+      const fourDigitId = Math.floor(1000 + Math.random() * 9000).toString();
+
+      deliveryBoy = {
+        id: fourDigitId,
+        name: document.getElementById('dbName').value.trim(),
+        fatherName: document.getElementById('dbFatherName').value.trim(),
+        phone: document.getElementById('dbPhone').value.trim(),
+        district: document.getElementById('dbDistrict').value.trim(),
+        taluk: document.getElementById('dbTaluk').value.trim(),
+        village: document.getElementById('dbVillage').value.trim(),
+        pincode: document.getElementById('dbPincode').value.trim(),
+        selfie: selfieBase64,
+        aadhaarFront: frontBase64,
+        aadhaarBack: backBase64
+      };
+
+      try {
+        await window.addDoc(window.collection(window.db, "delivery_boys"), deliveryBoy);
+        localStorage.setItem('my_delivery_boy_session', JSON.stringify(deliveryBoy));
+        
+        document.getElementById('popup-id').innerText = fourDigitId;
+        document.getElementById('successModal').style.display = 'flex';
+      } catch (err) {
+        alert("Error: " + err.message);
+      } finally {
+        btn.innerText = "ಖಾತೆ ಸೃಷ್ಟಿಸಿ & ಲಾಗಿನ್ ಮಾಡಿ"; btn.disabled = false;
+      }
+    }
+
+    function closeSuccessModal() {
+      document.getElementById('successModal').style.display = 'none';
+      renderIDCard();
+      document.getElementById('loginSection').style.display = 'none';
+      document.getElementById('dashboardSection').style.display = 'block';
+      startRealtimeOrders();
+    }
+
+    function renderIDCard() {
+      document.getElementById('displayName').innerText = deliveryBoy.name;
+      document.getElementById('displayPhone').innerText = deliveryBoy.phone;
+      document.getElementById('displayId').innerText = deliveryBoy.id;
+      if (deliveryBoy.selfie) document.getElementById('displaySelfie').src = deliveryBoy.selfie;
+    }
+
+    function toggleDuty() {
+      isOnline = !isOnline;
+      const btn = document.getElementById('dutyBtn');
+      if (isOnline) {
+        btn.innerText = "ONLINE (ಆನ್)";
+        btn.className = "duty-btn duty-on";
+      } else {
+        btn.innerText = "OFFLINE (ಆಫ್)";
+        btn.className = "duty-btn duty-off";
+      }
+      startRealtimeOrders();
+    }
+
+    function switchTab(tabId, btn) {
+      document.getElementById('tabNew').style.display = tabId === 'tabNew' ? 'block' : 'none';
+      document.getElementById('tabHistory').style.display = tabId === 'tabHistory' ? 'block' : 'none';
+      document.getElementById('tabPayments').style.display = tabId === 'tabPayments' ? 'block' : 'none';
+
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function startRealtimeOrders() {
+      const q = window.query(window.collection(window.db, "orders"), window.orderBy("timestamp", "desc"));
+      window.onSnapshot(q, (snap) => {
+        let orders = [];
+        snap.forEach(docSnap => {
+          orders.push({ docId: docSnap.id, ...docSnap.data() });
+        });
+        processDeliveryData(orders);
+      });
+    }
+
+    function processDeliveryData(orders) {
+      if (!isOnline) {
+        document.getElementById('newOrdersList').innerHTML = '<p style="text-align:center; color:#d32f2f; padding:15px; font-weight:bold;">⚠️ ನೀವು ಆಫ್‌ಲೈನ್‌ನಲ್ಲಿದ್ದೀರಿ. ಹೊಸ ಆರ್ಡರ್‌ಗಳು ಕಾಣಿಸುವುದಿಲ್ಲ.</p>';
         return;
       }
-      list.innerHTML = tasks.map(t => `
-        <div class="order-box">
-          <b>ವಸ್ತು: ${t.productName} (₹${t.totalPrice})</b>
-          <p>ಗ್ರಾಹಕರು: ${t.customer?.name} (${t.customer?.phone})</p>
-          <p>ಊರು: ${t.customer?.village}</p>
-          <button class="btn" onclick="markDelivered('${t.docId}')">✅ ಡೆಲಿವರಿ ಪೂರ್ಣಗೊಳಿಸಿ (Delivered)</button>
+
+      // Calculations
+      const now = new Date();
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+
+      let monthTotal = 0;
+      let monthReturns = 0;
+      let todayEarnings = 0;
+      let todayCount = 0;
+
+      orders.forEach(o => {
+        const orderTime = o.timestamp?.toMillis?.() || Date.now();
+
+        if (orderTime >= startOfMonth) {
+          monthTotal++;
+          if (o.status === 'RETURNED') monthReturns++;
+        }
+
+        if (orderTime >= startOfDay && o.status === 'DELIVERED') {
+          todayCount++;
+          todayEarnings += Number(o.totalPrice || 0);
+        }
+      });
+
+      // Update Stats Board
+      document.getElementById('monthlyStats').innerText = `${monthTotal} (Ret: ${monthReturns})`;
+      document.getElementById('dailyEarnings').innerText = `₹${todayEarnings} (${todayCount} Orders)`;
+
+      // Render Lists
+      renderNewOrders(orders.filter(o => o.status === 'PACKING' || o.status === 'STEP_2' || o.status === 'PICKED_UP' || o.status === 'STEP_3'));
+      renderHistoryOrders(orders.filter(o => o.status === 'DELIVERED' || o.status === 'STEP_4'));
+      renderPaymentOrders(orders.filter(o => o.status === 'DELIVERED' || o.status === 'STEP_4' || o.status === 'PICKED_UP'));
+    }
+
+    function renderNewOrders(list) {
+      const container = document.getElementById('newOrdersList');
+      if (list.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#777; padding:15px;">ಯಾವುದೇ ಹೊಸ ಡೆಲಿವರಿ ಟಾಸ್ಕ್ ಇಲ್ಲ.</p>';
+        return;
+      }
+
+      container.innerHTML = list.map(o => {
+        let shopMapLink = o.shopGps ? `https://maps.google.com/?q=${o.shopGps}` : '#';
+        let isPickedUp = (o.status === 'PICKED_UP' || o.status === 'STEP_3');
+
+        return `
+          <div class="order-box">
+            <h4>📦 ವಸ್ತುವಿನ ಹೆಸರು: ${o.productName} (₹${o.totalPrice})</h4>
+            <p><b>ಅಂಗಡಿ ಹೆಸರು:</b> ${o.shopName || 'ಸ್ಥಳೀಯ ಅಂಗಡಿ'}</p>
+            <p><b>ಅಂಗಡಿ ಲೊಕೇಶನ್:</b> <a href="${shopMapLink}" target="_blank" style="color:var(--primary); font-weight:bold;">🗺️ ಜಿಪಿಎಸ್ ಮ್ಯಾಪ್ ನೋಡಿ</a></p>
+            <p><b>ಅಂಗಡಿಯವರ ಫೋನ್:</b> ${o.shopPhone || 'N/A'} 
+               ${o.shopPhone ? `<a href="tel:${o.shopPhone}" style="background:#4caf50; color:#fff; padding:2px 6px; border-radius:4px; text-decoration:none; font-size:0.75rem;">📞 ಕಾಲ್ ಮಾಡಿ</a>` : ''}
+            </p>
+            <hr style="margin:6px 0; border:0; border-top:1px solid #eee;">
+            <p><b>ಗ್ರಾಹಕರು:</b> ${o.customer?.name} (${o.customer?.phone})</p>
+            <p><b>ಊರು:</b> ${o.customer?.village}, ${o.customer?.taluk || ''}</p>
+            
+            <div style="margin-top:8px;">
+              ${!isPickedUp ? `
+                <button class="btn btn-success" onclick="updateOrderStatus('${o.docId}', 'PICKED_UP')">📦 ಆರ್ಡರ್ ಪಿಕ್‌ಅಪ್ ಮಾಡಿ (Pickup Item)</button>
+              ` : `
+                <button class="btn" style="background:#2874f0;" onclick="updateOrderStatus('${o.docId}', 'DELIVERED')">🚀 ಡೆಲಿವರಿ ತಲುಪಿದೆ (Complete Delivery)</button>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderHistoryOrders(list) {
+      const container = document.getElementById('historyOrdersList');
+      if (list.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#777; padding:15px;">ಯಾವುದೇ ಹಳೆಯ ಆರ್ಡರ್‌ಗಳಿಲ್ಲ.</p>';
+        return;
+      }
+
+      container.innerHTML = list.map(o => `
+        <div class="order-box" style="border-left-color: var(--success);">
+          <h4>✅ ${o.productName} - ₹${o.totalPrice}</h4>
+          <p>ಗ್ರಾಹಕರು: ${o.customer?.name} (${o.customer?.phone})</p>
+          <p>ಸ್ಥಳ: ${o.customer?.village}</p>
+          <p style="color:var(--success); font-weight:bold; margin-top:4px;">STATUS: DELIVERED (ಡೆಲಿವರಿ ಸಕ್ಸೆಸ್‌ಫುಲ್)</p>
         </div>
       `).join('');
     }
 
-    async function markDelivered(id) {
-      await window.updateDoc(window.doc(window.db, "orders", id), { status: 'DELIVERED' });
-      alert("🎉 ಡೆಲಿವರಿ ಯಶಸ್ವಿಯಾಗಿದೆ!");
+    function renderPaymentOrders(list) {
+      const container = document.getElementById('paymentOrdersList');
+      if (list.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#777; padding:15px;">ಯಾವುದೇ ಪೇಮೆಂಟ್ ವಿವರಗಳಿಲ್ಲ.</p>';
+        return;
+      }
+
+      container.innerHTML = list.map(o => {
+        let isPaid = o.isShopPaid === true;
+
+        return `
+          <div class="order-box">
+            <h4>${o.productName} - ₹${o.totalPrice}</h4>
+            <p>ಅಂಗಡಿ: ${o.shopName || 'Local Shop'}</p>
+            <div style="margin-top:6px;">
+              ${!isPaid ? `
+                <span style="background:#ffebee; color:#c62828; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:0.75rem;">
+                  🔴 ಪೇಮೆಂಟ್: PENDING (ಅಂಗಡಿ ಮಾಲೀಕರು ಇನ್ನೂ ಪಾವತಿಸಿಲ್ಲ)
+                </span>
+              ` : `
+                <span style="background:#e8f5e9; color:#2e7d32; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:0.75rem;">
+                  🟢 ಪೇಮೆಂಟ್: SUCCESSFUL (ಪಾವತಿ ಪೂರ್ಣಗೊಂಡಿದೆ)
+                </span>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function updateOrderStatus(docId, newStatus) {
+      try {
+        await window.updateDoc(window.doc(window.db, "orders", docId), { status: newStatus });
+        alert("ಸ್ಟೇಟಸ್ ಯಶಸ್ವಿಯಾಗಿ ಅಪ್ಡೇಟ್ ಆಗಿದೆ!");
+      } catch (err) {
+        alert("Error: " + err.message);
+      }
     }
   </script>
 </body>
