@@ -61,7 +61,7 @@
     .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
     .stat-card { background: #f1f8e9; border: 1px solid #c8e6c9; padding: 8px; border-radius: 6px; text-align: center; }
     .stat-card h5 { font-size: 0.7rem; color: #33691e; }
-    .stat-card p { font-size: 0.9rem; font-weight: bold; color: #1b5e20; margin-top: 2px; }
+    .stat-card p { font-size: 0.85rem; font-weight: bold; color: #1b5e20; margin-top: 2px; }
 
     /* Form UI */
     .form-group { margin-bottom: 10px; }
@@ -72,7 +72,7 @@
     .btn-success { background: var(--success); }
     .btn-danger { background: var(--danger); }
 
-    .order-box { border-left: 4px solid var(--primary); background: #fff; border: 1px solid #e0e0e0; border-left-width: 5px; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 0.8rem; }
+    .order-box { border-left: 5px solid var(--primary); background: #fff; border: 1px solid #e0e0e0; border-left-width: 5px; padding: 12px; border-radius: 6px; margin-bottom: 10px; font-size: 0.82rem; }
     
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; }
     .modal-box { background: white; padding: 20px; border-radius: 10px; max-width: 350px; text-align: center; }
@@ -147,10 +147,10 @@
         </div>
       </div>
 
-      <!-- Stats Grid -->
+      <!-- Stats Grid (With 5% Commission & Total Calculation) -->
       <div class="stats-grid">
         <div class="stat-card">
-          <h5>ತಿಂಗಳ ಆರ್ಡರ್ (ರಿಟರ್ನ್ 5%)</h5>
+          <h5>ತಿಂಗಳ ಆರ್ಡರ್ & 5% ಕಮಿಷನ್</h5>
           <p id="monthlyStats">0 (Ret: 0)</p>
         </div>
         <div class="stat-card">
@@ -315,13 +315,13 @@
         return;
       }
 
-      // Calculations
       const now = new Date();
       const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
 
       let monthTotal = 0;
       let monthReturns = 0;
+      let monthDeliveredRevenue = 0;
       let todayEarnings = 0;
       let todayCount = 0;
 
@@ -331,19 +331,23 @@
         if (orderTime >= startOfMonth) {
           monthTotal++;
           if (o.status === 'RETURNED') monthReturns++;
+          if (o.status === 'DELIVERED' || o.status === 'STEP_4') {
+            monthDeliveredRevenue += Number(o.totalPrice || 0);
+          }
         }
 
-        if (orderTime >= startOfDay && o.status === 'DELIVERED') {
+        if (orderTime >= startOfDay && (o.status === 'DELIVERED' || o.status === 'STEP_4')) {
           todayCount++;
           todayEarnings += Number(o.totalPrice || 0);
         }
       });
 
-      // Update Stats Board
-      document.getElementById('monthlyStats').innerText = `${monthTotal} (Ret: ${monthReturns})`;
+      // 5% Commission calculation on monthly delivered amount
+      let commission5Percent = Math.round(monthDeliveredRevenue * 0.05);
+
+      document.getElementById('monthlyStats').innerText = `${monthTotal} Orders (5%: ₹${commission5Percent})`;
       document.getElementById('dailyEarnings').innerText = `₹${todayEarnings} (${todayCount} Orders)`;
 
-      // Render Lists
       renderNewOrders(orders.filter(o => o.status === 'PACKING' || o.status === 'STEP_2' || o.status === 'PICKED_UP' || o.status === 'STEP_3'));
       renderHistoryOrders(orders.filter(o => o.status === 'DELIVERED' || o.status === 'STEP_4'));
       renderPaymentOrders(orders.filter(o => o.status === 'DELIVERED' || o.status === 'STEP_4' || o.status === 'PICKED_UP'));
@@ -357,20 +361,26 @@
       }
 
       container.innerHTML = list.map(o => {
-        let shopMapLink = o.shopGps ? `https://maps.google.com/?q=${o.shopGps}` : '#';
+        let shopMapLink = o.shopGps ? `https://maps.google.com/?q=${o.shopGps}` : `https://maps.google.com/?q=${encodeURIComponent(o.customer?.village || 'Shahapur')}`;
+        let customerMapLink = o.customer?.gps ? `https://maps.google.com/?q=${o.customer.gps}` : `https://maps.google.com/?q=${encodeURIComponent(o.customer?.village || 'Shahapur')}`;
         let isPickedUp = (o.status === 'PICKED_UP' || o.status === 'STEP_3');
 
         return `
           <div class="order-box">
             <h4>📦 ವಸ್ತುವಿನ ಹೆಸರು: ${o.productName} (₹${o.totalPrice})</h4>
             <p><b>ಅಂಗಡಿ ಹೆಸರು:</b> ${o.shopName || 'ಸ್ಥಳೀಯ ಅಂಗಡಿ'}</p>
-            <p><b>ಅಂಗಡಿ ಲೊಕೇಶನ್:</b> <a href="${shopMapLink}" target="_blank" style="color:var(--primary); font-weight:bold;">🗺️ ಜಿಪಿಎಸ್ ಮ್ಯಾಪ್ ನೋಡಿ</a></p>
+            <p><b>ಅಂಗಡಿ ಲೊಕೇಶನ್ (ಮ್ಯಾಪ್):</b> <a href="${shopMapLink}" target="_blank" style="color:var(--primary); font-weight:bold;">🗺️ ಮ್ಯಾಪ್‌ನಲ್ಲಿ ನೋಡಿ</a></p>
             <p><b>ಅಂಗಡಿಯವರ ಫೋನ್:</b> ${o.shopPhone || 'N/A'} 
                ${o.shopPhone ? `<a href="tel:${o.shopPhone}" style="background:#4caf50; color:#fff; padding:2px 6px; border-radius:4px; text-decoration:none; font-size:0.75rem;">📞 ಕಾಲ್ ಮಾಡಿ</a>` : ''}
             </p>
+            
             <hr style="margin:6px 0; border:0; border-top:1px solid #eee;">
-            <p><b>ಗ್ರಾಹಕರು:</b> ${o.customer?.name} (${o.customer?.phone})</p>
-            <p><b>ಊರು:</b> ${o.customer?.village}, ${o.customer?.taluk || ''}</p>
+            
+            <p><b>ಗ್ರಾಹಕರು:</b> ${o.customer?.name} 
+               <a href="tel:${o.customer?.phone}" style="background:#4caf50; color:#fff; padding:2px 6px; border-radius:4px; text-decoration:none; font-size:0.75rem; margin-left:6px;">📞 ಕಾಲ್ ಮಾಡಿ</a>
+            </p>
+            <p><b>ವಿಳಾಸ:</b> ${o.customer?.village}, ತಾ: ${o.customer?.taluk || 'ಶಹಾಪುರ'}, ಜಿ: ${o.customer?.district || 'ಯಾದಗಿರಿ'} - ${o.customer?.pincode || '585223'}</p>
+            <p><b>ಗ್ರಾಹಕರ ಜಿಪಿಎಸ್ ಮ್ಯಾಪ್:</b> <a href="${customerMapLink}" target="_blank" style="color:var(--primary); font-weight:bold;">📍 ರೋಡ್ ಮ್ಯಾಪ್ ನೋಡಿ</a></p>
             
             <div style="margin-top:8px;">
               ${!isPickedUp ? `
@@ -395,7 +405,7 @@
         <div class="order-box" style="border-left-color: var(--success);">
           <h4>✅ ${o.productName} - ₹${o.totalPrice}</h4>
           <p>ಗ್ರಾಹಕರು: ${o.customer?.name} (${o.customer?.phone})</p>
-          <p>ಸ್ಥಳ: ${o.customer?.village}</p>
+          <p>ಊರು: ${o.customer?.village}, ಪಿನ್‌ಕೋಡ್: ${o.customer?.pincode || ''}</p>
           <p style="color:var(--success); font-weight:bold; margin-top:4px;">STATUS: DELIVERED (ಡೆಲಿವರಿ ಸಕ್ಸೆಸ್‌ಫುಲ್)</p>
         </div>
       `).join('');
