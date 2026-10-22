@@ -1,294 +1,84 @@
 <!DOCTYPE html>
 <html lang="kn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ಅಂಗಡಿ ಮಾಲೀಕರ ಆಪ್ - Shop Owner Panel</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-slate-100 font-sans min-h-screen text-slate-800 pb-10">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ನಮ್ಮ ಶಾಪುರ್ - ಡೆಲಿವರಿ ಬಾಯ್ ಆಪ್</title>
+  
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    <!-- Header Navigation -->
-    <header class="bg-indigo-700 text-white p-4 shadow-lg sticky top-0 z-40">
-        <div class="max-w-6xl mx-auto flex justify-between items-center flex-wrap gap-2">
-            <div>
-                <h1 class="text-lg font-bold flex items-center gap-2">🏪 ನನ್ನ ಲೋಕಲ್ ಶಾಪ್ Panel</h1>
-                <p class="text-xs text-indigo-200">ಐಡಿ: #9353 | ಶಾಶ್ವತ ಸೇವಿಂಗ್ ಆನ್</p>
-            </div>
-            
-            <div class="flex items-center gap-2">
-                <!-- ಆರ್ಡರ್ ನೋಡಲು ಪ್ರತ್ಯೇಕ ಬಟನ್ -->
-                <button onclick="openOrdersModal()" class="bg-amber-400 hover:bg-amber-500 text-indigo-950 font-bold text-xs px-3.5 py-2 rounded-xl shadow flex items-center gap-1">
-                    📋 ಆರ್ಡರ್ ನೋಡಿ (<span id="topOrderBadge">0</span>)
-                </button>
-            </div>
-        </div>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAm3HFKu101wex1b025-zJZ2BJ_o1Xvw",
+      authDomain: "ar-taxi-booking-shahapur.firebaseapp.com",
+      projectId: "ar-taxi-booking-shahapur",
+      storageBucket: "ar-taxi-booking-shahapur.appspot.com",
+      messagingSenderId: "585815710897",
+      appId: "1:586815710897:web:ab7138b9c016843db95dsa"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.db = db;
+    window.collection = collection;
+    window.onSnapshot = onSnapshot;
+    window.updateDoc = updateDoc;
+    window.doc = doc;
+  </script>
+
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f6f8; padding: 10px; }
+    .container { max-width: 450px; margin: auto; background: white; padding: 15px; border-radius: 10px; }
+    header { background: #fb8c00; color: white; padding: 10px; text-align: center; border-radius: 6px; }
+    .order-box { border: 1px solid #ffb74d; background: #fff8e1; padding: 10px; border-radius: 6px; margin-top: 10px; }
+    .btn { background: #4caf50; color: white; border: none; padding: 8px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h2>🛵 ಡೆಲಿವರಿ ಬಾಯ್ ಪ್ಯಾನಲ್</h2>
     </header>
 
-    <main class="max-w-5xl mx-auto p-4 space-y-6">
+    <h3>📦 ಡೆಲಿವರಿಯಾಗಬೇಕಾದ ಆರ್ಡರ್‌ಗಳು</h3>
+    <div id="deliveryList"></div>
+  </div>
 
-        <!-- Analytics Cards -->
-        <section class="grid grid-cols-3 gap-3">
-            <div class="bg-white p-3.5 rounded-2xl border shadow-sm text-center">
-                <p class="text-[11px] font-bold text-slate-500">ತಿಂಗಳ ಆರ್ಡರ್</p>
-                <p id="statTotalOrders" class="text-lg font-black text-indigo-700 mt-1">0</p>
-            </div>
-            <div class="bg-white p-3.5 rounded-2xl border shadow-sm text-center">
-                <p class="text-[11px] font-bold text-slate-500">ರಿಟರ್ನ್ ಬಂದದ್ದು</p>
-                <p class="text-lg font-black text-red-600 mt-1">0</p>
-            </div>
-            <div class="bg-white p-3.5 rounded-2xl border shadow-sm text-center">
-                <p class="text-[11px] font-bold text-slate-500">ಒಟ್ಟು ಸಂಪಾದನೆ</p>
-                <p id="statEarnings" class="text-lg font-black text-emerald-600 mt-1">₹0</p>
-            </div>
-        </section>
-
-        <!-- Main Action Buttons -->
-        <section class="flex gap-3">
-            <button onclick="openAddProductModal()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-2xl shadow-lg text-sm flex items-center justify-center gap-2 border-2 border-indigo-400">
-                ➕ ಹೊಸ ಪ್ರಾಡಕ್ಟ್ / ಫೋಟೋ ಹಾಕಿ
-            </button>
-            <button onclick="simulateCustomerOrder()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-2xl shadow-lg text-xs">
-                🚨 ಟೆಸ್ಟ್ ಆರ್ಡರ್
-            </button>
-        </section>
-
-        <!-- Permanent Photo Gallery Section -->
-        <section class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-            <div class="flex justify-between items-center mb-3 border-b pb-2">
-                <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-                    📦 ಅಂಗಡಿಯ ಫೋಟೋಗಳು / ಸಾಮಗ್ರಿಗಳು (<span id="productCount">0</span>)
-                </h2>
-                <span class="text-[10px] text-slate-400">*ಮಾಲೀಕರು ಡಿಲೀಟ್ ಮಾಡುವವರೆಗೆ ಕಣ್ಮರೆಯಾಗುವುದಿಲ್ಲ</span>
-            </div>
-            
-            <div id="productList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                <!-- Permanent Product Cards Rendered Here -->
-            </div>
-        </section>
-
-    </main>
-
-    <!-- Modal 1: Separate Orders View Popup -->
-    <div id="ordersModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-xl rounded-3xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden">
-            <div class="bg-indigo-700 text-white p-4 flex justify-between items-center">
-                <h2 class="text-base font-bold flex items-center gap-2">📋 ಬಂದಿರುವ ಆರ್ಡರ್‌ಗಳು (<span id="modalOrderCount">0</span>)</h2>
-                <button onclick="closeOrdersModal()" class="bg-indigo-800 text-white w-8 h-8 rounded-full font-bold text-sm">✕</button>
-            </div>
-            <div id="ordersContainer" class="p-4 space-y-3 overflow-y-auto flex-1">
-                <!-- Orders details appear only here -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal 2: Product Upload Form Popup -->
-    <div id="addProductModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-5 relative">
-            <button onclick="closeAddProductModal()" class="absolute top-4 right-4 text-slate-400 text-lg font-bold">✕</button>
-            <h2 class="text-base font-bold mb-3 text-indigo-900 border-b pb-2">➕ ಪ್ರಾಡಕ್ಟ್ / ಫೋಟೋ ಅಪ್‌ಲೋಡ್</h2>
-
-            <form id="productForm" class="space-y-3">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">ವಸ್ತುವಿನ ಹೆಸರು</label>
-                    <input type="text" id="itemName" required placeholder="ಉದಾ: ಚಪ್ಪಲಿ" class="w-full p-2 border rounded-xl text-xs outline-none">
-                </div>
-
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1">ಹಳೆಯ ಬೆಲೆ (₹)</label>
-                        <input type="number" id="oldPrice" placeholder="500" class="w-full p-2 border rounded-xl text-xs outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-emerald-700 mb-1">ಪ್ರೆಸೆಂಟ್ ರೇಟ್ (₹)</label>
-                        <input type="number" id="newPrice" required placeholder="400" class="w-full p-2 border border-emerald-400 rounded-xl text-xs font-bold">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">ಪ್ರಮಾಣ</label>
-                        <select id="itemUnit" required class="w-full p-2 border rounded-xl text-xs bg-white outline-none">
-                            <option value="1 Piece" selected>1 Piece</option>
-                            <option value="2 Pieces">2 Pieces</option>
-                            <option value="3 Pieces">3 Pieces</option>
-                            <option value="1 KG">1 KG</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">ರಿಟರ್ನ್ ಆಪ್ಷನ್?</label>
-                        <select id="itemReturn" class="w-full p-2 border rounded-xl text-xs bg-white font-bold outline-none">
-                            <option value="ರಿಟರ್ನ್ ಇದೆ" class="text-emerald-600">✅ ರಿಟರ್ನ್ ಇದೆ</option>
-                            <option value="ರಿಟರ್ನ್ ಇಲ್ಲ" class="text-red-600">❌ ರಿಟರ್ನ್ ಇಲ್ಲ</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">ಫೋಟೋ ಆಯ್ಕೆ ಮಾಡಿ</label>
-                    <input type="file" id="itemImage" accept="image/*" class="w-full text-xs text-slate-500">
-                </div>
-
-                <button type="submit" id="submitBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md mt-2 transition-all">
-                    🚀 ಆಪ್‌ಗೆ ಸೇರಿಸಿ (Publish To Customer App)
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- JAVASCRIPT LOGIC (FIXED PERMANENT STORAGE & ULTRA FAST) -->
-    <script>
-        // Shared Storage Keys
-        const SHARED_PRODUCTS_KEY = "SHARED_LOCAL_SHOP_PRODUCTS";
-        const SHARED_ORDERS_KEY = "SHARED_LOCAL_SHOP_ORDERS";
-
-        let products = JSON.parse(localStorage.getItem(SHARED_PRODUCTS_KEY)) || [];
-        let orders = JSON.parse(localStorage.getItem(SHARED_ORDERS_KEY)) || [];
-
-        window.addEventListener('DOMContentLoaded', () => {
-            renderProducts();
-            renderOrders();
-            calculateStats();
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      window.onSnapshot(window.collection(window.db, "orders"), (snap) => {
+        let tasks = [];
+        snap.forEach(d => {
+          let o = d.data();
+          if (o.status === 'PACKING') tasks.push({ docId: d.id, ...o });
         });
+        renderDeliveryTasks(tasks);
+      });
+    });
 
-        // Fast Permanent Save Function
-        function saveState() {
-            try {
-                localStorage.setItem(SHARED_PRODUCTS_KEY, JSON.stringify(products));
-                localStorage.setItem(SHARED_ORDERS_KEY, JSON.stringify(orders));
-            } catch(e) {
-                console.log("Memory Safe Mode");
-            }
-        }
+    function renderDeliveryTasks(tasks) {
+      const list = document.getElementById('deliveryList');
+      if (tasks.length === 0) {
+        list.innerHTML = '<p style="margin-top:10px;">ಯಾವುದೇ ಡೆಲಿವರಿ ಟಾಸ್ಕ್ ಇಲ್ಲ.</p>';
+        return;
+      }
+      list.innerHTML = tasks.map(t => `
+        <div class="order-box">
+          <b>ವಸ್ತು: ${t.productName} (₹${t.totalPrice})</b>
+          <p>ಗ್ರಾಹಕರು: ${t.customer?.name} (${t.customer?.phone})</p>
+          <p>ಊರು: ${t.customer?.village}</p>
+          <button class="btn" onclick="markDelivered('${t.docId}')">✅ ಡೆಲಿವರಿ ಪೂರ್ಣಗೊಳಿಸಿ (Delivered)</button>
+        </div>
+      `).join('');
+    }
 
-        function openOrdersModal() { document.getElementById('ordersModal').classList.remove('hidden'); }
-        function closeOrdersModal() { document.getElementById('ordersModal').classList.add('hidden'); }
-        function openAddProductModal() { document.getElementById('addProductModal').classList.remove('hidden'); }
-        function closeAddProductModal() { document.getElementById('addProductModal').classList.add('hidden'); }
-
-        // Fast Image Upload Handler
-        document.getElementById('productForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const name = document.getElementById('itemName').value;
-            const oldPrice = document.getElementById('oldPrice').value;
-            const newPrice = document.getElementById('newPrice').value;
-            const unit = document.getElementById('itemUnit').value;
-            const returnOption = document.getElementById('itemReturn').value;
-            const imageInput = document.getElementById('itemImage');
-
-            const finalizePublish = (imgSrc) => {
-                products.push({ id: Date.now(), name, oldPrice, newPrice, unit, returnOption, image: imgSrc });
-                saveState(); // ಶಾಶ್ವತವಾಗಿ ಸೇವ್ ಆಗುತ್ತದೆ
-                renderProducts();
-                document.getElementById('productForm').reset();
-                closeAddProductModal();
-                alert("🎉 ಯಶಸ್ವಿಯಾಗಿ ಅಪ್‌ಲೋಡ್ ಆಗಿದೆ! ಗ್ರಾಹಕರ ಆಪ್‌ನಲ್ಲಿ ಈಗ ಲೈವ್ ಕಾಣಿಸುತ್ತದೆ.");
-            };
-
-            if (imageInput.files && imageInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    finalizePublish(evt.target.result);
-                };
-                reader.readAsDataURL(imageInput.files[0]);
-            } else {
-                finalizePublish("https://images.unsplash.com/photo-1542838132-92c53300491e?w=150");
-            }
-        });
-
-        // Render Permanent Micro Product Thumbnails
-        function renderProducts() {
-            const list = document.getElementById('productList');
-            document.getElementById('productCount').innerText = products.length;
-
-            if(products.length === 0) {
-                list.innerHTML = `<p class="col-span-full text-center text-xs text-slate-400 py-6">ಇನ್ನೂ ಯಾವುದೇ ಫೋಟೋ ಅಪ್‌ಲೋಡ್ ಮಾಡಿಲ್ಲ</p>`;
-                return;
-            }
-
-            list.innerHTML = products.map((item) => `
-                <div class="border rounded-2xl p-2 bg-slate-50 flex flex-col items-center text-center shadow-sm">
-                    <img src="${item.image}" class="w-16 h-16 object-cover rounded-xl border bg-white mb-1.5">
-                    <h3 class="font-bold text-xs text-slate-800 line-clamp-1">${item.name}</h3>
-                    <p class="text-[10px] text-slate-500">${item.unit}</p>
-                    <div class="flex items-center gap-1.5 my-1">
-                        ${item.oldPrice ? `<span class="line-through text-[10px] text-slate-400">₹${item.oldPrice}</span>` : ''}
-                        <span class="text-emerald-700 font-bold text-xs">₹${item.newPrice}</span>
-                    </div>
-                    <span class="text-[9px] ${item.returnOption === 'ರಿಟರ್ನ್ ಇದೆ' ? 'text-emerald-600' : 'text-red-500'} font-semibold mb-2">${item.returnOption}</span>
-                    <button onclick="confirmDelete(${item.id})" class="w-full bg-red-500 hover:bg-red-600 text-white text-[10px] font-bold py-1 rounded-lg">
-                        🗑️ ಡಿಲೀಟ್ ಮಾಡಿ
-                    </button>
-                </div>
-            `).join('');
-        }
-
-        // Only Shop Owner Delete Control
-        function confirmDelete(id) {
-            if(confirm("ನೀವು ನಿಜವಾಗಿಯೂ ಈ ಫೋಟೋವನ್ನು ಡಿಲೀಟ್ ಮಾಡಲು ಬಯಸುತ್ತೀರಾ?")) {
-                products = products.filter(p => p.id !== id);
-                saveState();
-                renderProducts();
-            }
-        }
-
-        // Render Orders inside Modal Popup
-        function renderOrders() {
-            orders = JSON.parse(localStorage.getItem(SHARED_ORDERS_KEY)) || [];
-            const container = document.getElementById('ordersContainer');
-            document.getElementById('modalOrderCount').innerText = orders.length;
-            document.getElementById('topOrderBadge').innerText = orders.length;
-
-            if(orders.length === 0) {
-                container.innerHTML = `<p class="text-center text-xs text-slate-400 py-8">ಯಾವುದೇ ಹೊಸ ಆರ್ಡರ್‌ಗಳು ಇಲ್ಲ</p>`;
-                return;
-            }
-
-            container.innerHTML = orders.slice().reverse().map((ord) => `
-                <div class="border-2 border-slate-200 bg-white p-3 rounded-2xl shadow-sm">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <span class="text-[10px] bg-indigo-100 text-indigo-900 font-bold px-1.5 py-0.5 rounded">ಆರ್ಡರ್ #${ord.id}</span>
-                            <p class="font-bold text-xs mt-1">${ord.customer}</p>
-                            <p class="text-[10px] text-slate-500">ಫೋನ್: ${ord.phone}</p>
-                        </div>
-                        <span class="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-lg">⏳ ಹೊಸ ಆರ್ಡರ್ ಬಂದಿದೆ!</span>
-                    </div>
-                    <div class="my-2 border-t border-b border-slate-100 py-1.5 text-xs flex justify-between">
-                        <span>• ${ord.item}</span> <span class="font-semibold text-indigo-700">₹${ord.amount}</span>
-                    </div>
-                    <button onclick="acceptOrder(${ord.id})" class="w-full bg-indigo-600 text-white text-xs py-2 rounded-xl font-bold">
-                        ✅ ಆರ್ಡರ್ ಸ್ವೀಕರಿಸಿ & ಲಾಕ್ ಮಾಡಿ
-                    </button>
-                </div>
-            `).join('');
-        }
-
-        function acceptOrder(id) {
-            alert("🔒 ಆರ್ಡರ್ ನಿಮಗೆ ಯಶಸ್ವಿಯಾಗಿ ಲಾಕ್ ಆಗಿದೆ!");
-        }
-
-        function calculateStats() {
-            document.getElementById('statTotalOrders').innerText = orders.length;
-        }
-
-        let orderCounter = 102;
-        function simulateCustomerOrder() {
-            orders.push({
-                id: orderCounter++,
-                customer: "ಗ್ರಾಹಕರು (ಮಲ್ಲೇಶ್ವರಂ)",
-                phone: "+91 98765 43210",
-                item: "ಚಪ್ಪಲಿ (1 Piece)",
-                amount: 400,
-                statusStep: 1
-            });
-            saveState();
-            renderOrders();
-            calculateStats();
-            openOrdersModal();
-        }
-    </script>
+    async function markDelivered(id) {
+      await window.updateDoc(window.doc(window.db, "orders", id), { status: 'DELIVERED' });
+      alert("🎉 ಡೆಲಿವರಿ ಯಶಸ್ವಿಯಾಗಿದೆ!");
+    }
+  </script>
 </body>
 </html>
