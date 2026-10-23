@@ -400,7 +400,7 @@
               <p style="margin-top:3px;"><b>ಗ್ರಾಹಕರ ರೋಡ್ ಮ್ಯಾಪ್:</b> <a href="${customerMapLink}" target="_blank" style="color:var(--primary); font-weight:bold;">📍 ಜಿಪಿಎಸ್ ಮ್ಯಾಪ್ ವೀಕ್ಷಿಸಿ</a></p>
             </div>
 
-            <!-- ಬಟನ್‌ಗಳು ಮತ್ತು ಪಿಕ್‌ಅಪ್ ಪ್ರಕ್ರಿಯೆ -->
+            <!-- ಬಟನ್‌ಗಳು ಮತ್ತು ಪಿಕ್‌ಅಪ್ ಪ್ರಕ್ರಿಯೆ (ಹೊಸ OTP ಕ್ರಮ) -->
             <div style="margin-top:10px;">
               ${isReturnOrder ? (
                 !isReturnPickedUp ? `
@@ -414,7 +414,7 @@
                 <div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;">
                   <button class="btn" style="background:#2196f3; font-size:0.8rem;" onclick="sendDeliveryOTP('${o.docId}')">📲 ಗ್ರಾಹಕರಿಗೆ OTP ಕಳುಹಿಸಿ</button>
                   <div id="otpBox_${o.docId}" style="display:none; flex-direction:column; gap:6px; margin-top:6px;">
-                    <input type="text" id="otp_${o.docId}" placeholder="4-ಡಿಜಿಟ್ OTP ಹಾಕಿ" maxlength="4" style="padding:6px; font-size:0.8rem;">
+                    <input type="text" id="otp_${o.docId}" placeholder="ಗ್ರಾಹಕರಿಂದ ಪಡೆದ 4-ಡಿಜಿಟ್ OTP ಹಾಕಿ" maxlength="4" style="padding:6px; font-size:0.8rem;">
                     <div style="display:flex; gap:6px;">
                       <button class="btn btn-success" style="flex:1; padding:6px; font-size:0.75rem;" onclick="verifyAndDeliver('${o.docId}')">OK / ಡೆಲಿವರಿ</button>
                       <button class="btn btn-danger" style="flex:1; padding:6px; font-size:0.75rem;" onclick="verifyAndCancel('${o.docId}')">ಕ್ಯಾನ್ಸಲ್</button>
@@ -467,10 +467,10 @@
 
     async function requestPickupOTP(docId) {
       const shopOtp = Math.floor(1000 + Math.random() * 9000).toString();
-      const enteredPin = prompt(`🏪 ಅಂಗಡಿಯಿಂದ ಪಿಕ್‌ಅಪ್ ಮಾಡಲು OTP ಕಳುಹಿಸಲಾಗಿದೆ.\n\nಅಂಗಡಿ ಮಾಲೀಕರ OTP ನಮೂದಿಸಿ (OTP: ${shopOtp}):`);
+      const enteredPin = prompt(`🏪 ಅಂಗಡಿಯಿಂದ ಪಿಕ್‌ಅಪ್ ಮಾಡಲು OTP ಕಳುಹಿಸಲಾಗಿದೆ.\n\nಅಂಗಡಿ ಮಾಲೀಕರಿಂದ ಪಡೆದ OTP ನಮೂದಿಸಿ (ಮಾಲೀಕರಿಗೆ ಕಳುಹಿಸಿದ OTP: ${shopOtp}):`);
       
       if (!enteredPin || enteredPin.trim() !== shopOtp) {
-        alert("⚠️ ತಪ್ಪಾದ OTP! ಅಂಗಡಿ ಮಾಲೀಕರ ಸರಿಯಾದ OTP ನಮೂದಿಸಿ.");
+        alert("⚠️ ತಪ್ಪಾದ OTP! ಅಂಗಡಿ ಮಾಲೀಕರಿಂದ ಸರಿಯಾದ OTP ಪಡೆದು ನಮೂದಿಸಿ.");
         return;
       }
       try {
@@ -486,7 +486,8 @@
       try {
         await window.updateDoc(window.doc(window.db, "orders", docId), { deliveryPin: newOtp });
         document.getElementById(`otpBox_${docId}`).style.display = 'flex';
-        alert(`📱 ಹೊಸ OTP ಯಶಸ್ವಿಯಾಗಿ ಕಳುಹಿಸಲಾಗಿದೆ!\n\nಗ್ರಾಹಕರ OTP ನಂಬರ್: ${newOtp}`);
+        // ಡೆಲಿವರಿ ಬಾಯ್ ಹತ್ತಿರ OTP ಕಾಣಿಸುವುದಿಲ್ಲ, ಗ್ರಾಹಕರಿಗೆ ಮಾತ್ರ ರವಾನೆಯಾಗುತ್ತದೆ. ಇಲ್ಲಿ ಅಲರ್ಟ್ ಬದಲು ಸಂದೇಶ ತೋರಿಸಲಾಗಿದೆ.
+        alert("📱 ಗ್ರಾಹಕರ ಮೊಬೈಲ್ ಸಂಖ್ಯೆಗೆ ಹೊಸ OTP ಕಳುಹಿಸಲಾಗಿದೆ. ಗ್ರಾಹಕರ ಬಳಿ ಕೇಳಿ OTP ನಮೂದಿಸಿ.");
       } catch (err) {
         alert("ದೋಷ: " + err.message);
       }
@@ -495,7 +496,7 @@
     async function verifyAndDeliver(docId) {
       const enteredPin = document.getElementById(`otp_${docId}`).value.trim();
       if (!enteredPin || enteredPin.length !== 4) {
-        alert("⚠️ ದಯವಿಟ್ಟು ಸರಿಯಾದ 4-ಡಿಜಿಟ್ OTP ನಮೂದಿಸಿ.");
+        alert("⚠️ ದಯವಿಟ್ಟು ಗ್ರಾಹಕರಿಂದ ಪಡೆದ ಸರಿಯಾದ 4-ಡಿಜಿಟ್ OTP ನಮೂದಿಸಿ.");
         return;
       }
       try {
@@ -509,7 +510,7 @@
     async function verifyAndCancel(docId) {
       const enteredPin = document.getElementById(`otp_${docId}`).value.trim();
       if (!enteredPin || enteredPin.length !== 4) {
-        alert("⚠️ ಆರ್ಡರ್ ಕ್ಯಾನ್ಸಲ್ ಮಾಡಲು 4-ಡಿಜಿಟ್ OTP ನಮೂದಿಸಬೇಕು.");
+        alert("⚠️ ಆರ್ಡರ್ ಕ್ಯಾನ್ಸಲ್ ಮಾಡಲು ಗ್ರಾಹಕರ 4-ಡಿಜಿಟ್ OTP ನಮೂದಿಸಬೇಕು.");
         return;
       }
       try {
@@ -533,10 +534,10 @@
 
     async function requestReturnOTPAndPickup(docId) {
       const newOtp = Math.floor(1000 + Math.random() * 9000).toString();
-      const enteredPin = prompt(`📱 ರಿಟರ್ನ್ OTP ಕಳುಹಿಸಲಾಗಿದೆ.\n\nಗ್ರಾಹಕರ ಬಳಿ ಇರುವ OTP ನಮೂದಿಸಿ (OTP: ${newOtp}):`);
+      const enteredPin = prompt(`📱 ರಿಟರ್ನ್ OTP ಗ್ರಾಹಕರಿಗೆ ಕಳುಹಿಸಲಾಗಿದೆ.\n\nಗ್ರಾಹಕರ ಬಳಿ ಇರುವ OTP ಪಡೆದು ನಮೂದಿಸಿ:`);
       
       if (!enteredPin || enteredPin.trim() !== newOtp) {
-        alert("⚠️ ತಪ್ಪಾದ OTP! ಸರಿಯಾದ OTP ಹಾಕಿದರೆ ಮಾತ್ರ ಪಿಕ್‌ಅಪ್ ಸಾಧ್ಯ.");
+        alert("⚠️ ತಪ್ಪಾದ OTP! ಗ್ರಾಹಕರಿಂದ ಸರಿಯಾದ OTP ಪಡೆದು ಹಾಕಿದರೆ ಮಾತ್ರ ಪಿಕ್‌ಅಪ್ ಸಾಧ್ಯ.");
         return;
       }
       try {
@@ -553,10 +554,10 @@
 
     async function deliverReturnToShop(docId) {
       const shopOtp = Math.floor(1000 + Math.random() * 9000).toString();
-      const enteredPin = prompt(`🏪 ಅಂಗಡಿ ಮಾಲೀಕರಿಗೆ OTP ಕಳುಹಿಸಲಾಗಿದೆ.\n\nಅಂಗಡಿ ಮಾಲೀಕರ OTP ನಮೂದಿಸಿ (OTP: ${shopOtp}):`);
+      const enteredPin = prompt(`🏪 ಅಂಗಡಿ ಮಾಲೀಕರಿಗೆ OTP ಕಳುಹಿಸಲಾಗಿದೆ.\n\nಅಂಗಡಿ ಮಾಲೀಕರಿಂದ ಪಡೆದ OTP ನಮೂದಿಸಿ:`);
       
       if (!enteredPin || enteredPin.trim() !== shopOtp) {
-        alert("⚠️ ತಪ್ಪಾದ OTP! ಅಂಗಡಿ ಮಾಲೀಕರ ಸರಿಯಾದ OTP ನಮೂದಿಸಿ.");
+        alert("⚠️ ತಪ್ಪಾದ OTP! ಅಂಗಡಿ ಮಾಲೀಕರ ಸರಿಯಾದ OTP ಪಡೆದು ನಮೂದಿಸಿ.");
         return;
       }
       try {
