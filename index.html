@@ -147,7 +147,7 @@
         </div>
       </div>
 
-      <!-- Stats Grid (With 5% Commission & Total Calculation) -->
+      <!-- Stats Grid -->
       <div class="stats-grid">
         <div class="stat-card">
           <h5>ತಿಂಗಳ ಆರ್ಡರ್ & 5% ಕಮಿಷನ್</h5>
@@ -347,10 +347,9 @@
       document.getElementById('monthlyStats').innerText = `${monthTotal} Orders (Ret: ${monthReturns}) (5%: ₹${commission5Percent})`;
       document.getElementById('dailyEarnings').innerText = `₹${todayEarnings} (${todayCount} Orders)`;
 
-      // Filter active delivery orders and return orders that need pickup
       renderNewOrders(orders.filter(o => 
         o.status === 'PACKING' || o.status === 'STEP_2' || o.status === 'PICKED_UP' || o.status === 'STEP_3' || 
-        o.isReturned || o.status === 'RETURNED' || o.returnStatus === 'RETURN_REQUESTED'
+        o.isReturned || o.status === 'RETURNED' || o.returnStatus === 'RETURN_REQUESTED' || o.returnStatus === 'PICKED_UP_BY_DBOY'
       ));
       renderHistoryOrders(orders.filter(o => o.status === 'DELIVERED' || o.status === 'STEP_4' || o.status === 'RETURN_COMPLETED'));
       renderPaymentOrders(orders.filter(o => o.status === 'DELIVERED' || o.status === 'STEP_4' || o.isReturned));
@@ -368,6 +367,7 @@
         let customerMapLink = o.customer?.gps ? `https://maps.google.com/?q=${o.customer.gps}` : `https://maps.google.com/?q=${encodeURIComponent(o.customer?.village || 'Shahapur')}`;
         let isPickedUp = (o.status === 'PICKED_UP' || o.status === 'STEP_3');
         let isReturnOrder = (o.isReturned || o.status === 'RETURNED' || o.returnStatus === 'RETURN_REQUESTED');
+        let isReturnPickedUp = (o.returnStatus === 'PICKED_UP_BY_DBOY');
 
         return `
           <div class="order-box" style="border-left-color: ${isReturnOrder ? '#e53935' : '#fb8c00'};">
@@ -379,18 +379,24 @@
             
             <p><b>ಗ್ರಾಹಕರು:</b> ${o.customer?.name} (${o.customer?.phone})</p>
             <p><b>ವಿಳಾಸ:</b> ${o.customer?.village}, ತಾ: ${o.customer?.taluk || 'ಶಹಾಪುರ'} - ${o.customer?.pincode || '585223'}</p>
-            ${!isReturnOrder ? `<p style="color:#d32f2f; font-weight:bold;">ಡೆಲಿವರಿ PIN (OTP): ${o.deliveryPin || '1234'}</p>` : ''}
             
             <div style="margin-top:8px;">
-              ${isReturnOrder ? `
-                <button class="btn btn-danger" onclick="completeReturnPickup('${o.docId}')">🔄 ರಿಟರ್ನ್ ಪಿಕ್‌ಅಪ್ ಮಾಡಿ (Pickup Return)</button>
-              ` : (!isPickedUp ? `
+              ${isReturnOrder ? (
+                !isReturnPickedUp ? `
+                  <button class="btn btn-danger" onclick="requestReturnOTPAndPickup('${o.docId}', '${o.deliveryPin || '1234'}')">🔄 ರಿಟರ್ನ್ ಪಿಕ್‌ಅಪ್ ಮಾಡಿ (Pickup Return)</button>
+                ` : `
+                  <button class="btn btn-success" onclick="deliverReturnToShop('${o.docId}', '${o.deliveryPin || '1234'}')">🏪 ಅಂಗಡಿಗೆ ತಲುಪಿಸಿ (Deliver to Shop)</button>
+                `
+              ) : (!isPickedUp ? `
                 <button class="btn btn-success" onclick="updateOrderStatus('${o.docId}', 'PICKED_UP')">📦 ಆರ್ಡರ್ ಪಿಕ್‌ಅಪ್ ಮಾಡಿ (Pickup Item)</button>
               ` : `
-                <div style="display:flex; gap:6px; margin-top:6px;">
-                  <input type="text" id="otp_${o.docId}" placeholder="4-ಡಿಜಿಟ್ OTP ಹಾಕಿ" maxlength="4" style="flex:1; padding:6px; font-size:0.8rem;">
-                  <button class="btn btn-success" style="flex:1; padding:6px; font-size:0.75rem;" onclick="verifyAndDeliver('${o.docId}', '${o.deliveryPin}')">ಒಕೆ / ಡೆಲಿವರಿ</button>
-                  <button class="btn btn-danger" style="flex:1; padding:6px; font-size:0.75rem;" onclick="verifyAndCancel('${o.docId}', '${o.deliveryPin}')">ಕ್ಯಾನ್ಸಲ್ ಮಾಡಿ</button>
+                <div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;">
+                  <button class="btn" style="background:#2196f3; font-size:0.8rem;" onclick="sendDeliveryOTP('${o.docId}', '${o.customer?.phone}')">📲 ಗ್ರಾಹಕರಿಗೆ OTP ಕಳುಹಿಸಿ</button>
+                  <div style="display:flex; gap:6px;">
+                    <input type="text" id="otp_${o.docId}" placeholder="4-ಡಿಜಿಟ್ OTP ಹಾಕಿ" maxlength="4" style="flex:1; padding:6px; font-size:0.8rem;">
+                    <button class="btn btn-success" style="flex:1; padding:6px; font-size:0.75rem;" onclick="verifyAndDeliver('${o.docId}', '${o.deliveryPin || '1234'}')">OK / ಡೆಲಿವರಿ</button>
+                    <button class="btn btn-danger" style="flex:1; padding:6px; font-size:0.75rem;" onclick="verifyAndCancel('${o.docId}', '${o.deliveryPin || '1234'}')">ಕ್ಯಾನ್ಸಲ್</button>
+                  </div>
                 </div>
               `)}
             </div>
@@ -425,7 +431,7 @@
       container.innerHTML = list.map(o => `
         <div class="order-box">
           <h4>${o.productName} - ₹${o.totalPrice}</h4>
-          <p>ಪಾವತಿ ಸ್ಥಿತಿ: <span style="color:green; font-weight:bold;">${o.paymentStatus === 'SUCCESS' ? 'ಪಾವತಿ ಸಕ್ಸಸ್‌ಫುಲ್ ಆಗಿದೆ' : 'ಪ್ರೆಂಡಿಂಗ್‌ನಲ್ಲಿದೆ'}</span></p>
+          <p>ಪಾವತಿ ಸ್ಥಿತಿ: <span style="color:green; font-weight:bold;">${o.paymentStatus === 'SUCCESS' ? 'ಪಾವತಿ ಸಕ್ಸಸ್‌ಫುಲ್ ಆಗಿದೆ' : 'ಪೆಂಡಿಂಗ್‌ನಲ್ಲಿದೆ'}</span></p>
         </div>
       `).join('');
     }
@@ -433,36 +439,27 @@
     async function updateOrderStatus(docId, newStatus) {
       try {
         await window.updateDoc(window.doc(window.db, "orders", docId), { status: newStatus });
-        alert("ಸ್ಟೇಟಸ್ ಯಶಸ್ವಿಯಾಗಿ ಅಪ್ಡೇಟ್ ಆಗಿದೆ!");
+        alert("ಆರ್ಡರ್ ಪಿಕ್‌ಅಪ್ ಮಾಡಲಾಗಿದೆ!");
       } catch (err) {
         alert("Error: " + err.message);
       }
     }
 
-    async function completeReturnPickup(docId) {
-      try {
-        await window.updateDoc(window.doc(window.db, "orders", docId), {
-          status: 'RETURNED',
-          returnStatus: 'PICKED_UP_BY_DBOY',
-          isReturned: true
-        });
-        alert("ರಿಟರ್ನ್ ಆರ್ಡರ್ ಪಿಕ್‌ಅಪ್ ಮಾಡಲಾಗಿದೆ ಮತ್ತು ಮಾಸ್ಟರ್ ಪ್ಯಾನಲ್‌ಗೆ ಕಳುಹಿಸಲಾಗಿದೆ.");
-      } catch(err) {
-        alert("Error: " + err.message);
-      }
+    function sendDeliveryOTP(docId, phone) {
+      alert(`📱 ಗ್ರಾಹಕರ ಮೊಬೈಲ್ (${phone}) ಸಂಖ್ಯೆಗೆ OTP ಕಳುಹಿಸಲಾಗಿದೆ. ಅವರಿಂದ 4-ಡಿಜಿಟ್ OTP ಪಡೆದು ನಮೂದಿಸಿ.`);
     }
 
     async function verifyAndDeliver(docId, correctPin) {
       const enteredPin = document.getElementById(`otp_${docId}`).value.trim();
-      if (enteredPin !== correctPin) {
-        alert("⚠️ ತಪ್ಪಾದ OTP! ದಯವಿಟ್ಟು ಸರಿಯಾದ 4-ಡಿಜಿಟ್ OTP ನಮೂದಿಸಿ.");
+      if (!enteredPin || enteredPin !== correctPin) {
+        alert("⚠️ ತಪ್ಪಾದ OTP! ದಯವಿಟ್ಟು ಗ್ರಾಹಕರಿಂದ ಸರಿಯಾದ 4-ಡಿಜಿಟ್ OTP ಕೇಳಿ ನಮೂದಿಸಿ.");
         return;
       }
       try {
-        await window.updateDoc(window.doc(window.db, "orders", docId), {
+        await window.updateDoc(window.doc(window.doc(window.db, "orders", docId)), {
           status: 'DELIVERED'
         });
-        alert("🎉 ಡೆಲಿವರಿ ಯಶಸ್ವಿಯಾಗಿ ಪೂರ್ಣಗೊಂಡಿದೆ!");
+        alert("🎉 ಡೆಲಿವರಿ ಸಕ್ಸಸ್‌ಫುಲ್ ಆಗಿದೆ!");
       } catch(err) {
         alert("Error: " + err.message);
       }
@@ -470,8 +467,8 @@
 
     async function verifyAndCancel(docId, correctPin) {
       const enteredPin = document.getElementById(`otp_${docId}`).value.trim();
-      if (enteredPin !== correctPin) {
-        alert("⚠️ ಆರ್ಡರ್ ಕ್ಯಾನ್ಸಲ್ ಮಾಡಲು ಸರಿಯಾದ 4-ಡಿಜಿಟ್ OTP ನಮೂದಿಸಬೇಕು.");
+      if (!enteredPin || enteredPin !== correctPin) {
+        alert("⚠️ ಆರ್ಡರ್ ಕ್ಯಾನ್ಸಲ್ ಮಾಡಲು ಗ್ರಾಹಕರ 4-ಡಿಜಿಟ್ OTP ಅವಶ್ಯಕ.");
         return;
       }
       try {
@@ -480,6 +477,41 @@
           isCancelled: true
         });
         alert("ಆರ್ಡರ್ ಯಶಸ್ವಿಯಾಗಿ ಕ್ಯಾನ್ಸಲ್ ಮಾಡಲಾಗಿದೆ.");
+      } catch(err) {
+        alert("Error: " + err.message);
+      }
+    }
+
+    async function requestReturnOTPAndPickup(docId, correctPin) {
+      const enteredPin = prompt("📲 ಗ್ರಾಹಕರ ಬಳಿ ಇರುವ 4-ಡಿಜಿಟ್ OTP ನಮೂದಿಸಿ:");
+      if (!enteredPin || enteredPin.trim() !== correctPin) {
+        alert("⚠️ ತಪ್ಪಾದ OTP! ಸರಿಯಾದ OTP ಹಾಕಿದರೆ ಮಾತ್ರ ಪಿಕ್‌ಅಪ್ ಸಾಧ್ಯ.");
+        return;
+      }
+      try {
+        await window.updateDoc(window.doc(window.db, "orders", docId), {
+          status: 'RETURNED',
+          returnStatus: 'PICKED_UP_BY_DBOY',
+          isReturned: true
+        });
+        alert("✅ ರಿಟರ್ನ್ ಆರ್ಡರ್ ಯಶಸ್ವಿಯಾಗಿ ಪಿಕ್‌ಅಪ್ ಆಗಿದೆ! ಈಗ ಇದನ್ನು ಅಂಗಡಿಗೆ ತಲುಪಿಸಿ.");
+      } catch(err) {
+        alert("Error: " + err.message);
+      }
+    }
+
+    async function deliverReturnToShop(docId, correctPin) {
+      const enteredPin = prompt("🏪 ಅಂಗಡಿ ಮಾಲೀಕರ ಬಳಿ ಇರುವ 4-ಡಿಜಿಟ್ OTP ನಮೂದಿಸಿ:");
+      if (!enteredPin || enteredPin.trim() !== correctPin) {
+        alert("⚠️ ತಪ್ಪಾದ OTP! ಅಂಗಡಿ ಮಾಲೀಕರ ಸರಿಯಾದ OTP ನಮೂದಿಸಿ.");
+        return;
+      }
+      try {
+        await window.updateDoc(window.doc(window.db, "orders", docId), {
+          status: 'RETURN_COMPLETED',
+          returnStatus: 'DELIVERED_TO_SHOP'
+        });
+        alert("🎉 ರಿಟರ್ನ್ ವಸ್ತು ಅಂಗಡಿಗೆ ಯಶಸ್ವಿಯಾಗಿ ತಲುಪಿದೆ!");
       } catch(err) {
         alert("Error: " + err.message);
       }
