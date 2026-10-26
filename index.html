@@ -389,23 +389,14 @@
             <div style="margin-top:10px;">
               ${isReturnOrder ? (
                 !isReturnPickedUp ? `
-                  <button class="btn btn-danger" onclick="requestReturnOTPAndPickup('${o.docId}')">🔄 ರಿಟರ್ನ್ ಪಿಕ್‌ಅಪ್ ಮಾಡಿ (Pickup Return)</button>
+                  <button class="btn btn-danger" onclick="directPickupReturn('${o.docId}')">🔄 ರಿಟರ್ನ್ ಪಿಕ್‌ಅಪ್ ಮಾಡಿ (Pickup Return)</button>
                 ` : `
-                  <button class="btn btn-success" onclick="deliverReturnToShop('${o.docId}')">🏪 ಅಂಗಡಿಗೆ ತಲುಪಿಸಿ (Deliver to Shop)</button>
+                  <button class="btn btn-success" onclick="directDeliverReturnToShop('${o.docId}')">🏪 ಅಂಗಡಿಗೆ ತಲುಪಿಸಿ (Deliver to Shop)</button>
                 `
               ) : (!isPickedUp ? `
-                <button class="btn btn-success" onclick="requestPickupOTP('${o.docId}')">📦 ಪಿಕ್‌ಅಪ್ ಮಾಡಿ (Pickup Order)</button>
+                <button class="btn btn-success" onclick="directPickupOrder('${o.docId}')">📦 ಪಿಕ್‌ಅಪ್ ಮಾಡಿ (Pickup Order)</button>
               ` : `
-                <div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;">
-                  <button class="btn" style="background:#2196f3; font-size:0.8rem;" onclick="sendDeliveryOTP('${o.docId}')">📲 ಗ್ರಾಹಕರಿಗೆ OTP ಕಳುಹಿಸಿ</button>
-                  <div id="otpBox_${o.docId}" style="display:none; flex-direction:column; gap:6px; margin-top:6px;">
-                    <input type="text" id="otp_${o.docId}" placeholder="ಗ್ರಾಹಕರಿಂದ ಪಡೆದ 4-ಡಿಜಿಟ್ OTP ಹಾಕಿ" maxlength="4" style="padding:6px; font-size:0.8rem;">
-                    <div style="display:flex; gap:6px;">
-                      <button class="btn btn-success" style="flex:1; padding:6px; font-size:0.75rem;" onclick="verifyAndDeliver('${o.docId}')">OK / ಡೆಲಿವರಿ</button>
-                      <button class="btn btn-danger" style="flex:1; padding:6px; font-size:0.75rem;" onclick="verifyAndCancel('${o.docId}')">ಕ್ಯಾನ್ಸಲ್</button>
-                    </div>
-                  </div>
-                </div>
+                <button class="btn btn-success" onclick="directDeliverOrder('${o.docId}')">🎉 ಡೆಲಿವರಿ ಕಂಪ್ಲೀಟ್ ಮಾಡಿ (Deliver)</button>
               `)}
             </div>
 
@@ -449,20 +440,7 @@
       `).join('');
     }
 
-    async function requestPickupOTP(docId) {
-      const shopOtp = Math.floor(1000 + Math.random() * 9000).toString();
-      
-      // Save shopOtp to order document so shop owner can see/verify it, but do NOT show it to delivery boy prompt
-      try {
-        await window.updateDoc(window.doc(window.db, "orders", docId), { shopPin: shopOtp });
-      } catch (e) {}
-
-      const enteredPin = prompt(`🏪 ಅಂಗಡಿಯಿಂದ ಪಿಕ್‌ಅಪ್ ಮಾಡಲು OTP ಕಳುಹಿಸಲಾಗಿದೆ.\n\nಅಂಗಡಿ ಮಾಲೀಕರಿಂದ ಪಡೆದ OTP ನಂಬರ್ ಇಲ್ಲಿ ತಿಳಿಸಿ ನಮೂದಿಸಿ:`);
-      
-      if (!enteredPin || enteredPin.trim() !== shopOtp) {
-        alert("⚠️ ತಪ್ಪಾದ OTP! ಅಂಗಡಿ ಮಾಲೀಕರಿಂದ ಸರಿಯಾದ OTP ಪಡೆದು ನಮೂದಿಸಿ.");
-        return;
-      }
+    async function directPickupOrder(docId) {
       try {
         await window.updateDoc(window.doc(window.db, "orders", docId), { status: 'PICKED_UP' });
         alert("✅ ಆರ್ಡರ್ ಯಶಸ್ವಿಯಾಗಿ ಪಿಕ್‌ಅಪ್ ಮಾಡಲಾಗಿದೆ!");
@@ -471,40 +449,10 @@
       }
     }
 
-    async function sendDeliveryOTP(docId) {
-      const newOtp = Math.floor(1000 + Math.random() * 9000).toString();
-      try {
-        await window.updateDoc(window.doc(window.db, "orders", docId), { deliveryPin: newOtp });
-        document.getElementById(`otpBox_${docId}`).style.display = 'flex';
-        alert("📱 ಗ್ರಾಹಕರ ಮೊಬೈಲ್ ಸಂಖ್ಯೆಗೆ ಹೊಸ OTP ಕಳುಹಿಸಲಾಗಿದೆ. ಗ್ರಾಹಕರ ಬಳಿ ಕೇಳಿ OTP ನಮೂದಿಸಿ.");
-      } catch (err) {
-        alert("ದೋಷ: " + err.message);
-      }
-    }
-
-    async function verifyAndDeliver(docId) {
-      const enteredPin = document.getElementById(`otp_${docId}`).value.trim();
-      if (!enteredPin || enteredPin.length !== 4) {
-        alert("⚠️ ದಯವಿಟ್ಟು ಗ್ರಾಹಕರಿಂದ ಪಡೆದ ಸರಿಯಾದ 4-ಡಿಜಿಟ್ OTP ನಮೂದಿಸಿ.");
-        return;
-      }
+    async function directDeliverOrder(docId) {
       try {
         await window.updateDoc(window.doc(window.db, "orders", docId), { status: 'DELIVERED' });
         alert("🎉 ಡೆಲಿವರಿ ಯಶಸ್ವಿಯಾಗಿ ಪೂರ್ಣಗೊಂಡಿದೆ!");
-      } catch(err) {
-        alert("ದೋಷ: " + err.message);
-      }
-    }
-
-    async function verifyAndCancel(docId) {
-      const enteredPin = document.getElementById(`otp_${docId}`).value.trim();
-      if (!enteredPin || enteredPin.length !== 4) {
-        alert("⚠️ ಆರ್ಡರ್ ಕ್ಯಾನ್ಸಲ್ ಮಾಡಲು ಗ್ರಾಹಕರ 4-ಡಿಜಿಟ್ OTP ನಮೂದಿಸಬೇಕು.");
-        return;
-      }
-      try {
-        await window.updateDoc(window.doc(window.db, "orders", docId), { status: 'CANCELLED', isCancelled: true });
-        alert("ಆರ್ಡರ್ ಯಶಸ್ವಿಯಾಗಿ ಕ್ಯಾನ್ಸಲ್ ಮಾಡಲಾಗಿದೆ.");
       } catch(err) {
         alert("ದೋಷ: " + err.message);
       }
@@ -521,18 +469,7 @@
       }
     }
 
-    async function requestReturnOTPAndPickup(docId) {
-      const newOtp = Math.floor(1000 + Math.random() * 9000).toString();
-      try {
-        await window.updateDoc(window.doc(window.db, "orders", docId), { deliveryPin: newOtp });
-      } catch(e) {}
-
-      const enteredPin = prompt(`📱 ರಿಟರ್ನ್ OTP ಗ್ರಾಹಕರಿಗೆ ಕಳುಹಿಸಲಾಗಿದೆ.\n\nಗ್ರಾಹಕರ ಬಳಿ ಇರುವ OTP ಪಡೆದು ನಮೂದಿಸಿ:`);
-      
-      if (!enteredPin || enteredPin.trim() !== newOtp) {
-        alert("⚠️ ತಪ್ಪಾದ OTP! ಗ್ರಾಹಕರಿಂದ ಸರಿಯಾದ OTP ಪಡೆದು ಹಾಕಿದರೆ ಮಾತ್ರ ಪಿಕ್‌ಅಪ್ ಸಾಧ್ಯ.");
-        return;
-      }
+    async function directPickupReturn(docId) {
       try {
         await window.updateDoc(window.doc(window.db, "orders", docId), {
           status: 'RETURNED',
@@ -545,19 +482,7 @@
       }
     }
 
-    async function deliverReturnToShop(docId) {
-      const shopOtp = Math.floor(1000 + Math.random() * 9000).toString();
-      
-      try {
-        await window.updateDoc(window.doc(window.db, "orders", docId), { shopReturnPin: shopOtp });
-      } catch(e) {}
-
-      const enteredPin = prompt(`🏪 ಅಂಗಡಿ ಮಾಲೀಕರಿಗೆ OTP ಕಳುಹಿಸಲಾಗಿದೆ.\n\nಅಂಗಡಿ ಮಾಲೀಕರಿಂದ ಪಡೆದ OTP ನಮೂದಿಸಿ:`);
-      
-      if (!enteredPin || enteredPin.trim() !== shopOtp) {
-        alert("⚠️ ತಪ್ಪಾದ OTP! ಅಂಗಡಿ ಮಾಲೀಕರ ಸರಿಯಾದ OTP ಪಡೆದು ನಮೂದಿಸಿ.");
-        return;
-      }
+    async function directDeliverReturnToShop(docId) {
       try {
         await window.updateDoc(window.doc(window.db, "orders", docId), {
           status: 'RETURN_COMPLETED',
