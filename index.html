@@ -129,7 +129,7 @@
       <form onsubmit="loginDeliveryBoy(event)">
         <div class="form-group">
           <label>4-ಅಂಕಿಯ ಡೆಲಿವರಿ ಐಡಿ (4-Digit ID):</label>
-          <input type="text" id="loginDboyId" placeholder="ನಿಮ್ಮ 4 ಅಂಕಿಯ ಐಡಿ ಹಾಕಿ" maxlength="4" required>
+          <input type="text" id="loginDboyId" placeholder="ನಿಮ್ಮ 4 ಅಂಕಿಯ ಐಡಿ ಹಾಕಿ (ಉ: 8010)" maxlength="4" required>
         </div>
         <div class="form-group">
           <label>ಮೊಬೈಲ್ ನಂಬರ್:</label>
@@ -237,7 +237,7 @@
     </div>
   </div>
 
-  <!-- AGENT DELIVERY BOYS LIST MODAL -->
+  <!-- AGENT DELIVERY BOYS LIST MODAL WITH 4-DIGIT IDs -->
   <div id="deliveryBoysListModal" class="modal">
     <div class="modal-box" style="text-align:left;">
       <h3 style="color:var(--agent-color); margin-bottom:10px;">👥 ನಿಮ್ಮ ಡೆಲಿವರಿ ಬಾಯ್ಸ್ ಪಟ್ಟಿ</h3>
@@ -461,7 +461,7 @@
         });
         let agentCommission5 = Math.round(totalRevenue * 0.05);
         document.getElementById('agentTotalEarnings').innerText = `₹${agentCommission5}`;
-        renderHistoryOrders(ordersList.filter(o => o.status === 'DELIVERED' || o.status === 'STEP_4'));
+        renderHistoryOrders(ordersList.filter(o => o.status === 'DELIVERED' || o.status === 'STEP_4' || o.status === 'CANCELLED'));
       });
     }
 
@@ -600,17 +600,24 @@
         let isReturnOrder = (o.isReturned || o.status === 'RETURNED' || o.returnStatus === 'RETURN_REQUESTED');
         let isReturnPickedUp = (o.returnStatus === 'PICKED_UP_BY_DBOY');
 
-        // Google Maps Navigation URL generator based on customer address
         let mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.customer?.village + ', ' + (o.customer?.taluk || 'Shahapur'))}`;
 
         return `
           <div class="order-box" style="border-left-color: ${isReturnOrder ? '#e53935' : '#fb8c00'};">
-            <div style="display:flex; gap:10px; align-items:center; background:#fff8e1; padding:8px; border-radius:6px; margin-bottom:8px;">
-              <div style="flex:1;">
-                <b style="font-size:0.85rem; color:#e65100;">🏪 ಅಂಗಡಿ: ${o.shopName || 'ನಮ್ಮ ಶಾಪುರ್ ಸ್ಟೋರ್'}</b><br>
-                <a href="tel:${o.shopPhone || '8105010768'}" style="background:#388e3c; color:#fff; padding:2px 6px; border-radius:4px; text-decoration:none; font-size:0.7rem; font-weight:bold; display:inline-block; margin-top:3px;">📞 ಅಂಗಡಿಗೆ ಕಾಲ್ ಮಾಡಿ</a>
+            ${isReturnOrder ? `
+              <div style="background:#ffebee; border:1px solid #ffcdd2; padding:8px; border-radius:6px; margin-bottom:8px;">
+                <b style="color:#c62828;">🔄 ರಿಟರ್ನ್ ಆರ್ಡರ್</b><br>
+                <span>ಅಂಗಡಿ ಹೆಸರು: <b>${o.shopName || 'ನಮ್ಮ ಶಾಪುರ್ ಸ್ಟೋರ್'}</b></span><br>
+                <span>ಫೋನ್: <a href="tel:${o.shopPhone || '8105010768'}">${o.shopPhone || '8105010768'}</a></span>
               </div>
-            </div>
+            ` : `
+              <div style="display:flex; gap:10px; align-items:center; background:#fff8e1; padding:8px; border-radius:6px; margin-bottom:8px;">
+                <div style="flex:1;">
+                  <b style="font-size:0.85rem; color:#e65100;">🏪 ಅಂಗಡಿ: ${o.shopName || 'ನಮ್ಮ ಶಾಪುರ್ ಸ್ಟೋರ್'}</b><br>
+                  <a href="tel:${o.shopPhone || '8105010768'}" style="background:#388e3c; color:#fff; padding:2px 6px; border-radius:4px; text-decoration:none; font-size:0.7rem; font-weight:bold; display:inline-block; margin-top:3px;">📞 ಅಂಗಡಿಗೆ ಕಾಲ್ ಮಾಡಿ</a>
+                </div>
+              </div>
+            `}
 
             <div style="display:flex; gap:10px; align-items:center; margin-top:6px;">
               <img src="${o.productPhoto || 'https://via.placeholder.com/60'}" style="width:65px; height:65px; object-fit:cover; border-radius:6px;">
@@ -652,7 +659,7 @@
 
     function sendOtpToCustomer(phone) {
       const generatedOtp = Math.floor(1000 + Math.random() * 9000);
-      alert(`✉️ ಗ್ರಾಹಕರ ಮೊಬೈಲ್ (${phone}) ಸಂಖ್ಯೆಗೆ OTP ಯಶಸ್ವಿಯಾಗಿ ಕಳುಹಿಸಲಾಗಿದೆ!\n[ಡೇಮೋ OTP: ${generatedOtp}]`);
+      alert(`✉️ ಗ್ರಾಹಕರ ಮೊಬೈಲ್ (${phone}) ಸಂಖ್ಯೆಗೆ 4-ಅಂಕಿಯ OTP ಯಶಸ್ವಿಯಾಗಿ ಕಳುಹಿಸಲಾಗಿದೆ!\n[ಡೇಮೋ OTP: ${generatedOtp}]`);
       window.activeOrderOtp = generatedOtp;
     }
 
