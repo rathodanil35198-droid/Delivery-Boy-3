@@ -62,7 +62,7 @@
     .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
     .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
-    .stat-card { background: #f1f8e9; border: 1px solid #c8e6c9; padding: 8px; border-radius: 6px; text-align: center; }
+    .stat-card { background: #f1f8e9; border: 1px solid #c8e6c9; padding: 8px; border-radius: 6px; text-align: center; cursor: pointer; }
     .stat-card h5 { font-size: 0.7rem; color: #33691e; }
     .stat-card p { font-size: 0.85rem; font-weight: bold; color: #1b5e20; margin-top: 2px; }
 
@@ -76,7 +76,6 @@
     .btn-agent { background: var(--agent-color); }
 
     .order-box { border-left: 5px solid var(--primary); background: #fff; border: 1px solid #e0e0e0; border-left-width: 5px; padding: 12px; border-radius: 6px; margin-bottom: 12px; font-size: 0.82rem; }
-    .order-box.completed-locked { border-left-color: var(--success); background: #f9f9f9; opacity: 0.9; }
     
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; }
     .modal-box { background: white; padding: 20px; border-radius: 10px; max-width: 350px; text-align: center; }
@@ -95,13 +94,13 @@
   </div>
 
   <div class="container">
-    <header id="appHeader">
+    <header>
       <h2>🛵 ಡೆಲಿವರಿ & ಏಜೆಂಟ್ ಪ್ಯಾನಲ್</h2>
     </header>
 
     <div class="role-switcher" id="roleSelector">
-      <button class="role-btn active" id="btnRoleDboy" onclick="switchRole('dboy')">🛵 ಡೆಲಿವರಿ ಬಾಯ್</button>
-      <button class="role-btn" id="btnRoleAgent" onclick="switchRole('agent')">👔 ತಾಲೂಕು/ಜಿಲ್ಲಾ ಏಜೆಂಟ್</button>
+      <button class="role-btn active" id="btnRoleDboy" onclick="switchRole('dboy')">🛵 ಡೆಲಿವರಿ ಬಾಯ್ ಲಾಗಿನ್</button>
+      <button class="role-btn" id="btnRoleAgent" onclick="switchRole('agent')">👔 ಏಜೆಂಟ್ ಲಾಗಿನ್</button>
     </div>
 
     <!-- DELIVERY BOY REGISTRATION -->
@@ -121,11 +120,11 @@
         </div>
         <div class="form-group">
           <label style="color:var(--danger)">🔑 6-ಅಂಕಿಯ ಏಜೆಂಟ್ ಐಡಿ (Agent ID):</label>
-          <input type="text" id="dbAgentId" placeholder="ನಿಮ್ಮ ಏಜೆಂಟ್ ಐಡಿ ನಮೂದಿಸಿ (6 Digits)" maxlength="6" required>
+          <input type="text" id="dbAgentId" placeholder="ನಿಮ್ಮ ಏಜೆಂಟ್ ಐಡಿ ನಮೂದಿಸಿ" maxlength="6" required>
         </div>
         <div class="form-group"><label>ಆಧಾರ್ ಕಾರ್ಡ್ ಫ್ರಂಟ್:</label><input type="file" accept="image/*" id="aadhaarFront" required></div>
         <div class="form-group"><label>ಆಧಾರ್ ಕಾರ್ಡ್ ಬ್ಯಾಕ್:</label><input type="file" accept="image/*" id="aadhaarBack" required></div>
-        <div class="form-group"><label>DL (ಚಾಲನಾ ಪರವಾನಗಿ) ಫೋಟೋ:</label><input type="file" accept="image/*" id="dlPhoto" required></div>
+        <div class="form-group"><label>DL ಫೋಟೋ:</label><input type="file" accept="image/*" id="dlPhoto" required></div>
         <div class="form-group"><label>ಸೆಲ್ಫಿ ಫೋಟೋ:</label><input type="file" accept="image/*" id="dbSelfie" required></div>
 
         <button type="submit" class="btn btn-success" id="btnRegisterDboy">ಖಾತೆ ಸೃಷ್ಟಿಸಿ & ಲಾಗಿನ್ ಮಾಡಿ</button>
@@ -182,8 +181,8 @@
 
       <!-- AGENT STATS -->
       <div class="stats-grid" id="agentStatsGrid" style="display:none;">
-        <div class="stat-card" style="background:#e3f2fd; border-color:#bbdefb;">
-          <h5 style="color:#0d47a1">ನಮ್ಮ ಏರಿಯಾ ಡೆಲಿವರಿ ಬಾಯ್ಸ್</h5>
+        <div class="stat-card" style="background:#e3f2fd; border-color:#bbdefb;" onclick="openAgentDeliveryBoysModal()">
+          <h5 style="color:#0d47a1">ನಮ್ಮ ಏರಿಯಾ ಡೆಲಿವರಿ ಬಾಯ್ಸ್ (ಕ್ಲಿಕ್ ಮಾಡಿ ನೋಡಿ)</h5>
           <p id="agentWorkersCount" style="color:#1565c0">0 ಜನ್ರು</p>
         </div>
         <div class="stat-card" style="background:#e8f5e9; border-color:#c8e6c9;">
@@ -192,26 +191,33 @@
         </div>
       </div>
 
+      <!-- Agent Add Delivery Boy Button & Search -->
+      <div id="agentControlSection" style="display:none; margin-bottom:12px;">
+        <button class="btn btn-agent" onclick="showAddDboyFormModal()" style="margin-bottom:8px;">➕ ಹೊಸ ಡೆಲಿವರಿ ಬಾಯ್ ಸೇರಿಸಿ</button>
+      </div>
+
       <div class="nav-tabs" id="navTabs">
         <button class="tab-btn active" onclick="switchTab('tabNew', this)">📦 ಹೊಸ ಟಾಸ್ಕ್</button>
-        <button class="tab-btn" onclick="switchTab('tabHistory', this)">📜 ಪೂರ್ಣಗೊಂಡ ಹಿಸ್ಟರಿ</button>
-        <button class="tab-btn" onclick="switchTab('tabPayments', this)" id="tabPaymentsBtn">💳 ಕಮಿಷನ್ & ಪೇಮೆಂಟ್ಸ್</button>
+        <button class="tab-btn" onclick="switchTab('tabHistory', this)">📜 ಹಿಸ್ಟರಿ</button>
+        <button class="tab-btn" onclick="switchTab('tabPayments', this)">💳 ಕಮಿಷನ್</button>
       </div>
 
-      <div id="tabNew">
-        <div id="newOrdersList"></div>
-      </div>
-
-      <div id="tabHistory" style="display:none;">
-        <div id="historyOrdersList"></div>
-      </div>
-
-      <div id="tabPayments" style="display:none;">
-        <div id="paymentOrdersList"></div>
-      </div>
+      <div id="tabNew"><div id="newOrdersList"></div></div>
+      <div id="tabHistory" style="display:none;"><div id="historyOrdersList"></div></div>
+      <div id="tabPayments" style="display:none;"><div id="paymentOrdersList"></div></div>
 
       <button class="btn btn-danger" style="margin-top:20px; font-size:0.75rem;" onclick="logoutSession()">🚪 ಲಾಗ್‌ಔಟ್ ಮಾಡಿ</button>
 
+    </div>
+  </div>
+
+  <!-- AGENT DELIVERY BOYS LIST MODAL WITH SEARCH -->
+  <div id="deliveryBoysListModal" class="modal">
+    <div class="modal-box" style="max-width:400px; text-align:left;">
+      <h3 style="color:var(--agent-color); margin-bottom:10px;">👥 ನಿಮ್ಮ ಡೆಲಿವರಿ ಬಾಯ್ಸ್ ಪಟ್ಟಿ</h3>
+      <input type="text" id="dboySearchInput" placeholder="🔍 ಡೆಲಿವರಿ ಬಾಯ್ ಹೆಸರು ಅಥವಾ ಐಡಿ ಹುಡುಕಿ..." oninput="filterAgentDboys()" style="margin-bottom:10px;">
+      <div id="agentDboysContainer" style="max-height:300px; overflow-y:auto;"></div>
+      <button class="btn btn-danger" style="margin-top:12px; padding:6px;" onclick="closeAgentDboysModal()">ಮುಚ್ಚಿ</button>
     </div>
   </div>
 
@@ -219,6 +225,7 @@
     let currentRole = 'dboy';
     let userSession = JSON.parse(localStorage.getItem('app_user_session')) || null;
     let isOnline = true;
+    let allAgentDboys = [];
 
     window.addEventListener('DOMContentLoaded', () => {
       if (userSession) {
@@ -320,12 +327,19 @@
 
       try {
         await window.addDoc(window.collection(window.db, "delivery_boys"), dboyData);
-        userSession = dboyData;
-        localStorage.setItem('app_user_session', JSON.stringify(userSession));
         
-        document.getElementById('modalIdLabel').innerText = "ನಿಮ್ಮ 4-ಅಂಕಿಯ ಡೆಲಿವರಿ ಐಡಿ (Delivery ID):";
-        document.getElementById('popup-id').innerText = fourDigitId;
-        document.getElementById('successModal').style.display = 'flex';
+        // If registered directly by Dboy, log in. If agent added, alert success.
+        if (userSession && userSession.role === 'agent') {
+          alert("✅ ಹೊಸ ಡೆಲಿವರಿ ಬಾಯ್ ಯಶಸ್ವಿಯಾಗಿ ಸೇರಿಸಲಾಗಿದೆ!");
+          closeAgentDboysModal();
+          loadAgentData();
+        } else {
+          userSession = dboyData;
+          localStorage.setItem('app_user_session', JSON.stringify(userSession));
+          document.getElementById('modalIdLabel').innerText = "ನಿಮ್ಮ 4-ಅಂಕಿಯ ಡೆಲಿವರಿ ಐಡಿ (Delivery ID):";
+          document.getElementById('popup-id').innerText = fourDigitId;
+          document.getElementById('successModal').style.display = 'flex';
+        }
       } catch (err) {
         alert("ದೋಷ: " + err.message);
       } finally {
@@ -354,6 +368,7 @@
         card.className = "id-card agent-card";
         document.getElementById('dboyStatsGrid').style.display = 'none';
         document.getElementById('agentStatsGrid').style.display = 'grid';
+        document.getElementById('agentControlSection').style.display = 'block';
         document.getElementById('dutyBarContainer').style.display = 'none';
         loadAgentData();
       } else {
@@ -361,6 +376,7 @@
         document.getElementById('agentLinkTag').innerText = `(Agent: ${userSession.agentId || 'N/A'})`;
         document.getElementById('dboyStatsGrid').style.display = 'grid';
         document.getElementById('agentStatsGrid').style.display = 'none';
+        document.getElementById('agentControlSection').style.display = 'none';
         startRealtimeOrders();
       }
     }
@@ -383,14 +399,16 @@
     }
 
     function loadAgentData() {
-      // Find delivery boys under this agent
       const qBoys = window.query(window.collection(window.db, "delivery_boys"), window.where("agentId", "==", userSession.id));
       window.onSnapshot(qBoys, (snap) => {
-        let count = snap.size;
-        document.getElementById('agentWorkersCount').innerText = `${count} ಜನ್ರು ಡೆಲಿವರಿ ಬಾಯ್ಸ್`;
+        allAgentDboys = [];
+        let index = 1;
+        snap.forEach(d => {
+          allAgentDboys.push({ serialNo: index++, ...d.data() });
+        });
+        document.getElementById('agentWorkersCount').innerText = `${allAgentDboys.length} ಜನ್ರು ಡೆಲಿವರಿ ಬಾಯ್ಸ್`;
       });
 
-      // Find orders and calculate 5% agent commission
       const qOrders = window.query(window.collection(window.db, "orders"), window.orderBy("timestamp", "desc"));
       window.onSnapshot(qOrders, (snap) => {
         let totalRevenue = 0;
@@ -408,6 +426,41 @@
       });
     }
 
+    function openAgentDeliveryBoysModal() {
+      renderAgentDboysList(allAgentDboys);
+      document.getElementById('deliveryBoysListModal').style.display = 'flex';
+    }
+
+    function closeAgentDboysModal() {
+      document.getElementById('deliveryBoysListModal').style.display = 'none';
+    }
+
+    function renderAgentDboysList(list) {
+      const container = document.getElementById('agentDboysContainer');
+      if (list.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#777; padding:10px;">ಯಾವುದೇ ಡೆಲಿವರಿ ಬಾಯ್ಸ್ ಇಲ್ಲ.</p>';
+        return;
+      }
+      container.innerHTML = list.map((b, idx) => `
+        <div style="background:#f9f9f9; border:1px solid #ddd; padding:8px; border-radius:6px; margin-bottom:6px; font-size:0.8rem;">
+          <b>ಕ್ರಂ.ಸಂಖ್ಯೆ: #${b.serialNo || (idx+1)}</b> | ಹೆಸರು: <b>${b.name}</b><br>
+          ಫೋನ್: ${b.phone} | ಡೆಲಿವರಿ ಐಡಿ: <span style="color:var(--primary); font-weight:bold;">${b.id}</span><br>
+          ಊರು: ${b.village}, ತಾ: ${b.taluk}
+        </div>
+      `).join('');
+    }
+
+    function filterAgentDboys() {
+      const keyword = document.getElementById('dboySearchInput').value.toLowerCase();
+      const filtered = allAgentDboys.filter(b => b.name.toLowerCase().includes(keyword) || b.id.includes(keyword) || b.phone.includes(keyword));
+      renderAgentDboysList(filtered);
+    }
+
+    function showAddDboyFormModal() {
+      document.getElementById('dbAgentId').value = userSession.id;
+      switchRole('dboy');
+    }
+
     function startRealtimeOrders() {
       const q = window.query(window.collection(window.db, "orders"), window.orderBy("timestamp", "desc"));
       window.onSnapshot(q, (snap) => {
@@ -419,7 +472,7 @@
 
     function processDeliveryData(orders) {
       if (!isOnline && userSession.role === 'dboy') {
-        document.getElementById('newOrdersList').innerHTML = '<p style="text-align:center; color:#d32f2f; padding:15px; font-weight:bold;">⚠️ ನೀವು ಆಫ್‌ಲೈನ್‌ನಲ್ಲಿದ್ದೀರಿ. ಹೊಸ ಆರ್ಡರ್‌ಗಳು ಕಾಣಿಸುವುದಿಲ್ಲ.</p>';
+        document.getElementById('newOrdersList').innerHTML = '<p style="text-align:center; color:#d32f2f; padding:15px; font-weight:bold;">⚠️ ನೀವು ಆಫ್‌ಲೈನ್‌ನಲ್ಲಿದ್ದೀರಿ.</p>';
         return;
       }
 
@@ -456,14 +509,11 @@
     function renderNewOrders(list) {
       const container = document.getElementById('newOrdersList');
       if (list.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#777; padding:15px;">ಯಾವುದೇ ಹೊಸ ಡೆಲಿವರಿ ಅಥವಾ ರಿಟರ್ನ್ ಟಾಸ್ಕ್ ಇಲ್ಲ.</p>';
+        container.innerHTML = '<p style="text-align:center; color:#777; padding:15px;">ಯಾವುದೇ ಹೊಸ ಟಾಸ್ಕ್ ಇಲ್ಲ.</p>';
         return;
       }
 
       container.innerHTML = list.map(o => {
-        let shopMapLink = o.shopGps ? `https://maps.google.com/?q=${o.shopGps}` : `https://maps.google.com/?q=${encodeURIComponent(o.shopAddress || 'Shahapur')}`;
-        let customerMapLink = o.customer?.gps ? `https://maps.google.com/?q=${o.customer.gps}` : `https://maps.google.com/?q=${encodeURIComponent(o.customer?.village || 'Shahapur')}`;
-        
         let isConfirmedByShop = (o.status === 'CONFIRMED' || o.status === 'STEP_2' || o.status === 'PACKING');
         let isPickedUp = (o.status === 'PICKED_UP' || o.status === 'STEP_3');
         let isReturnOrder = (o.isReturned || o.status === 'RETURNED' || o.returnStatus === 'RETURN_REQUESTED');
@@ -471,18 +521,15 @@
 
         return `
           <div class="order-box" style="border-left-color: ${isReturnOrder ? '#e53935' : '#fb8c00'};">
-            <div style="display:flex; gap:10px; align-items:center; background:#fff8e1; padding:8px; border-radius:6px; margin-bottom:8px; border:1px solid #ffe0b2;">
-              <img src="${o.shopPhoto || 'https://via.placeholder.com/50'}" style="width:45px; height:45px; object-fit:cover; border-radius:50%; border:1px solid #ccc;">
+            <div style="display:flex; gap:10px; align-items:center; background:#fff8e1; padding:8px; border-radius:6px; margin-bottom:8px;">
               <div style="flex:1;">
                 <b style="font-size:0.85rem; color:#e65100;">🏪 ಅಂಗಡಿ: ${o.shopName || 'ನಮ್ಮ ಶಾಪುರ್ ಸ್ಟೋರ್'}</b><br>
-                <span style="font-size:0.75rem;">ಮಾಲೀಕರು: ${o.shopOwnerName || 'ಅಂಗಡಿ ಮಾಲೀಕ'} (${o.shopPhone || '8105010768'})</span><br>
                 <a href="tel:${o.shopPhone || '8105010768'}" style="background:#388e3c; color:#fff; padding:2px 6px; border-radius:4px; text-decoration:none; font-size:0.7rem; font-weight:bold; display:inline-block; margin-top:3px;">📞 ಮಾಲೀಕರಿಗೆ ಕಾಲ್ ಮಾಡಿ</a>
-                <a href="${shopMapLink}" target="_blank" style="color:#1976d2; font-weight:bold; font-size:0.7rem; margin-left:6px;">🗺️ ಅಂಗಡಿ GPS ಮ್ಯಾಪ್</a>
               </div>
             </div>
 
             <div style="display:flex; gap:10px; align-items:center; margin-top:6px;">
-              <img src="${o.productPhoto || 'https://via.placeholder.com/60'}" style="width:65px; height:65px; object-fit:cover; border-radius:6px; border:1px solid #ddd;">
+              <img src="${o.productPhoto || 'https://via.placeholder.com/60'}" style="width:65px; height:65px; object-fit:cover; border-radius:6px;">
               <div>
                 <h4 style="font-size:0.88rem;">📦 ${o.productName}</h4>
                 <div style="font-weight:bold; font-size:0.9rem; color:#2e7d32; margin-top:2px;">₹${o.totalPrice}</div>
@@ -490,24 +537,17 @@
             </div>
 
             <div style="margin-top:8px; background:#f8f9fa; padding:8px; border-radius:6px; font-size:0.8rem;">
-              <p><b>ಗ್ರಾಹಕರು:</b> ${o.customer?.name} 
-                 <a href="tel:${o.customer?.phone}" style="background:#388e3c; color:#fff; padding:2px 6px; border-radius:4px; text-decoration:none; font-size:0.7rem; margin-left:6px;">📞 ಕಾಲ್ ಮಾಡಿ</a>
-              </p>
-              <p style="margin-top:3px;"><b>ವಿಳಾಸ:</b> ${o.customer?.village}, ತಾ: ${o.customer?.taluk || 'ಶಹಾಪುರ'} - ${o.customer?.pincode || '585223'}</p>
-              <p style="margin-top:3px;"><b>ಗ್ರಾಹಕರ ರೋಡ್ ಮ್ಯಾಪ್:</b> <a href="${customerMapLink}" target="_blank" style="color:var(--primary); font-weight:bold;">📍 ಜಿಪಿಎಸ್ ಮ್ಯಾಪ್ ವೀಕ್ಷಿಸಿ</a></p>
+              <p><b>ಗ್ರಾಹಕರು:</b> ${o.customer?.name} <a href="tel:${o.customer?.phone}" style="background:#388e3c; color:#fff; padding:2px 6px; border-radius:4px; text-decoration:none; font-size:0.7rem; margin-left:6px;">📞 ಕಾಲ್</a></p>
+              <p style="margin-top:3px;"><b>ವಿಳಾಸ:</b> ${o.customer?.village}, ತಾ: ${o.customer?.taluk || 'ಶಹಾಪುರ'}</p>
             </div>
 
             <div style="margin-top:10px;">
               ${isReturnOrder ? (
-                !isReturnPickedUp ? `
-                  <button class="btn btn-danger" onclick="directPickupReturn('${o.docId}')">🔄 ರಿಟರ್ನ್ ಇದೆ, ಪಿಕಪ್ ಮಾಡಿ (Pickup Return)</button>
-                ` : `
-                  <button class="btn btn-success" onclick="directDeliverReturnToShop('${o.docId}')">🏪 ಅಂಗಡಿಗೆ ತಲುಪಿಸಿ (Deliver to Shop)</button>
-                `
+                !isReturnPickedUp ? `<button class="btn btn-danger" onclick="directPickupReturn('${o.docId}')">🔄 ರಿಟರ್ನ್ ಇದೆ, ಪಿಕಪ್ ಮಾಡಿ</button>` : `<button class="btn btn-success" onclick="directDeliverReturnToShop('${o.docId}')">🏪 ಅಂಗಡಿಗೆ ತಲುಪಿಸಿ</button>`
               ) : (isConfirmedByShop && !isPickedUp ? `
-                <button class="btn btn-warning" style="background:#ff9800; color:#fff;" onclick="directPickupOrder('${o.docId}')">📦 ಪ್ಯಾಕಿಂಗ್ ಆಗಿದೆ, ಅಂಗಡಿಗೆ ಹೋಗಿ ಪಿಕಪ್ ಮಾಡಿ (Pickup Order)</button>
+                <button class="btn btn-warning" style="background:#ff9800; color:#fff;" onclick="directPickupOrder('${o.docId}')">📦 ಪ್ಯಾಕಿಂಗ್ ಆಗಿದೆ, ಅಂಗಡಿಗೆ ಹೋಗಿ ಪಿಕಪ್ ಮಾಡಿ</button>
               ` : (isPickedUp ? `
-                <button class="btn btn-success" onclick="directDeliverOrder('${o.docId}')">🎉 ಗ್ರಾಹಕರಿಗೆ ಡೆಲಿವರಿ ತಲುಪಿಸಿ (Deliver)</button>
+                <button class="btn btn-success" onclick="directDeliverOrder('${o.docId}')">🎉 ಗ್ರಾಹಕರಿಗೆ ಡೆಲಿವರಿ ತಲುಪಿಸಿ</button>
               ` : `
                 <p style="font-size:0.75rem; color:#d32f2f; font-weight:bold;">ಅಂಗಡಿ ಮಾಲೀಕರು ಕನ್ಫರ್ಮ್ ಮಾಡಲು ಕಾಯಲಾಗುತ್ತಿದೆ...</p>
               `))}
@@ -520,18 +560,16 @@
     function renderHistoryOrders(list) {
       const container = document.getElementById('historyOrdersList');
       if (list.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#777; padding:15px;">ಯಾವುದೇ ಹಳೆಯ ಪೂರ್ಣಗೊಂಡ ಆರ್ಡರ್‌ಗಳಿಲ್ಲ.</p>';
+        container.innerHTML = '<p style="text-align:center; color:#777; padding:15px;">ಯಾವುದೇ ಹಳೆಯ ಆರ್ಡರ್‌ಗಳಿಲ್ಲ.</p>';
         return;
       }
-
       container.innerHTML = list.map(o => `
         <div class="order-box completed-locked">
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <h4 style="font-size:0.88rem;">✅ ${o.productName}</h4>
-            <span style="font-size:0.7rem; background:#c8e6c9; color:#1b5e20; padding:2px 6px; border-radius:4px; font-weight:bold;">Locked / Success</span>
+            <span style="font-size:0.7rem; background:#c8e6c9; color:#1b5e20; padding:2px 6px; border-radius:4px; font-weight:bold;">Success</span>
           </div>
           <p style="font-size:0.8rem; margin-top:4px;">₹${o.totalPrice} | ಗ್ರಾಹಕರು: ${o.customer?.name} (${o.customer?.phone})</p>
-          <p style="color:var(--success); font-weight:bold; font-size:0.75rem; margin-top:3px;">ಸ್ಥಿತಿ: ${o.status === 'RETURN_DELIVERED_TO_SHOP' ? 'ರಿಟರ್ನ್ ಅಂಗಡಿಗೆ ತಲುಪಿಸಲಾಗಿದೆ (ಸಕ್ಸಸ್)' : 'ಡೆಲಿವರಿ ಕಂಪ್ಲೀಟ್ (ಸಕ್ಸಸ್)'}</p>
         </div>
       `).join('');
     }
@@ -539,17 +577,15 @@
     function renderPaymentOrders(list) {
       const container = document.getElementById('paymentOrdersList');
       if (list.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#777; padding:15px;">ಯಾವುದೇ ಪೇಮೆಂಟ್ ವಿವರಗಳಿಲ್ಲ.</p>';
+        container.innerHTML = '<p style="text-align:center; color:#777; padding:15px;">ಯಾವುದೇ ಕಮಿಷನ್ ವಿವರಗಳಿಲ್ಲ.</p>';
         return;
       }
-
       container.innerHTML = list.map(o => {
         let comm = Math.round(Number(o.totalPrice || 0) * 0.05);
         return `
           <div class="order-box">
             <h4>${o.productName} - ₹${o.totalPrice}</h4>
-            <p style="color:var(--success); font-weight:bold; margin-top:4px;">ನಿಮ್ಮ ಕಮಿಷನ್ (5%): ₹${comm}</p>
-            <p style="font-size:0.75rem; color:#555; margin-top:2px;">ಪಾವತಿ ಸ್ಥಿತಿ: ಸಕ್ಸಸ್‌ಫುಲ್</p>
+            <p style="color:var(--success); font-weight:bold; margin-top:4px;">ಕಮಿಷನ್ (5%): ₹${comm}</p>
           </div>
         `;
       }).join('');
@@ -579,12 +615,12 @@
     async function directDeliverReturnToShop(docId) {
       try {
         await window.updateDoc(window.doc(window.db, "orders", docId), { status: 'RETURN_DELIVERED_TO_SHOP', returnStatus: 'DELIVERED_TO_SHOP' });
-        alert("🏪 ಅಂಗಡಿಗೆ ರಿಟರ್ನ್ ವಸ್ತು ತಲುಪಿಸಲಾಗಿದೆ!");
+        alert("🏪 ಅಂಗಡಿಗೆ ರಿಟರ್ನ್ ತಲುಪಿಸಲಾಗಿದೆ!");
       } catch(err) { alert("ದೋಷ: " + err.message); }
     }
 
     function logoutSession() {
-      if (confirm("ನಿಜವಾಗಿಯೂ ಲಾಗ್‌ಔಟ್ ಆಗಲು ಬಯಸುವಿರಾ?")) {
+      if (confirm("ಲಾಗ್‌ಔಟ್ ಆಗಲು ಬಯಸುವಿರಾ?")) {
         localStorage.removeItem('app_user_session');
         location.reload();
       }
