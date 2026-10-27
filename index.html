@@ -182,7 +182,7 @@
 
       <!-- Live Order Route Tracking & Assign Box for Agent -->
       <div id="agentRouteTrackingBox" style="display:none; background:#e3f2fd; padding:10px; border-radius:8px; margin-bottom:12px; border:1px solid #bbdefb;">
-        <h5 style="color:#0d47a1; margin-bottom:6px;">📍 ಲೈಫ್ ಆರ್ಡರ್ ಟ್ರ್ಯಾಕಿಂಗ್ & ಅಸೈನ್</h5>
+        <h5 style="color:#0d47a1; margin-bottom:6px;">📍 ಲೈವ್ ಆರ್ಡರ್ ಟ್ರ್ಯಾಕಿಂಗ್ & ಅಸೈನ್</h5>
         <div style="display:flex; gap:6px; margin-bottom:6px;">
           <input type="text" id="trackOrderIdInput" placeholder="ಆರ್ಡರ್ ಐಡಿ ನಮೂದಿಸಿ (ಉ: OD...)" style="flex:1; padding:6px; font-size:0.75rem;">
           <button class="btn btn-agent" style="width:auto; padding:6px 12px; font-size:0.75rem;" onclick="trackLiveOrderRoute()">ಟ್ರ್ಯಾಕ್ ಮಾಡಿ</button>
@@ -511,11 +511,11 @@
           <b>ಪ್ರಾಡಕ್ಟ್:</b> ${o.productName}<br>
           <b>ಸ್ಥಿತಿ:</b> <span style="color:green; font-weight:bold;">${o.status}</span><br>
           <b>ಗ್ರಾಹಕರು:</b> ${o.customer?.name}, ${o.customer?.village}<br>
-          📍 <b>ರೂಟ್ ಮ್ಯಾಪ್:</b> ಅಂಗಡಿಯಿಂದ ಹೊರಟು ಗ್ರಾಹಕರ ವಿಳಾಸಕ್ಕೆ ತಲುಪುತ್ತಿದೆ.<br><br>
+          📍 <b>ರೂಟ್ ಮ್ಯಾಪ್:</b> ಅಂಗಡಿಯಿಂದ ಹೊರಟು ಗ್ರಾಹಕರ ವಿಳಾಸಕ್ಕೆ ತಲುಪುತ್ತಿದೆ (2-3 ಗಂಟೆ).<br><br>
           <div style="margin-top:6px;">
             <label style="font-size:0.75rem; font-weight:bold;">ಡೆಲಿವರಿ ಬಾಯ್ 4-Digit ID ಹಾಕಿ ಅಸೈನ್ ಮಾಡಿ:</label>
             <div style="display:flex; gap:4px; margin-top:2px;">
-              <input type="text" id="assignDboyIdInput" placeholder="ಡೆಲಿವರಿ ID (ಉ: 4041)" style="flex:1; padding:4px; font-size:0.75rem;" maxlength="4">
+              <input type="text" id="assignDboyIdInput" placeholder="ಡೆಲಿವರಿ ID (ಉ: 8010)" style="flex:1; padding:4px; font-size:0.75rem;" maxlength="4">
               <button class="btn btn-success" style="width:auto; padding:4px 8px; font-size:0.75rem;" onclick="assignOrderToDboy()">ಅಸೈನ್ ಮಾಡಿ</button>
             </div>
           </div>
@@ -544,13 +544,11 @@
         return;
       }
 
-      // Query orders assigned specifically to this Dboy ID or general unassigned orders in their agent zone
       const q = window.query(window.collection(window.db, "orders"), window.orderBy("timestamp", "desc"));
       window.onSnapshot(q, (snap) => {
         let orders = [];
         snap.forEach(docSnap => {
           let o = { docId: docSnap.id, ...docSnap.data() };
-          // Filter only orders assigned to this delivery boy
           if (o.assignedDboyId === userSession.id || o.deliveryBoyId === userSession.id) {
             orders.push(o);
           }
@@ -602,12 +600,15 @@
         let isReturnOrder = (o.isReturned || o.status === 'RETURNED' || o.returnStatus === 'RETURN_REQUESTED');
         let isReturnPickedUp = (o.returnStatus === 'PICKED_UP_BY_DBOY');
 
+        // Google Maps Navigation URL generator based on customer address
+        let mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.customer?.village + ', ' + (o.customer?.taluk || 'Shahapur'))}`;
+
         return `
           <div class="order-box" style="border-left-color: ${isReturnOrder ? '#e53935' : '#fb8c00'};">
             <div style="display:flex; gap:10px; align-items:center; background:#fff8e1; padding:8px; border-radius:6px; margin-bottom:8px;">
               <div style="flex:1;">
                 <b style="font-size:0.85rem; color:#e65100;">🏪 ಅಂಗಡಿ: ${o.shopName || 'ನಮ್ಮ ಶಾಪುರ್ ಸ್ಟೋರ್'}</b><br>
-                <a href="tel:${o.shopPhone || '8105010768'}" style="background:#388e3c; color:#fff; padding:2px 6px; border-radius:4px; text-decoration:none; font-size:0.7rem; font-weight:bold; display:inline-block; margin-top:3px;">📞 ಮಾಲೀಕರಿಗೆ ಕಾಲ್ ಮಾಡಿ</a>
+                <a href="tel:${o.shopPhone || '8105010768'}" style="background:#388e3c; color:#fff; padding:2px 6px; border-radius:4px; text-decoration:none; font-size:0.7rem; font-weight:bold; display:inline-block; margin-top:3px;">📞 ಅಂಗಡಿಗೆ ಕಾಲ್ ಮಾಡಿ</a>
               </div>
             </div>
 
@@ -620,8 +621,14 @@
             </div>
 
             <div style="margin-top:8px; background:#f8f9fa; padding:8px; border-radius:6px; font-size:0.8rem;">
-              <p><b>ಗ್ರಾಹಕರು:</b> ${o.customer?.name} <a href="tel:${o.customer?.phone}" style="background:#388e3c; color:#fff; padding:2px 6px; border-radius:4px; text-decoration:none; font-size:0.7rem; margin-left:6px;">📞 ಕಾಲ್</a></p>
+              <p><b>ಗ್ರಾಹಕರು:</b> ${o.customer?.name} 
+                <a href="tel:${o.customer?.phone}" style="background:#388e3c; color:#fff; padding:2px 6px; border-radius:4px; text-decoration:none; font-size:0.7rem; margin-left:6px;">📞 ಗ್ರಾಹಕರಿಗೆ ಕಾಲ್</a>
+              </p>
               <p style="margin-top:3px;"><b>ವಿಳಾಸ:</b> ${o.customer?.village}, ತಾ: ${o.customer?.taluk || 'ಶಹಾಪುರ'}</p>
+              <div style="margin-top:6px; display:flex; gap:6px;">
+                <a href="${mapsUrl}" target="_blank" style="flex:1; background:#1976d2; color:#fff; text-align:center; padding:5px; border-radius:4px; text-decoration:none; font-size:0.75rem; font-weight:bold;">🗺️ ರೂಟ್ ಮ್ಯಾಪ್ ನೋಡಿ</a>
+                <button class="btn btn-warning" style="flex:1; padding:5px; font-size:0.75rem; background:#ffa000; color:#fff;" onclick="sendOtpToCustomer('${o.customer?.phone}')">✉️ OTP ಕಳುಹಿಸಿ</button>
+              </div>
             </div>
 
             <div style="margin-top:10px;">
@@ -630,7 +637,10 @@
               ) : (isConfirmedByShop && !isPickedUp ? `
                 <button class="btn btn-warning" style="background:#ff9800; color:#fff;" onclick="directPickupOrder('${o.docId}')">📦 ಪ್ಯಾಕಿಂಗ್ ಆಗಿದೆ, ಅಂಗಡಿಗೆ ಹೋಗಿ ಪಿಕಪ್ ಮಾಡಿ</button>
               ` : (isPickedUp ? `
-                <button class="btn btn-success" onclick="directDeliverOrder('${o.docId}')">🎉 ಗ್ರಾಹಕರಿಗೆ ಡೆಲಿವರಿ ತಲುಪಿಸಿ (2-3 ಗಂಟೆ)</button>
+                <div style="display:flex; gap:6px;">
+                  <button class="btn btn-success" style="flex:2;" onclick="verifyOtpAndDeliver('${o.docId}')">🎉 OTP ಹಾಕಿ ಡೆಲಿವರಿ ತಲುಪಿಸಿ</button>
+                  <button class="btn btn-danger" style="flex:1; padding:6px;" onclick="cancelOrder('${o.docId}')">❌ ಕ್ಯಾನ್ಸಲ್</button>
+                </div>
               ` : `
                 <p style="font-size:0.75rem; color:#d32f2f; font-weight:bold;">ಅಂಗಡಿ ಮಾಲೀಕರು ಪ್ಯಾಕಿಂಗ್ ಮಾಡಲು ಕಾಯಲಾಗುತ್ತಿದೆ...</p>
               `))}
@@ -638,6 +648,37 @@
           </div>
         `;
       }).join('');
+    }
+
+    function sendOtpToCustomer(phone) {
+      const generatedOtp = Math.floor(1000 + Math.random() * 9000);
+      alert(`✉️ ಗ್ರಾಹಕರ ಮೊಬೈಲ್ (${phone}) ಸಂಖ್ಯೆಗೆ OTP ಯಶಸ್ವಿಯಾಗಿ ಕಳುಹಿಸಲಾಗಿದೆ!\n[ಡೇಮೋ OTP: ${generatedOtp}]`);
+      window.activeOrderOtp = generatedOtp;
+    }
+
+    async function verifyOtpAndDeliver(docId) {
+      const enteredOtp = prompt("ಗ್ರಾಹಕರಿಂದ ಪಡೆದ 4-ಅಂಕಿಯ OTP ನಮೂದಿಸಿ:");
+      if (!enteredOtp) return;
+
+      if (window.activeOrderOtp && enteredOtp !== String(window.activeOrderOtp)) {
+        alert("❌ ತಪ್ಪಾದ OTP! ದಯವಿಟ್ಟು ಸರಿಯಾದ OTP ಹಾಕಿ.");
+        return;
+      }
+
+      try {
+        await window.updateDoc(window.doc(window.db, "orders", docId), { status: 'DELIVERED', deliveryBoyId: userSession.id });
+        alert("🎉 ಡೆಲಿವರಿ ಸಕ್ಸಸ್‌ಫುಲ್!");
+      } catch(err) { alert("ದೋಷ: " + err.message); }
+    }
+
+    async function cancelOrder(docId) {
+      const reason = prompt("ಆರ್ಡರ್ ಕ್ಯಾನ್ಸಲ್ ಮಾಡಲು ಕಾರಣ ಬರೆಯಿರಿ:");
+      if (!reason) return;
+
+      try {
+        await window.updateDoc(window.doc(window.db, "orders", docId), { status: 'CANCELLED', cancelReason: reason });
+        alert("❌ ಆರ್ಡರ್ ಕ್ಯಾನ್ಸಲ್ ಮಾಡಲಾಗಿದೆ.");
+      } catch(err) { alert("ದೋಷ: " + err.message); }
     }
 
     function renderHistoryOrders(list) {
@@ -673,13 +714,6 @@
         await window.updateDoc(window.doc(window.db, "orders", docId), { status: 'PICKED_UP', deliveryBoyId: userSession.id });
         alert("✅ ಆರ್ಡರ್ ಪಿಕ್‌ಅಪ್ ಆಗಿದೆ! 2 ರಿಂದ 3 ಗಂಟೆಯೊಳಗೆ ಗ್ರಾಹಕರಿಗೆ ತಲುಪುತ್ತದೆ.");
       } catch (err) { alert("ದೋಷ: " + err.message); }
-    }
-
-    async function directDeliverOrder(docId) {
-      try {
-        await window.updateDoc(window.doc(window.db, "orders", docId), { status: 'DELIVERED', deliveryBoyId: userSession.id });
-        alert("🎉 ಡೆಲಿವರಿ ಸಕ್ಸಸ್‌ಫುಲ್!");
-      } catch(err) { alert("ದೋಷ: " + err.message); }
     }
 
     async function directPickupReturn(docId) {
