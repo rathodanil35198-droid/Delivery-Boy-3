@@ -180,14 +180,14 @@
         </div>
       </div>
 
-      <!-- Live Order Route Tracking Input for Agent -->
+      <!-- Live Order Route Tracking & Assign Box for Agent -->
       <div id="agentRouteTrackingBox" style="display:none; background:#e3f2fd; padding:10px; border-radius:8px; margin-bottom:12px; border:1px solid #bbdefb;">
-        <h5 style="color:#0d47a1; margin-bottom:6px;">📍 ಲೈವ್ ಆರ್ಡರ್ ರೂಟ್ ಟ್ರ್ಯಾಕಿಂಗ್</h5>
-        <div style="display:flex; gap:6px;">
-          <input type="text" id="trackOrderIdInput" placeholder="ಆರ್ಡರ್ ಐಡಿ ನಮೂದಿಸಿ (ഉ: OD...)" style="flex:1; padding:6px; font-size:0.75rem;">
+        <h5 style="color:#0d47a1; margin-bottom:6px;">📍 ಲೈಫ್ ಆರ್ಡರ್ ಟ್ರ್ಯಾಕಿಂಗ್ & ಅಸೈನ್</h5>
+        <div style="display:flex; gap:6px; margin-bottom:6px;">
+          <input type="text" id="trackOrderIdInput" placeholder="ಆರ್ಡರ್ ಐಡಿ ನಮೂದಿಸಿ (ಉ: OD...)" style="flex:1; padding:6px; font-size:0.75rem;">
           <button class="btn btn-agent" style="width:auto; padding:6px 12px; font-size:0.75rem;" onclick="trackLiveOrderRoute()">ಟ್ರ್ಯಾಕ್ ಮಾಡಿ</button>
         </div>
-        <div id="trackResultDisplay" style="margin-top:6px; font-size:0.75rem; color:#333;"></div>
+        <div id="trackResultDisplay" style="font-size:0.75rem; color:#333;"></div>
       </div>
 
       <!-- Agent Button to Add Delivery Boy -->
@@ -237,7 +237,7 @@
     </div>
   </div>
 
-  <!-- AGENT DELIVERY BOYS LIST MODAL WITH SEARCH & SERIAL NO -->
+  <!-- AGENT DELIVERY BOYS LIST MODAL -->
   <div id="deliveryBoysListModal" class="modal">
     <div class="modal-box" style="text-align:left;">
       <h3 style="color:var(--agent-color); margin-bottom:10px;">👥 ನಿಮ್ಮ ಡೆಲಿವರಿ ಬಾಯ್ಸ್ ಪಟ್ಟಿ</h3>
@@ -252,6 +252,7 @@
     let userSession = JSON.parse(localStorage.getItem('app_user_session')) || null;
     let isOnline = true;
     let allAgentDboys = [];
+    let currentTrackedDocId = null;
 
     window.addEventListener('DOMContentLoaded', () => {
       if (userSession) {
@@ -499,18 +500,42 @@
 
       if (snap.empty) {
         display.innerHTML = '<span style="color:red;">⚠️ ಆರ್ಡರ್ ಕಂಡುಬಂದಿಲ್ಲ.</span>';
+        currentTrackedDocId = null;
         return;
       }
 
       snap.forEach(d => {
+        currentTrackedDocId = d.id;
         let o = d.data();
         display.innerHTML = `
           <b>ಪ್ರಾಡಕ್ಟ್:</b> ${o.productName}<br>
           <b>ಸ್ಥಿತಿ:</b> <span style="color:green; font-weight:bold;">${o.status}</span><br>
           <b>ಗ್ರಾಹಕರು:</b> ${o.customer?.name}, ${o.customer?.village}<br>
-          📍 <b>ರೂಟ್ ಮ್ಯಾಪ್:</b> ಅಂಗಡಿಯಿಂದ ಹೊರಟು ಗ್ರಾಹಕರ ವಿಳಾಸಕ್ಕೆ ತಲುಪುತ್ತಿದೆ.
+          📍 <b>ರೂಟ್ ಮ್ಯಾಪ್:</b> ಅಂಗಡಿಯಿಂದ ಹೊರಟು ಗ್ರಾಹಕರ ವಿಳಾಸಕ್ಕೆ ತಲುಪುತ್ತಿದೆ.<br><br>
+          <div style="margin-top:6px;">
+            <label style="font-size:0.75rem; font-weight:bold;">ಡೆಲಿವರಿ ಬಾಯ್ 4-Digit ID ಹಾಕಿ ಅಸೈನ್ ಮಾಡಿ:</label>
+            <div style="display:flex; gap:4px; margin-top:2px;">
+              <input type="text" id="assignDboyIdInput" placeholder="ಡೆಲಿವರಿ ID (ಉ: 4041)" style="flex:1; padding:4px; font-size:0.75rem;" maxlength="4">
+              <button class="btn btn-success" style="width:auto; padding:4px 8px; font-size:0.75rem;" onclick="assignOrderToDboy()">ಅಸೈನ್ ಮಾಡಿ</button>
+            </div>
+          </div>
         `;
       });
+    }
+
+    async function assignOrderToDboy() {
+      const dboyId = document.getElementById('assignDboyIdInput').value.trim();
+      if (!dboyId || !currentTrackedDocId) { alert("ದಯವಿಟ್ಟು ಸರಿಯಾದ ಡೆಲಿವರಿ ಬಾಯ್ ಐಡಿ ನಮೂದಿಸಿ"); return; }
+
+      try {
+        await window.updateDoc(window.doc(window.db, "orders", currentTrackedDocId), {
+          assignedDboyId: dboyId,
+          agentId: userSession.id
+        });
+        alert(`✅ ಆರ್ಡರ್ ಯಶಸ್ವಿಯಾಗಿ ಡೆಲಿವರಿ ಬಾಯ್ (ID: ${dboyId}) ಅವರಿಗೆ ಅಸೈನ್ ಮಾಡಲಾಗಿದೆ!`);
+      } catch (e) {
+        alert("ದೋಷ: " + e.message);
+      }
     }
 
     function startRealtimeOrders() {
@@ -519,10 +544,17 @@
         return;
       }
 
+      // Query orders assigned specifically to this Dboy ID or general unassigned orders in their agent zone
       const q = window.query(window.collection(window.db, "orders"), window.orderBy("timestamp", "desc"));
       window.onSnapshot(q, (snap) => {
         let orders = [];
-        snap.forEach(docSnap => orders.push({ docId: docSnap.id, ...docSnap.data() }));
+        snap.forEach(docSnap => {
+          let o = { docId: docSnap.id, ...docSnap.data() };
+          // Filter only orders assigned to this delivery boy
+          if (o.assignedDboyId === userSession.id || o.deliveryBoyId === userSession.id) {
+            orders.push(o);
+          }
+        });
         processDeliveryData(orders);
       });
     }
@@ -560,7 +592,7 @@
     function renderNewOrders(list) {
       const container = document.getElementById('newOrdersList');
       if (list.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#777; padding:15px;">ಯಾವುದೇ ಹೊಸ ಟಾಸ್ಕ್ ಇಲ್ಲ.</p>';
+        container.innerHTML = '<p style="text-align:center; color:#777; padding:15px;">ಯಾವುದೇ ಹೊಸ ಅಸೈನ್ ಆದ ಟಾಸ್ಕ್ ಇಲ್ಲ.</p>';
         return;
       }
 
@@ -638,14 +670,14 @@
 
     async function directPickupOrder(docId) {
       try {
-        await window.updateDoc(window.doc(window.db, "orders", docId), { status: 'PICKED_UP', deliveryBoyId: userSession.id, agentId: userSession.agentId || '' });
+        await window.updateDoc(window.doc(window.db, "orders", docId), { status: 'PICKED_UP', deliveryBoyId: userSession.id });
         alert("✅ ಆರ್ಡರ್ ಪಿಕ್‌ಅಪ್ ಆಗಿದೆ! 2 ರಿಂದ 3 ಗಂಟೆಯೊಳಗೆ ಗ್ರಾಹಕರಿಗೆ ತಲುಪುತ್ತದೆ.");
       } catch (err) { alert("ದೋಷ: " + err.message); }
     }
 
     async function directDeliverOrder(docId) {
       try {
-        await window.updateDoc(window.doc(window.db, "orders", docId), { status: 'DELIVERED', deliveryBoyId: userSession.id, agentId: userSession.agentId || '' });
+        await window.updateDoc(window.doc(window.db, "orders", docId), { status: 'DELIVERED', deliveryBoyId: userSession.id });
         alert("🎉 ಡೆಲಿವರಿ ಸಕ್ಸಸ್‌ಫುಲ್!");
       } catch(err) { alert("ದೋಷ: " + err.message); }
     }
