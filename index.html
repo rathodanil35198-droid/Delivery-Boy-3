@@ -84,7 +84,7 @@
 </head>
 <body>
 
-  <!-- Popup Modal for Success -->
+  <!-- Success Modal -->
   <div id="successModal" class="modal">
     <div class="modal-box">
       <h3 style="color:var(--success)">🎉 ನೋಂದಣಿ ಯಶಸ್ವಿಯಾಗಿದೆ!</h3>
@@ -95,17 +95,16 @@
   </div>
 
   <div class="container">
-    <header id="mainHeader">
+    <header>
       <h2>👔 ಏಜೆಂಟ್ & ಡೆಲಿವರಿ ಪ್ಯಾನಲ್</h2>
     </header>
 
-    <!-- Role Switcher (Default: Agent First) -->
     <div class="role-switcher" id="roleSelector">
       <button class="role-btn active" id="btnRoleAgent" onclick="switchRole('agent')">👔 ಏಜೆಂಟ್ ಲಾಗಿನ್ / ನೋಂದಣಿ</button>
       <button class="role-btn" id="btnRoleDboy" onclick="switchRole('dboy')">🛵 ಡೆಲಿವರಿ ಬಾಯ್ ಲಾಗಿನ್ (4-Digit ID)</button>
     </div>
 
-    <!-- 1. AGENT REGISTRATION / LOGIN -->
+    <!-- AGENT REGISTRATION -->
     <div id="agentRegisterSection">
       <h3 style="font-size:0.95rem; margin-bottom:10px; color:var(--agent-color)">👔 ಏಜೆಂಟ್ ನೋಂದಣಿ</h3>
       <form onsubmit="registerAgent(event)">
@@ -124,7 +123,7 @@
       </form>
     </div>
 
-    <!-- 2. DBOY DIRECT LOGIN WITH 4-DIGIT ID -->
+    <!-- DBOY LOGIN -->
     <div id="dboyLoginSection" style="display:none;">
       <h3 style="font-size:0.95rem; margin-bottom:10px; color:var(--primary);">🔑 ಡೆಲಿವರಿ ಬಾಯ್ ಡ್ಯೂಟಿ ಲಾಗಿನ್</h3>
       <form onsubmit="loginDeliveryBoy(event)">
@@ -140,7 +139,7 @@
       </form>
     </div>
 
-    <!-- 3. DASHBOARD SECTION -->
+    <!-- DASHBOARD SECTION -->
     <div id="dashboardSection" style="display:none;">
       
       <div class="duty-bar" id="dutyBarContainer">
@@ -181,9 +180,19 @@
         </div>
       </div>
 
+      <!-- Live Order Route Tracking Input for Agent -->
+      <div id="agentRouteTrackingBox" style="display:none; background:#e3f2fd; padding:10px; border-radius:8px; margin-bottom:12px; border:1px solid #bbdefb;">
+        <h5 style="color:#0d47a1; margin-bottom:6px;">📍 ಲೈವ್ ಆರ್ಡರ್ ರೂಟ್ ಟ್ರ್ಯಾಕಿಂಗ್</h5>
+        <div style="display:flex; gap:6px;">
+          <input type="text" id="trackOrderIdInput" placeholder="ಆರ್ಡರ್ ಐಡಿ ನಮೂದಿಸಿ (ഉ: OD...)" style="flex:1; padding:6px; font-size:0.75rem;">
+          <button class="btn btn-agent" style="width:auto; padding:6px 12px; font-size:0.75rem;" onclick="trackLiveOrderRoute()">ಟ್ರ್ಯಾಕ್ ಮಾಡಿ</button>
+        </div>
+        <div id="trackResultDisplay" style="margin-top:6px; font-size:0.75rem; color:#333;"></div>
+      </div>
+
       <!-- Agent Button to Add Delivery Boy -->
       <div id="agentControlSection" style="display:none; margin-bottom:12px;">
-        <button class="btn btn-agent" onclick="openAddDboyModal()">➕ ಹೊಸ ಡೆಲಿವರಿ ಬಾಯ್ ಸೇರಿಸಿ</button>
+        <button class="btn btn-agent" onclick="openAddDboyModal()" style="margin-bottom:8px;">➕ ಹೊಸ ಡೆಲಿವರಿ ಬಾಯ್ ಸೇರಿಸಿ</button>
       </div>
 
       <div class="nav-tabs" id="navTabs">
@@ -201,7 +210,7 @@
     </div>
   </div>
 
-  <!-- ADD DBOY MODAL (Inside Agent Account) -->
+  <!-- ADD DBOY MODAL -->
   <div id="addDboyModal" class="modal">
     <div class="modal-box" style="text-align:left; max-height:85vh; overflow-y:auto;">
       <h3 style="color:var(--primary); margin-bottom:10px;">➕ ಡೆಲಿವರಿ ಬಾಯ್ ಸೇರಿಸಿ</h3>
@@ -327,7 +336,7 @@
         const snap = await window.getDocs(q);
 
         if (snap.empty) {
-          alert("⚠️ ತಪ್ಪಾದ 4-Digit ID ಅಥವಾ ಫೋನ್ ನಂಬರ್! ದಯವಿಟ್ಟು ಏಜೆಂಟ್ ಅನ್ನು ಸಂಪರ್ಕಿಸಿ.");
+          alert("⚠️ ತಪ್ಪಾದ 4-Digit ID ಅಥವಾ ಫೋನ್ ನಂಬರ್!");
           return;
         }
 
@@ -379,18 +388,9 @@
       }
     }
 
-    function openAddDboyModal() {
-      document.getElementById('addDboyModal').style.display = 'flex';
-    }
-
-    function closeAddDboyModal() {
-      document.getElementById('addDboyModal').style.display = 'none';
-    }
-
-    function closeSuccessModal() {
-      document.getElementById('successModal').style.display = 'none';
-      showDashboard();
-    }
+    function openAddDboyModal() { document.getElementById('addDboyModal').style.display = 'flex'; }
+    function closeAddDboyModal() { document.getElementById('addDboyModal').style.display = 'none'; }
+    function closeSuccessModal() { document.getElementById('successModal').style.display = 'none'; showDashboard(); }
 
     function showDashboard() {
       document.getElementById('roleSelector').style.display = 'none';
@@ -409,6 +409,7 @@
         document.getElementById('dboyStatsGrid').style.display = 'none';
         document.getElementById('agentStatsGrid').style.display = 'grid';
         document.getElementById('agentControlSection').style.display = 'block';
+        document.getElementById('agentRouteTrackingBox').style.display = 'block';
         document.getElementById('dutyBarContainer').style.display = 'none';
         loadAgentData();
       } else {
@@ -417,6 +418,7 @@
         document.getElementById('dboyStatsGrid').style.display = 'grid';
         document.getElementById('agentStatsGrid').style.display = 'none';
         document.getElementById('agentControlSection').style.display = 'none';
+        document.getElementById('agentRouteTrackingBox').style.display = 'none';
         startRealtimeOrders();
       }
     }
@@ -443,9 +445,7 @@
       window.onSnapshot(qBoys, (snap) => {
         allAgentDboys = [];
         let index = 1;
-        snap.forEach(d => {
-          allAgentDboys.push({ serialNo: index++, ...d.data() });
-        });
+        snap.forEach(d => { allAgentDboys.push({ serialNo: index++, ...d.data() }); });
         document.getElementById('agentWorkersCount').innerText = `${allAgentDboys.length} ಜನ್ರು (ಕ್ಲಿಕ್ ಮಾಡಿ ನೋಡಿ)`;
       });
 
@@ -455,9 +455,7 @@
         let ordersList = [];
         snap.forEach(d => {
           let o = { docId: d.id, ...d.data() };
-          if (o.status === 'DELIVERED' || o.status === 'STEP_4') {
-            totalRevenue += Number(o.totalPrice || 0);
-          }
+          if (o.status === 'DELIVERED' || o.status === 'STEP_4') { totalRevenue += Number(o.totalPrice || 0); }
           ordersList.push(o);
         });
         let agentCommission5 = Math.round(totalRevenue * 0.05);
@@ -471,16 +469,11 @@
       document.getElementById('deliveryBoysListModal').style.display = 'flex';
     }
 
-    function closeAgentDboysModal() {
-      document.getElementById('deliveryBoysListModal').style.display = 'none';
-    }
+    function closeAgentDboysModal() { document.getElementById('deliveryBoysListModal').style.display = 'none'; }
 
     function renderAgentDboysList(list) {
       const container = document.getElementById('agentDboysContainer');
-      if (list.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#777; padding:10px;">ಯಾವುದೇ ಡೆಲಿವರಿ ಬಾಯ್ಸ್ ಇಲ್ಲ.</p>';
-        return;
-      }
+      if (list.length === 0) { container.innerHTML = '<p style="text-align:center; color:#777; padding:10px;">ಯಾವುದೇ ಡೆಲಿವರಿ ಬಾಯ್ಸ್ ಇಲ್ಲ.</p>'; return; }
       container.innerHTML = list.map((b, idx) => `
         <div style="background:#f9f9f9; border:1px solid #ddd; padding:8px; border-radius:6px; margin-bottom:6px; font-size:0.8rem;">
           <b>ಕ್ರಂ.ಸಂಖ್ಯೆ: #${b.serialNo || (idx+1)}</b> | ಹೆಸರು: <b>${b.name}</b><br>
@@ -494,6 +487,30 @@
       const keyword = document.getElementById('dboySearchInput').value.toLowerCase();
       const filtered = allAgentDboys.filter(b => b.name.toLowerCase().includes(keyword) || b.id.includes(keyword) || b.phone.includes(keyword));
       renderAgentDboysList(filtered);
+    }
+
+    async function trackLiveOrderRoute() {
+      const orderId = document.getElementById('trackOrderIdInput').value.trim();
+      const display = document.getElementById('trackResultDisplay');
+      if (!orderId) { alert("ದಯವಿಟ್ಟು ಆರ್ಡರ್ ಐಡಿ ನಮೂದಿಸಿ"); return; }
+
+      const q = window.query(window.collection(window.db, "orders"), window.where("orderId", "==", orderId));
+      const snap = await window.getDocs(q);
+
+      if (snap.empty) {
+        display.innerHTML = '<span style="color:red;">⚠️ ಆರ್ಡರ್ ಕಂಡುಬಂದಿಲ್ಲ.</span>';
+        return;
+      }
+
+      snap.forEach(d => {
+        let o = d.data();
+        display.innerHTML = `
+          <b>ಪ್ರಾಡಕ್ಟ್:</b> ${o.productName}<br>
+          <b>ಸ್ಥಿತಿ:</b> <span style="color:green; font-weight:bold;">${o.status}</span><br>
+          <b>ಗ್ರಾಹಕರು:</b> ${o.customer?.name}, ${o.customer?.village}<br>
+          📍 <b>ರೂಟ್ ಮ್ಯಾಪ್:</b> ಅಂಗಡಿಯಿಂದ ಹೊರಟು ಗ್ರಾಹಕರ ವಿಳಾಸಕ್ಕೆ ತಲುಪುತ್ತಿದೆ.
+        `;
+      });
     }
 
     function startRealtimeOrders() {
@@ -523,10 +540,7 @@
         const orderTime = o.timestamp?.toMillis?.() || Date.now();
         if (o.status === 'DELIVERED' || o.status === 'STEP_4') {
           deliveredRev += Number(o.totalPrice || 0);
-          if (orderTime >= startOfDay) {
-            todayRev += Number(o.totalPrice || 0);
-            todayCount++;
-          }
+          if (orderTime >= startOfDay) { todayRev += Number(o.totalPrice || 0); todayCount++; }
         }
       });
 
@@ -584,9 +598,9 @@
               ) : (isConfirmedByShop && !isPickedUp ? `
                 <button class="btn btn-warning" style="background:#ff9800; color:#fff;" onclick="directPickupOrder('${o.docId}')">📦 ಪ್ಯಾಕಿಂಗ್ ಆಗಿದೆ, ಅಂಗಡಿಗೆ ಹೋಗಿ ಪಿಕಪ್ ಮಾಡಿ</button>
               ` : (isPickedUp ? `
-                <button class="btn btn-success" onclick="directDeliverOrder('${o.docId}')">🎉 ಗ್ರಾಹಕರಿಗೆ ಡೆಲಿವರಿ ತಲುಪಿಸಿ</button>
+                <button class="btn btn-success" onclick="directDeliverOrder('${o.docId}')">🎉 ಗ್ರಾಹಕರಿಗೆ ಡೆಲಿವರಿ ತಲುಪಿಸಿ (2-3 ಗಂಟೆ)</button>
               ` : `
-                <p style="font-size:0.75rem; color:#d32f2f; font-weight:bold;">ಅಂಗಡಿ ಮಾಲೀಕರು ಕನ್ಫರ್ಮ್ ಮಾಡಲು ಕಾಯಲಾಗುತ್ತಿದೆ...</p>
+                <p style="font-size:0.75rem; color:#d32f2f; font-weight:bold;">ಅಂಗಡಿ ಮಾಲೀಕರು ಪ್ಯಾಕಿಂಗ್ ಮಾಡಲು ಕಾಯಲಾಗುತ್ತಿದೆ...</p>
               `))}
             </div>
           </div>
@@ -596,10 +610,7 @@
 
     function renderHistoryOrders(list) {
       const container = document.getElementById('historyOrdersList');
-      if (list.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#777; padding:15px;">ಯಾವುದೇ ಹಳೆಯ ಆರ್ಡರ್‌ಗಳಿಲ್ಲ.</p>';
-        return;
-      }
+      if (list.length === 0) { container.innerHTML = '<p style="text-align:center; color:#777; padding:15px;">ಯಾವುದೇ ಹಳೆಯ ಆರ್ಡರ್‌ಗಳಿಲ್ಲ.</p>'; return; }
       container.innerHTML = list.map(o => `
         <div class="order-box">
           <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -613,10 +624,7 @@
 
     function renderPaymentOrders(list) {
       const container = document.getElementById('paymentOrdersList');
-      if (list.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#777; padding:15px;">ಯಾವುದೇ ಕಮಿಷನ್ ವಿವರಗಳಿಲ್ಲ.</p>';
-        return;
-      }
+      if (list.length === 0) { container.innerHTML = '<p style="text-align:center; color:#777; padding:15px;">ಯಾವುದೇ ಕಮಿಷನ್ ವಿವರಗಳಿಲ್ಲ.</p>'; return; }
       container.innerHTML = list.map(o => {
         let comm = Math.round(Number(o.totalPrice || 0) * 0.05);
         return `
@@ -631,7 +639,7 @@
     async function directPickupOrder(docId) {
       try {
         await window.updateDoc(window.doc(window.db, "orders", docId), { status: 'PICKED_UP', deliveryBoyId: userSession.id, agentId: userSession.agentId || '' });
-        alert("✅ ಆರ್ಡರ್ ಪಿಕ್‌ಅಪ್ ಆಗಿದೆ!");
+        alert("✅ ಆರ್ಡರ್ ಪಿಕ್‌ಅಪ್ ಆಗಿದೆ! 2 ರಿಂದ 3 ಗಂಟೆಯೊಳಗೆ ಗ್ರಾಹಕರಿಗೆ ತಲುಪುತ್ತದೆ.");
       } catch (err) { alert("ದೋಷ: " + err.message); }
     }
 
