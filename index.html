@@ -159,12 +159,16 @@
 
       <div class="stats-container">
         <div class="stat-box">
-          <h4>ಒಟ್ಟು ಡೆಲಿವರಿ</h4>
-          <p id="statTotalDeliveries">0</p>
+          <h4>ಇಂದಿನ ಡೆಲಿವರಿ (Orders)</h4>
+          <p id="statTodayCount">0</p>
         </div>
         <div class="stat-box">
-          <h4>ಇಂದಿನ ಕಲೆಕ್ಷನ್</h4>
-          <p id="statEarnings">₹0</p>
+          <h4>ಕಮಿಷನ್ (5%)</h4>
+          <p id="statCommission">₹0</p>
+        </div>
+        <div class="stat-box">
+          <h4>ಪೇಮೆಂಟ್ (Pending)</h4>
+          <p id="statPendingPayment">₹0</p>
         </div>
       </div>
 
@@ -175,13 +179,13 @@
 
       <!-- ಹೊಸ ಟಾಸ್ಕ್‌ಗಳು -->
       <div id="tabTasks" style="background:#fff; padding:15px; border-radius:10px; border:1px solid #cbd5e0;">
-        <h2>📦 ಅಂಗಡಿಗಳಿಂದ ಪ್ಯಾಕ್ ಆಗಿರುವ ಹೊಸ ಟಾಸ್ಕ್‌ಗಳು (ಸ್ಥಳೀಯ ತಾಲ್ಲೂಕು/ಜಿಲ್ಲೆ)</h2>
+        <h2>📦 ಅಂಗಡಿಗಳಿಂದ ಪ್ಯಾಕ್ ಆಗಿರುವ ಹೊಸ ಟಾಸ್ಕ್‌ಗಳು (ಇಂದಿನವು ಮಾತ್ರ)</h2>
         <div id="dboyTasksList" style="margin-top:10px;"></div>
       </div>
 
       <!-- ಹಿಸ್ಟರಿ -->
       <div id="tabHistory" style="display:none; background:#fff; padding:15px; border-radius:10px; border:1px solid #cbd5e0;">
-        <h2>📜 ಪೂರ್ಣಗೊಂಡ ಡೆಲಿವರಿ ಹಿಸ್ಟರಿ</h2>
+        <h2>📜 ಪೂರ್ಣಗೊಂಡ ಡೆಲಿವರಿ ಹಿಸ್ಟರಿ (ಇಂದಿನವು)</h2>
         <div id="dboyHistoryList" style="margin-top:10px;"></div>
       </div>
 
@@ -309,32 +313,47 @@
       window.onSnapshot(window.collection(window.db, "orders"), (snapshot) => {
         let tasks = [];
         let history = [];
+        let todayTotalAmount = 0;
+        let todayPendingPayment = 0;
+
+        const startOfToday = new Date();
+        startOfToday.setHours(0, 0, 0, 0);
+        const todayMillis = startOfToday.getTime();
 
         snapshot.forEach(docSnap => {
           const o = { docId: docSnap.id, ...docSnap.data() };
-          
-          let custTaluk = (o.customer?.taluk || '').toLowerCase();
-          let dboyTaluk = (dboy.taluk || '').toLowerCase();
-          let matchTaluk = (custTaluk === '' || dboyTaluk === '' || custTaluk.includes(dboyTaluk) || dboyTaluk.includes(custTaluk));
+          const orderTime = o.timestamp?.toMillis?.() || o.timestamp || Date.now();
 
-          if (matchTaluk) {
-            // STEP_3 means shop owner clicked "Pack Order" / Ready for delivery
-            if (o.status === 'STEP_3' || o.status === 'PACKING' || o.status === 'PICKED_UP') {
-              if (!o.assignedDboyId || o.assignedDboyId === dboy.id) {
-                tasks.push(o);
-              }
-            } else if (o.status === 'DELIVERED' || o.status === 'STEP_4') {
-              if (o.assignedDboyId === dboy.id) {
-                history.push(o);
+          // Filter strictly for Today's orders
+          if (orderTime >= todayMillis) {
+            let custTaluk = (o.customer?.taluk || '').toLowerCase();
+            let dboyTaluk = (dboy.taluk || '').toLowerCase();
+            let matchTaluk = (custTaluk === '' || dboyTaluk === '' || custTaluk.includes(dboyTaluk) || dboyTaluk.includes(custTaluk));
+
+            if (matchTaluk) {
+              if (o.status === 'STEP_3' || o.status === 'PACKING') {
+                if (!o.assignedDboyId || o.assignedDboyId === dboy.id) {
+                  tasks.push(o);
+                }
+              } else if (o.status === 'DELIVERED' || o.status === 'STEP_4') {
+                if (o.assignedDboyId === dboy.id) {
+                  history.push(o);
+                  todayTotalAmount += Number(o.totalPrice || 0);
+                  if (!o.isPaymentClearedByMaster) {
+                    todayPendingPayment += Number(o.totalPrice || 0);
+                  }
+                }
               }
             }
           }
         });
 
+        const commission = Math.round(todayTotalAmount * 0.05);
+
         document.getElementById('taskCount').innerText = tasks.length;
-        document.getElementById('statTotalDeliveries').innerText = history.length;
-        const totalColl = history.reduce((acc, curr) => acc + Number(curr.totalPrice || 0), 0);
-        document.getElementById('statEarnings').innerText = `₹${totalColl}`;
+        document.getElementById('statTodayCount').innerText = history.length;
+        document.getElementById('statCommission').innerText = `₹${commission}`;
+        document.getElementById('statPendingPayment').innerText = o => o?.isPaymentClearedByMaster ? '₹0' : `₹${todayPendingPayment}`;
 
         renderTasks(tasks);
         renderHistory(history);
@@ -344,13 +363,38 @@
     function renderTasks(tasks) {
       const listDiv = document.getElementById('dboyTasksList');
       if (tasks.length === 0) {
-        listDiv.innerHTML = '<p style="font-size:0.8rem; color:#777;">ಯಾವುದೇ ಹೊಸ ಟಾಸ್ಕ್‌ಗಳಿಲ್ಲ.</p>';
+        listDiv.innerHTML = '<p style="font-size:0.8rem; color:#777;">ಇಂದಿನ ಯಾವುದೇ ಹೊಸ ಟಾಸ್ಕ್‌ಗಳಿಲ್ಲ.</p>';
         return;
       }
 
       listDiv.innerHTML = tasks.map(o => {
         let mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.customer?.village + ', ' + (o.customer?.taluk || dboy.taluk))}`;
         let shopMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.shopName + ' ' + (o.shopLocation || dboy.taluk))}`;
+
+        let pickupButtonHTML = '';
+        if (o.status !== 'PICKED_UP' && !o.isPickedUp) {
+          pickupButtonHTML = `
+            <div style="margin-top:8px; background:#fff3e0; padding:8px; border-radius:6px; border:1px solid #ffe0b2;">
+              <label style="font-size:0.75rem; font-weight:bold; color:#e65100;">ಅಂಗಡಿಯವರ ಬಳಿ ಪಡೆದ 4-ಡಿಜಿಟ್ ಪಿಕ್ ಅಪ್ ಒಟಿಪಿ ಹಾಕಿ:</label>
+              <div style="display:flex; gap:6px; margin-top:4px;">
+                <input type="number" id="pickupOtp_${o.docId}" placeholder="OTP" style="flex:1; padding:6px; font-size:0.9rem; border:1px solid #ccc; border-radius:4px; text-align:center;">
+                <button onclick="verifyPickupOtp('${o.docId}')" class="btn-pickup" style="margin-top:0; padding:6px 12px;">ಪಿಕ್ ಅಪ್ (OK)</button>
+              </div>
+            </div>
+          `;
+        } else {
+          pickupButtonHTML = `<p style="font-size:0.75rem; color:var(--success); font-weight:bold; margin-top:6px;">✔ ಅಂಗಡಿಯಿಂದ ಪಿಕ್ ಅಪ್ ಮಾಡಿಕೊಳ್ಳಲಾಗಿದೆ</p>`;
+        }
+
+        let deliveryButtonHTML = `
+          <div style="margin-top:8px; background:#e8f5e9; padding:8px; border-radius:6px; border:1px solid #c8e6c9;">
+            <label style="font-size:0.75rem; font-weight:bold; color:#2e7d32;">ಗ್ರಾಹಕರ ಬಳಿ ಪಡೆದ 4-ಡಿಜಿಟ್ ಡೆಲಿವರಿ ಒಟಿಪಿ ಹಾಕಿ:</label>
+            <div style="display:flex; gap:6px; margin-top:4px;">
+              <input type="number" id="deliveryOtp_${o.docId}" placeholder="OTP" style="flex:1; padding:6px; font-size:0.9rem; border:1px solid #ccc; border-radius:4px; text-align:center;">
+              <button onclick="verifyDeliveryOtp('${o.docId}')" class="btn-deliver" style="margin-top:0; padding:6px 12px;">ಡೆಲಿವರಿ ಸಕ್ಸಸ್ (OK)</button>
+            </div>
+          </div>
+        `;
 
         return `
           <div class="order-item">
@@ -378,8 +422,8 @@
 
             <a href="${mapsUrl}" target="_blank" style="display:block; background:#1976d2; color:#fff; text-align:center; padding:5px; border-radius:4px; text-decoration:none; font-size:0.75rem; font-weight:bold; margin-top:6px; margin-bottom:8px;">🗺️ ಗ್ರಾಹಕರ ವಿಳಾಸ ಮ್ಯಾಪ್ (Delivery)</a>
 
-            <button onclick="pickupOrder('${o.docId}')" class="btn-pickup">🛵 ಪಿಕ್ ಅಪ್ ಮಾಡಿಕೊಳ್ಳಿ (Pick Up)</button>
-            <button onclick="deliverOrder('${o.docId}')" class="btn-deliver" style="margin-top:6px;">✅ ಡೆಲಿವರಿ ಸಕ್ಸಸ್‌ಫುಲ್ (Delivery Successful)</button>
+            ${pickupButtonHTML}
+            ${deliveryButtonHTML}
           </div>
         `;
       }).join('');
@@ -388,43 +432,55 @@
     function renderHistory(history) {
       const listDiv = document.getElementById('dboyHistoryList');
       if (history.length === 0) {
-        listDiv.innerHTML = '<p style="font-size:0.8rem; color:#777;">ಯಾವುದೇ ಪೂರ್ಣಗೊಂಡ ಹಿಸ್ಟರಿ ಇಲ್ಲ.</p>';
+        listDiv.innerHTML = '<p style="font-size:0.8rem; color:#777;">ಇಂದಿನ ಯಾವುದೇ ಪೂರ್ಣಗೊಂಡ ಹಿಸ್ಟರಿ ಇಲ್ಲ.</p>';
         return;
       }
       listDiv.innerHTML = history.map(o => `
         <div class="order-item" style="border-left-color: var(--success);">
           <p><b>${o.productName}</b> - ₹${o.totalPrice}</p>
           <p style="font-size:0.75rem; color:#555;">ಗ್ರಾಹಕರು: ${o.customer?.name} | ವಿಳಾಸ: ${o.customer?.village}</p>
-          <p style="font-size:0.75rem; color:var(--success); font-weight:bold; margin-top:2px;">✔ ಡೆಲಿವರಿ ಯಶಸ್ವಿಯಾಗಿದೆ</p>
+          <p style="font-size:0.75rem; color:var(--success); font-weight:bold; margin-top:2px;">✔ ಡೆಲಿವರಿ ಯಶಸ್ವಿಯಾಗಿದೆ (ಇಂದಿನವು)</p>
         </div>
       `).join('');
     }
 
-    async function pickupOrder(docId) {
+    async function verifyPickupOtp(docId) {
+      const otpInput = document.getElementById(`pickupOtp_${docId}`).value.trim();
+      if (otpInput.length !== 4) {
+        alert("ದಯವಿಟ್ಟು ಸರಿಯಾದ 4-ಡಿಜಿಟ್ ಒಟಿಪಿ ನಮೂದಿಸಿ.");
+        return;
+      }
+
       try {
         await window.updateDoc(window.doc(window.db, "orders", docId), {
           status: 'PICKED_UP',
+          isPickedUp: true,
           assignedDboyId: dboy.id,
           deliveryBoyPhone: dboy.phone
         });
-        alert("🛵 ಆರ್ಡರ್ ಪಿಕ್ ಅಪ್ ಮಾಡಿಕೊಳ್ಳಲಾಗಿದೆ!");
+        alert("🛵 ಪಿಕ್ ಅಪ್ ಒಟಿಪಿ ಸಕ್ಸಸ್ ಆಗಿದೆ!");
       } catch (e) {
         alert("ದೋಷ: " + e.message);
       }
     }
 
-    async function deliverOrder(docId) {
-      if (confirm("ಈ ಆರ್ಡರ್ ಯಶಸ್ವಿಯಾಗಿ ತಲುಪಿಸಲಾಗಿದೆ ಎಂದು ಖಚಿತಪಡಿಸಲು OK ಒತ್ತಿ.")) {
-        try {
-          await window.updateDoc(window.doc(window.db, "orders", docId), {
-            status: 'DELIVERED',
-            assignedDboyId: dboy.id,
-            deliveryBoyPhone: dboy.phone
-          });
-          alert("🎉 ಡೆಲಿವರಿ ಯಶಸ್ವಿಯಾಗಿ ಪೂರ್ಣಗೊಂಡಿದೆ!");
-        } catch (e) {
-          alert("ದೋಷ: " + e.message);
-        }
+    async function verifyDeliveryOtp(docId) {
+      const otpInput = document.getElementById(`deliveryOtp_${docId}`).value.trim();
+      if (otpInput.length !== 4) {
+        alert("ದಯವಿಟ್ಟು ಗ್ರಾಹಕರ 4-ಡಿಜಿಟ್ ಡೆಲಿವರಿ ಒಟಿಪಿ ನಮೂದಿಸಿ.");
+        return;
+      }
+
+      try {
+        await window.updateDoc(window.doc(window.db, "orders", docId), {
+          status: 'DELIVERED',
+          isDelivered: true,
+          assignedDboyId: dboy.id,
+          deliveryBoyPhone: dboy.phone
+        });
+        alert("🎉 ಡೆಲಿವರಿ ಯಶಸ್ವಿಯಾಗಿ ಪೂರ್ಣಗೊಂಡಿದೆ!");
+      } catch (e) {
+        alert("ದೋಷ: " + e.message);
       }
     }
   </script>
