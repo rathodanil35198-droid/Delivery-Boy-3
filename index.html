@@ -63,8 +63,8 @@
     .btn-danger { background: var(--danger); }
     .btn-warning { background: var(--warning); }
     .btn-call { background: #388e3c; color: #fff; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.75rem; font-weight: bold; display: inline-block; margin-top: 4px; }
-    .btn-pickup { background: #2874f0; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; cursor: pointer; margin-top: 6px; width: 100%; }
-    .btn-deliver { background: #388e3c; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; cursor: pointer; margin-top: 6px; width: 100%; }
+    .btn-pickup { background: #2874f0; color: #fff; border: none; padding: 10px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; width: 100%; }
+    .btn-deliver { background: #388e3c; color: #fff; border: none; padding: 10px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; width: 100%; }
 
     .id-card {
       background: linear-gradient(135deg, #e65100, #ef6c00);
@@ -324,7 +324,6 @@
           const o = { docId: docSnap.id, ...docSnap.data() };
           const orderTime = o.timestamp?.toMillis?.() || o.timestamp || Date.now();
 
-          // Filter strictly for Today's orders
           if (orderTime >= todayMillis) {
             let custTaluk = (o.customer?.taluk || '').toLowerCase();
             let dboyTaluk = (dboy.taluk || '').toLowerCase();
@@ -353,7 +352,7 @@
         document.getElementById('taskCount').innerText = tasks.length;
         document.getElementById('statTodayCount').innerText = history.length;
         document.getElementById('statCommission').innerText = `₹${commission}`;
-        document.getElementById('statPendingPayment').innerText = o => o?.isPaymentClearedByMaster ? '₹0' : `₹${todayPendingPayment}`;
+        document.getElementById('statPendingPayment').innerText = `₹${todayPendingPayment}`;
 
         renderTasks(tasks);
         renderHistory(history);
@@ -371,36 +370,49 @@
         let mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.customer?.village + ', ' + (o.customer?.taluk || dboy.taluk))}`;
         let shopMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.shopName + ' ' + (o.shopLocation || dboy.taluk))}`;
 
+        // Auto-generate or assign a 4-digit OTP for pickup if not present
+        if (!o.pickupOtp) {
+          o.pickupOtp = Math.floor(1000 + Math.random() * 9000).toString();
+        }
+        if (!o.deliveryOtp) {
+          o.deliveryOtp = Math.floor(1000 + Math.random() * 9000).toString();
+        }
+
         let pickupButtonHTML = '';
-        if (o.status !== 'PICKED_UP' && !o.isPickedUp) {
+        if (!o.isPickedUp) {
           pickupButtonHTML = `
-            <div style="margin-top:8px; background:#fff3e0; padding:8px; border-radius:6px; border:1px solid #ffe0b2;">
-              <label style="font-size:0.75rem; font-weight:bold; color:#e65100;">ಅಂಗಡಿಯವರ ಬಳಿ ಪಡೆದ 4-ಡಿಜಿಟ್ ಪಿಕ್ ಅಪ್ ಒಟಿಪಿ ಹಾಕಿ:</label>
-              <div style="display:flex; gap:6px; margin-top:4px;">
-                <input type="number" id="pickupOtp_${o.docId}" placeholder="OTP" style="flex:1; padding:6px; font-size:0.9rem; border:1px solid #ccc; border-radius:4px; text-align:center;">
-                <button onclick="verifyPickupOtp('${o.docId}')" class="btn-pickup" style="margin-top:0; padding:6px 12px;">ಪಿಕ್ ಅಪ್ (OK)</button>
+            <div style="margin-top:10px; background:#fff3e0; padding:10px; border-radius:8px; border:1px solid #ffe0b2;">
+              <label style="font-size:0.8rem; font-weight:bold; color:#e65100; margin-bottom:4px;">ಅಂಗಡಿಯವರ ಬಳಿ ಪಡೆದ 4-ಡಿಜಿಟ್ ಪಿಕ್ ಅಪ್ ಒಟಿಪಿ ಹಾಕಿ:</label>
+              <div style="font-size:0.75rem; color:#555; margin-bottom:6px;">(ಅಂಗಡಿ ಮಾಲೀಕರ ಪ್ಯಾನಲ್‌ನಲ್ಲಿ ಒಟಿಪಿ ಲಭ್ಯವಿರುತ್ತದೆ)</div>
+              <div style="display:flex; gap:8px;">
+                <input type="number" id="pickupOtp_${o.docId}" placeholder="OTP ಹಾಕಿ" style="flex:1; padding:8px; font-size:1rem; border:1px solid #ccc; border-radius:6px; text-align:center; font-weight:bold;">
+                <button onclick="verifyPickupOtp('${o.docId}', '${o.pickupOtp}')" class="btn-pickup" style="width:auto; padding:8px 16px;">ಪಿಕ್ ಅಪ್ (OK)</button>
               </div>
             </div>
           `;
         } else {
-          pickupButtonHTML = `<p style="font-size:0.75rem; color:var(--success); font-weight:bold; margin-top:6px;">✔ ಅಂಗಡಿಯಿಂದ ಪಿಕ್ ಅಪ್ ಮಾಡಿಕೊಳ್ಳಲಾಗಿದೆ</p>`;
+          pickupButtonHTML = `<p style="font-size:0.8rem; color:var(--success); font-weight:bold; margin-top:8px;">✔ ಅಂಗಡಿಯಿಂದ ಪಿಕ್ ಅಪ್ ಯಶಸ್ವಿಯಾಗಿದೆ</p>`;
         }
 
-        let deliveryButtonHTML = `
-          <div style="margin-top:8px; background:#e8f5e9; padding:8px; border-radius:6px; border:1px solid #c8e6c9;">
-            <label style="font-size:0.75rem; font-weight:bold; color:#2e7d32;">ಗ್ರಾಹಕರ ಬಳಿ ಪಡೆದ 4-ಡಿಜಿಟ್ ಡೆಲಿವರಿ ಒಟಿಪಿ ಹಾಕಿ:</label>
-            <div style="display:flex; gap:6px; margin-top:4px;">
-              <input type="number" id="deliveryOtp_${o.docId}" placeholder="OTP" style="flex:1; padding:6px; font-size:0.9rem; border:1px solid #ccc; border-radius:4px; text-align:center;">
-              <button onclick="verifyDeliveryOtp('${o.docId}')" class="btn-deliver" style="margin-top:0; padding:6px 12px;">ಡೆಲಿವರಿ ಸಕ್ಸಸ್ (OK)</button>
+        let deliveryButtonHTML = '';
+        if (o.isPickedUp && !o.isDelivered) {
+          deliveryButtonHTML = `
+            <div style="margin-top:10px; background:#e8f5e9; padding:10px; border-radius:8px; border:1px solid #c8e6c9;">
+              <label style="font-size:0.8rem; font-weight:bold; color:#2e7d32; margin-bottom:4px;">ಗ್ರಾಹಕರ ಬಳಿ ಪಡೆದ 4-ಡಿಜಿಟ್ ಡೆಲಿವರಿ ಒಟಿಪಿ ಹಾಕಿ:</label>
+              <div style="display:flex; gap:8px;">
+                <input type="number" id="deliveryOtp_${o.docId}" placeholder="OTP ಹಾಕಿ" style="flex:1; padding:8px; font-size:1rem; border:1px solid #ccc; border-radius:6px; text-align:center; font-weight:bold;">
+                <button onclick="verifyDeliveryOtp('${o.docId}', '${o.deliveryOtp}')" class="btn-deliver" style="width:auto; padding:8px 16px;">ಡೆಲಿವರಿ (OK)</button>
+              </div>
             </div>
-          </div>
-        `;
+          `;
+        }
 
         return `
           <div class="order-item">
             <div style="background:#fff3e0; border:1px solid #ffe0b2; border-radius:6px; padding:6px; margin-bottom:8px; text-align:center;">
               <span style="font-size:0.7rem; color:#e65100; font-weight:bold;">📷 ಆರ್ಡರ್ ಐಡಿ (Order ID):</span>
               <div style="font-size:0.95rem; font-weight:bold; color:#bf360c; letter-spacing:1px;">${o.orderId || 'OD000000'}</div>
+              <div style="font-size:0.75rem; color:#333; margin-top:2px;"><b>ಅಂಗಡಿ ಒಟಿಪಿ (Pickup OTP):</b> <span style="color:#d32f2f; font-weight:bold;">${o.pickupOtp}</span> | <b>ಡೆಲಿವರಿ ಒಟಿಪಿ:</b> <span style="color:#2e7d32; font-weight:bold;">${o.deliveryOtp}</span></div>
             </div>
 
             <div style="display:flex; gap:10px; align-items:center;">
@@ -444,30 +456,29 @@
       `).join('');
     }
 
-    async function verifyPickupOtp(docId) {
-      const otpInput = document.getElementById(`pickupOtp_${docId}`).value.trim();
-      if (otpInput.length !== 4) {
-        alert("ದಯವಿಟ್ಟು ಸರಿಯಾದ 4-ಡಿಜಿಟ್ ಒಟಿಪಿ ನಮೂದಿಸಿ.");
+    async function verifyPickupOtp(docId, correctOtp) {
+      const inputVal = document.getElementById(`pickupOtp_${docId}`).value.trim();
+      if (inputVal !== correctOtp) {
+        alert("❌ ತಪ್ಪಾದ ಒಟಿಪಿ! ದಯವಿಟ್ಟು ಅಂಗಡಿ ಮಾಲೀಕರ ಬಳಿ ಸರಿಯಾದ ಒಟಿಪಿ ಪಡೆದು ನಮೂದಿಸಿ.");
         return;
       }
 
       try {
         await window.updateDoc(window.doc(window.db, "orders", docId), {
-          status: 'PICKED_UP',
           isPickedUp: true,
           assignedDboyId: dboy.id,
           deliveryBoyPhone: dboy.phone
         });
-        alert("🛵 ಪಿಕ್ ಅಪ್ ಒಟಿಪಿ ಸಕ್ಸಸ್ ಆಗಿದೆ!");
+        alert("✅ ಪಿಕ್ ಅಪ್ ಒಟಿಪಿ ಯಶಸ್ವಿಯಾಗಿದೆ!");
       } catch (e) {
         alert("ದೋಷ: " + e.message);
       }
     }
 
-    async function verifyDeliveryOtp(docId) {
-      const otpInput = document.getElementById(`deliveryOtp_${docId}`).value.trim();
-      if (otpInput.length !== 4) {
-        alert("ದಯವಿಟ್ಟು ಗ್ರಾಹಕರ 4-ಡಿಜಿಟ್ ಡೆಲಿವರಿ ಒಟಿಪಿ ನಮೂದಿಸಿ.");
+    async function verifyDeliveryOtp(docId, correctOtp) {
+      const inputVal = document.getElementById(`deliveryOtp_${docId}`).value.trim();
+      if (inputVal !== correctOtp) {
+        alert("❌ ತಪ್ಪಾದ ಒಟಿಪಿ! ದಯವಿಟ್ಟು ಗ್ರಾಹಕರ ಬಳಿ ಸರಿಯಾದ ಒಟಿಪಿ ಪಡೆದು ನಮೂದಿಸಿ.");
         return;
       }
 
