@@ -370,7 +370,7 @@
         let mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.customer?.village + ', ' + (o.customer?.taluk || dboy.taluk))}`;
         let shopMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.shopName + ' ' + (o.shopLocation || dboy.taluk))}`;
 
-        // Auto-generate or assign a 4-digit OTP for pickup if not present
+        // Ensure Pickup OTP and Delivery OTP are present
         if (!o.pickupOtp) {
           o.pickupOtp = Math.floor(1000 + Math.random() * 9000).toString();
         }
@@ -399,6 +399,7 @@
           deliveryButtonHTML = `
             <div style="margin-top:10px; background:#e8f5e9; padding:10px; border-radius:8px; border:1px solid #c8e6c9;">
               <label style="font-size:0.8rem; font-weight:bold; color:#2e7d32; margin-bottom:4px;">ಗ್ರಾಹಕರ ಬಳಿ ಪಡೆದ 4-ಡಿಜಿಟ್ ಡೆಲಿವರಿ ಒಟಿಪಿ ಹಾಕಿ:</label>
+              <div style="font-size:0.75rem; color:#555; margin-bottom:6px;">(ಗ್ರಾಹಕರ ಆರ್ಡರ್ ಬಿಲ್‌ನಲ್ಲಿ ಒಟಿಪಿ ಲಭ್ಯವಿರುತ್ತದೆ)</div>
               <div style="display:flex; gap:8px;">
                 <input type="number" id="deliveryOtp_${o.docId}" placeholder="OTP ಹಾಕಿ" style="flex:1; padding:8px; font-size:1rem; border:1px solid #ccc; border-radius:6px; text-align:center; font-weight:bold;">
                 <button onclick="verifyDeliveryOtp('${o.docId}', '${o.deliveryOtp}')" class="btn-deliver" style="width:auto; padding:8px 16px;">ಡೆಲಿವರಿ (OK)</button>
