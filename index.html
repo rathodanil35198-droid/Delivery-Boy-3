@@ -378,9 +378,16 @@
           o.deliveryOtp = Math.floor(1000 + Math.random() * 9000).toString();
         }
 
-        let pickupButtonHTML = '';
+        let stepBoxHTML = '';
         if (!o.isPickedUp) {
-          pickupButtonHTML = `
+          // STEP 1: Show ONLY Pickup OTP instructions and input
+          stepBoxHTML = `
+            <div style="background:#fff3e0; border:1px solid #ffe0b2; border-radius:6px; padding:6px; margin-bottom:8px; text-align:center;">
+              <span style="font-size:0.7rem; color:#e65100; font-weight:bold;">📷 ಆರ್ಡರ್ ಐಡಿ (Order ID):</span>
+              <div style="font-size:0.95rem; font-weight:bold; color:#bf360c; letter-spacing:1px;">${o.orderId || 'OD000000'}</div>
+              <div style="font-size:0.75rem; color:#333; margin-top:2px;"><b>ಅಂಗಡಿ ಒಟಿಪಿ (Pickup OTP):</b> <span style="color:#d32f2f; font-weight:bold;">${o.pickupOtp}</span></div>
+            </div>
+            
             <div style="margin-top:10px; background:#fff3e0; padding:10px; border-radius:8px; border:1px solid #ffe0b2;">
               <label style="font-size:0.8rem; font-weight:bold; color:#e65100; margin-bottom:4px;">ಅಂಗಡಿಯವರ ಬಳಿ ಪಡೆದ 4-ಡಿಜಿಟ್ ಪಿಕ್ ಅಪ್ ಒಟಿಪಿ ಹಾಕಿ:</label>
               <div style="font-size:0.75rem; color:#555; margin-bottom:6px;">(ಅಂಗಡಿ ಮಾಲೀಕರ ಪ್ಯಾನಲ್‌ನಲ್ಲಿ ಒಟಿಪಿ ಲಭ್ಯವಿರುತ್ತದೆ)</div>
@@ -391,12 +398,14 @@
             </div>
           `;
         } else {
-          pickupButtonHTML = `<p style="font-size:0.8rem; color:var(--success); font-weight:bold; margin-top:8px;">✔ ಅಂಗಡಿಯಿಂದ ಪಿಕ್ ಅಪ್ ಯಶಸ್ವಿಯಾಗಿದೆ</p>`;
-        }
+          // STEP 2: Once picked up, hide pickup OTP and show ONLY Delivery OTP input
+          stepBoxHTML = `
+            <div style="background:#fff3e0; border:1px solid #ffe0b2; border-radius:6px; padding:6px; margin-bottom:8px; text-align:center;">
+              <span style="font-size:0.7rem; color:#e65100; font-weight:bold;">📷 ಆರ್ಡರ್ ಐಡಿ (Order ID):</span>
+              <div style="font-size:0.95rem; font-weight:bold; color:#bf360c; letter-spacing:1px;">${o.orderId || 'OD000000'}</div>
+              <div style="font-size:0.75rem; color:var(--success); font-weight:bold; margin-top:2px;">✔ ಅಂಗಡಿಯಿಂದ ಪಿಕ್ ಅಪ್ ಯಶಸ್ವಿಯಾಗಿದೆ</div>
+            </div>
 
-        let deliveryButtonHTML = '';
-        if (o.isPickedUp && !o.isDelivered) {
-          deliveryButtonHTML = `
             <div style="margin-top:10px; background:#e8f5e9; padding:10px; border-radius:8px; border:1px solid #c8e6c9;">
               <label style="font-size:0.8rem; font-weight:bold; color:#2e7d32; margin-bottom:4px;">ಗ್ರಾಹಕರ ಬಳಿ ಪಡೆದ 4-ಡಿಜಿಟ್ ಡೆಲಿವರಿ ಒಟಿಪಿ ಹಾಕಿ:</label>
               <div style="font-size:0.75rem; color:#555; margin-bottom:6px;">(ಗ್ರಾಹಕರ ಆರ್ಡರ್ ಬಿಲ್‌ನಲ್ಲಿ ಒಟಿಪಿ ಲಭ್ಯವಿರುತ್ತದೆ)</div>
@@ -410,13 +419,9 @@
 
         return `
           <div class="order-item">
-            <div style="background:#fff3e0; border:1px solid #ffe0b2; border-radius:6px; padding:6px; margin-bottom:8px; text-align:center;">
-              <span style="font-size:0.7rem; color:#e65100; font-weight:bold;">📷 ಆರ್ಡರ್ ಐಡಿ (Order ID):</span>
-              <div style="font-size:0.95rem; font-weight:bold; color:#bf360c; letter-spacing:1px;">${o.orderId || 'OD000000'}</div>
-              <div style="font-size:0.75rem; color:#333; margin-top:2px;"><b>ಅಂಗಡಿ ಒಟಿಪಿ (Pickup OTP):</b> <span style="color:#d32f2f; font-weight:bold;">${o.pickupOtp}</span> | <b>ಡೆಲಿವರಿ ಒಟಿಪಿ:</b> <span style="color:#2e7d32; font-weight:bold;">${o.deliveryOtp}</span></div>
-            </div>
+            ${stepBoxHTML}
 
-            <div style="display:flex; gap:10px; align-items:center;">
+            <div style="display:flex; gap:10px; align-items:center; margin-top:8px;">
               <img src="${o.productPhoto}" style="width:60px; height:60px; object-fit:cover; border-radius:6px;">
               <div>
                 <h4 style="font-size:0.9rem;">${o.productName}</h4>
@@ -434,9 +439,6 @@
             <p style="margin-top:4px;"><b>ವಿಳಾಸ:</b> ${o.customer?.village}, ${o.customer?.taluk || dboy.taluk}</p>
 
             <a href="${mapsUrl}" target="_blank" style="display:block; background:#1976d2; color:#fff; text-align:center; padding:5px; border-radius:4px; text-decoration:none; font-size:0.75rem; font-weight:bold; margin-top:6px; margin-bottom:8px;">🗺️ ಗ್ರಾಹಕರ ವಿಳಾಸ ಮ್ಯಾಪ್ (Delivery)</a>
-
-            ${pickupButtonHTML}
-            ${deliveryButtonHTML}
           </div>
         `;
       }).join('');
