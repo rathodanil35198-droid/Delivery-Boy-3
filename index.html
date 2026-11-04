@@ -63,6 +63,7 @@
     .btn-danger { background: var(--danger); }
     .btn-warning { background: var(--warning); }
     .btn-call { background: #388e3c; color: #fff; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.75rem; font-weight: bold; display: inline-block; margin-top: 4px; }
+    .btn-shop-call { background: #e65100; color: #fff; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.75rem; font-weight: bold; display: inline-block; margin-top: 4px; }
     .btn-pickup { background: #2874f0; color: #fff; border: none; padding: 10px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; width: 100%; }
     .btn-deliver { background: #388e3c; color: #fff; border: none; padding: 10px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; width: 100%; }
 
@@ -82,6 +83,10 @@
     .stat-box p { font-size: 0.8rem; font-weight: bold; color: #bf360c; }
 
     .order-item { border-left: 5px solid var(--primary); background: #f9f9f9; padding: 12px; margin-bottom: 12px; border-radius: 6px; font-size: 0.85rem; border: 1px solid #e0e0e0; border-left-width: 5px; }
+
+    .pay-badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-top: 4px; }
+    .pay-cod { background: #fff3e0; color: #e65100; border: 1px solid #ffe0b2; }
+    .pay-upi { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
 
     .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); text-align: center; padding: 20px; overflow-y: auto; justify-content: center; align-items: center; }
     .modal-content-box { background: #fff; max-width: 380px; margin: auto; padding: 25px; border-radius: 14px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
@@ -360,22 +365,22 @@
           let matchTaluk = (custTaluk === '' || dboyTaluk === '' || custTaluk.includes(dboyTaluk) || dboyTaluk.includes(custTaluk));
 
           if (matchTaluk) {
-            // Normal Delivery Tasks
+            // 1. Normal Delivery Tasks
             if (o.status === 'STEP_3' || o.status === 'PACKING') {
               if (!o.assignedDboyId || o.assignedDboyId === dboy.id) {
                 tasks.push(o);
               }
             } 
-            // Return Tasks (When return is requested)
+            // 2. Return Tasks
             else if (o.isReturned && o.status !== 'RETURN_COMPLETED' && o.status !== 'DELIVERED') {
               returnTasks.push(o);
             } 
-            // Completed Deliveries & Returns History
+            // 3. Completed Deliveries & Returns History
             else if (o.status === 'DELIVERED' || o.status === 'STEP_4' || o.status === 'RETURN_COMPLETED') {
               if (o.assignedDboyId === dboy.id || o.returnDboyId === dboy.id) {
                 history.push(o);
-                if (o.status === 'DELIVERED') totalEarnings += 50; // Delivery fee earning
-                if (o.status === 'RETURN_COMPLETED') totalEarnings += 30; // Return fee earning
+                if (o.status === 'DELIVERED') totalEarnings += 50;
+                if (o.status === 'RETURN_COMPLETED') totalEarnings += 30;
               }
             }
           }
@@ -406,6 +411,11 @@
       listDiv.innerHTML = tasks.map(o => {
         let mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.customer?.village + ', ' + (o.customer?.taluk || dboy.taluk))}`;
         let shopMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.shopName + ' ' + (o.shopLocation || dboy.taluk))}`;
+        let shopPhone = o.shopPhone || '8105010768';
+
+        let payBadge = o.paymentMode === 'COD' ? 
+          `<span class="pay-badge pay-cod">💵 COD (Cash on Delivery - ₹${o.totalPrice} ಪಡೆಯಿರಿ)</span>` : 
+          `<span class="pay-badge pay-upi">✔ UPI Online Paid (ದುಡ್ಡು ಪಡೆಯಬೇಡಿ)</span>`;
 
         if (!o.pickupOtp) o.pickupOtp = Math.floor(1000 + Math.random() * 9000).toString();
         if (!o.deliveryOtp) o.deliveryOtp = Math.floor(1000 + Math.random() * 9000).toString();
@@ -416,7 +426,6 @@
             <div style="background:#fff3e0; border:1px solid #ffe0b2; border-radius:6px; padding:6px; margin-bottom:8px; text-align:center;">
               <span style="font-size:0.7rem; color:#e65100; font-weight:bold;">📷 ಆರ್ಡರ್ ಐಡಿ (Order ID):</span>
               <div style="font-size:0.95rem; font-weight:bold; color:#bf360c; letter-spacing:1px;">${o.orderId || 'OD000000'}</div>
-              <div style="font-size:0.75rem; color:#333; margin-top:2px;"><b>ಅಂಗಡಿ ಒಟಿಪಿ (Pickup OTP):</b> <span style="color:#d32f2f; font-weight:bold;">${o.pickupOtp}</span></div>
             </div>
             
             <div style="margin-top:10px; background:#fff3e0; padding:10px; border-radius:8px; border:1px solid #ffe0b2;">
@@ -448,26 +457,41 @@
         return `
           <div class="order-item">
             ${stepBoxHTML}
+            
             <div style="display:flex; gap:10px; align-items:center; margin-top:8px;">
               <img src="${o.productPhoto}" style="width:60px; height:60px; object-fit:cover; border-radius:6px;">
               <div>
                 <h4 style="font-size:0.9rem;">${o.productName}</h4>
                 <p style="font-size:0.8rem; color:#2e7d32; font-weight:bold;">₹${o.totalPrice} (ಡೆಲಿವರಿ ಚಾರ್ಜ್: ₹50)</p>
+                <div>${payBadge}</div>
               </div>
             </div>
-            <p style="margin-top:6px;"><b>ಅಂಗಡಿ:</b> ${o.shopName || 'Store'} (${o.shopLocation || 'ಶಹಾಪುರ'})</p>
-            <a href="${shopMapsUrl}" target="_blank" style="display:block; background:#e65100; color:#fff; text-align:center; padding:5px; border-radius:4px; text-decoration:none; font-size:0.75rem; font-weight:bold; margin:4px 0;">📍 ಅಂಗಡಿ ಲೊಕೇಶನ್ (Pickup)</a>
+
+            <div style="background:#fff; padding:8px; border-radius:6px; border:1px solid #ddd; margin-top:8px;">
+              <p><b>ಅಂಗಡಿ:</b> ${o.shopName || 'Store'} (${o.shopLocation || dboy.taluk})</p>
+              <p style="font-size:0.75rem; color:#555;">📱 ಫೋನ್: ${shopPhone}</p>
+              <div style="display:flex; gap:6px; margin-top:4px;">
+                <a href="tel:${shopPhone}" class="btn-shop-call">📞 ಅಂಗಡಿಗೆ ಕಾಲ್ ಮಾಡಿ</a>
+                <a href="${shopMapsUrl}" target="_blank" style="flex:1; background:#e65100; color:#fff; text-align:center; padding:6px; border-radius:4px; text-decoration:none; font-size:0.75rem; font-weight:bold;">📍 ಅಂಗಡಿ ಲೊಕೇಶನ್</a>
+              </div>
+            </div>
+
             <hr style="margin:8px 0; border:0; border-top:1px solid #ddd;">
-            <p><b>ಗ್ರಾಹಕರು:</b> ${o.customer?.name} (${o.customer?.phone})</p>
-            <a href="tel:${o.customer?.phone}" class="btn-call">📞 ಗ್ರಾಹಕರಿಗೆ ಕಾಲ್ ಮಾಡಿ</a>
-            <p style="margin-top:4px;"><b>ವಿಳಾಸ:</b> ${o.customer?.village}, ${o.customer?.taluk || dboy.taluk}</p>
-            <a href="${mapsUrl}" target="_blank" style="display:block; background:#1976d2; color:#fff; text-align:center; padding:5px; border-radius:4px; text-decoration:none; font-size:0.75rem; font-weight:bold; margin-top:6px; margin-bottom:8px;">🗺️ ಗ್ರಾಹಕರ ವಿಳಾಸ ಮ್ಯಾಪ್ (Delivery)</a>
+
+            <div style="background:#fff; padding:8px; border-radius:6px; border:1px solid #ddd;">
+              <p><b>ಗ್ರಾಹಕರು:</b> ${o.customer?.name} (${o.customer?.phone})</p>
+              <p style="margin-top:2px;"><b>ವಿಳಾಸ:</b> ${o.customer?.village}, ${o.customer?.taluk || dboy.taluk}</p>
+              <div style="display:flex; gap:6px; margin-top:4px;">
+                <a href="tel:${o.customer?.phone}" class="btn-call">📞 ಗ್ರಾಹಕರಿಗೆ ಕಾಲ್ ಮಾಡಿ</a>
+                <a href="${mapsUrl}" target="_blank" style="flex:1; background:#1976d2; color:#fff; text-align:center; padding:6px; border-radius:4px; text-decoration:none; font-size:0.75rem; font-weight:bold;">🗺️ ಗ್ರಾಹಕರ ಮ್ಯಾಪ್</a>
+              </div>
+            </div>
           </div>
         `;
       }).join('');
     }
 
-    // 2. Return Tasks Rendering (Reverse Process with Customer Details First, then Shop Details)
+    // 2. Return Tasks Rendering with Shop Owner Call Button & Payment Mode
     function renderReturnTasks(returnTasks) {
       const listDiv = document.getElementById('dboyReturnTasksList');
       if (returnTasks.length === 0) {
@@ -478,25 +502,31 @@
       listDiv.innerHTML = returnTasks.map(o => {
         let mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.customer?.village + ', ' + (o.customer?.taluk || dboy.taluk))}`;
         let shopMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.shopName + ' ' + (o.shopLocation || dboy.taluk))}`;
+        let shopPhone = o.shopPhone || '8105010768';
+
+        let payBadge = o.paymentMode === 'COD' ? 
+          `<span class="pay-badge pay-cod">💵 COD Order Return</span>` : 
+          `<span class="pay-badge pay-upi">✔ UPI Online Return</span>`;
 
         if (!o.returnPickupOtp) o.returnPickupOtp = Math.floor(1000 + Math.random() * 9000).toString();
         if (!o.returnDeliveryOtp) o.returnDeliveryOtp = Math.floor(1000 + Math.random() * 9000).toString();
 
         let returnStepHtml = '';
         if (!o.isReturnPickedUp) {
-          // STEP 1: Customer Pickup (Reverse Order)
+          // STEP 1: Customer Pickup
           returnStepHtml = `
             <div style="background:#ffebee; border:1px solid #ffcdd2; border-radius:6px; padding:8px; margin-bottom:8px; text-align:center;">
               <span style="font-size:0.75rem; color:#c62828; font-weight:bold;">🔄 ರಿಟರ್ನ್ ಆರ್ಡರ್ ಐಡಿ: ${o.orderId || 'OD0000'}</span>
-              <div style="font-size:0.8rem; color:#333; margin-top:2px;"><b>ಗ್ರಾಹಕರ ರಿಟರ್ನ್ ಒಟಿಪಿ:</b> <span style="color:#d32f2f; font-weight:bold;">${o.returnPickupOtp}</span></div>
             </div>
 
             <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #ddd; margin-bottom:10px;">
               <h4 style="font-size:0.85rem; color:var(--danger); margin-bottom:4px;">1. ಗ್ರಾಹಕರ ವಿವರಗಳು (Pickup from Customer):</h4>
               <p><b>ಹೆಸರು:</b> ${o.customer?.name} (${o.customer?.phone})</p>
-              <a href="tel:${o.customer?.phone}" class="btn-call">📞 ಗ್ರಾಹಕರಿಗೆ ಕಾಲ್ ಮಾಡಿ</a>
-              <p style="margin-top:4px;"><b>ವಿಳಾಸ:</b> ${o.customer?.village}, ${o.customer?.taluk || dboy.taluk} - ${o.customer?.pincode}</p>
-              <a href="${mapsUrl}" target="_blank" style="display:block; background:#1976d2; color:#fff; text-align:center; padding:5px; border-radius:4px; text-decoration:none; font-size:0.75rem; font-weight:bold; margin-top:4px;">🗺️ ಗ್ರಾಹಕರ ಜಿಪಿಎಸ್ ಮ್ಯಾಪ್</a>
+              <p style="margin-top:2px;"><b>ವಿಳಾಸ:</b> ${o.customer?.village}, ${o.customer?.taluk || dboy.taluk} - ${o.customer?.pincode}</p>
+              <div style="display:flex; gap:6px; margin-top:4px;">
+                <a href="tel:${o.customer?.phone}" class="btn-call">📞 ಗ್ರಾಹಕರಿಗೆ ಕಾಲ್ ಮಾಡಿ</a>
+                <a href="${mapsUrl}" target="_blank" style="flex:1; background:#1976d2; color:#fff; text-align:center; padding:6px; border-radius:4px; text-decoration:none; font-size:0.75rem; font-weight:bold;">🗺️ ಗ್ರಾಹಕರ ಜಿಪಿಎಸ್ ಮ್ಯಾಪ್</a>
+              </div>
             </div>
 
             <div style="background:#ffebee; padding:10px; border-radius:8px; border:1px solid #ffcdd2;">
@@ -508,18 +538,22 @@
             </div>
           `;
         } else {
-          // STEP 2: Deliver to Shop Owner (Reverse Order)
+          // STEP 2: Deliver to Shop Owner with CALL & GPS BUTTON
           returnStepHtml = `
             <div style="background:#e8f5e9; border:1px solid #c8e6c9; border-radius:6px; padding:8px; margin-bottom:8px; text-align:center;">
               <span style="font-size:0.75rem; color:#2e7d32; font-weight:bold;">✔ ಗ್ರಾಹಕರಿಂದ ರಿಟರ್ನ್ ಪಿಕ್ ಅಪ್ ಯಶಸ್ವಿಯಾಗಿದೆ</span>
-              <div style="font-size:0.8rem; color:#333; margin-top:2px;"><b>ಅಂಗಡಿ ಮಾಲೀಕರ ಒಟಿಪಿ:</b> <span style="color:#2e7d32; font-weight:bold;">${o.returnDeliveryOtp}</span></div>
             </div>
 
             <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #ddd; margin-bottom:10px;">
               <h4 style="font-size:0.85rem; color:var(--success); margin-bottom:4px;">2. ಅಂಗಡಿ ಮಾಲೀಕರ ವಿವರಗಳು (Deliver to Shop):</h4>
               <p><b>ಅಂಗಡಿ ಹೆಸರು:</b> ${o.shopName || 'Store'}</p>
               <p><b>ಸ್ಥಳ / ವಿಳಾಸ:</b> ${o.shopLocation || dboy.taluk}</p>
-              <a href="${shopMapsUrl}" target="_blank" style="display:block; background:#e65100; color:#fff; text-align:center; padding:5px; border-radius:4px; text-decoration:none; font-size:0.75rem; font-weight:bold; margin-top:4px;">📍 ಅಂಗಡಿ ಜಿಪಿಎಸ್ ಲೊಕೇಶನ್</a>
+              <p style="font-size:0.75rem; color:#555; margin-top:2px;">📱 ಫೋನ್: ${shopPhone}</p>
+              
+              <div style="display:flex; gap:6px; margin-top:6px;">
+                <a href="tel:${shopPhone}" class="btn-shop-call">📞 ಅಂಗಡಿಗೆ ಕಾಲ್ ಮಾಡಿ</a>
+                <a href="${shopMapsUrl}" target="_blank" style="flex:1; background:#e65100; color:#fff; text-align:center; padding:6px; border-radius:4px; text-decoration:none; font-size:0.75rem; font-weight:bold;">📍 ಅಂಗಡಿ ಜಿಪಿಎಸ್ ಲೊಕೇಶನ್</a>
+              </div>
             </div>
 
             <div style="background:#e8f5e9; padding:10px; border-radius:8px; border:1px solid #c8e6c9;">
@@ -540,6 +574,7 @@
               <div>
                 <h4 style="font-size:0.9rem;">${o.productName}</h4>
                 <p style="font-size:0.8rem; color:var(--danger); font-weight:bold;">ಕಾರಣ: ${o.returnReason || 'Size/Quality Issue'} (ರಿಟರ್ನ್ ಚಾರ್ಜ್: ₹30)</p>
+                <div>${payBadge}</div>
               </div>
             </div>
           </div>
@@ -555,9 +590,10 @@
       }
       listDiv.innerHTML = history.map(o => {
         let isReturn = o.status === 'RETURN_COMPLETED';
+        let payBadge = o.paymentMode === 'COD' ? `(COD Order)` : `(UPI Paid)`;
         return `
           <div class="order-item" style="border-left-color: ${isReturn ? 'var(--danger)' : 'var(--success)'};">
-            <p><b>${o.productName}</b> - ₹${o.totalPrice}</p>
+            <p><b>${o.productName}</b> - ₹${o.totalPrice} <span style="font-size:0.75rem; color:#666;">${payBadge}</span></p>
             <p style="font-size:0.75rem; color:#555;">ಗ್ರಾಹಕರು: ${o.customer?.name} | ವಿಳಾಸ: ${o.customer?.village}</p>
             <p style="font-size:0.75rem; color:${isReturn ? 'var(--danger)' : 'var(--success)'}; font-weight:bold; margin-top:2px;">
               ${isReturn ? '✔ ರಿಟರ್ನ್ ಯಶಸ್ವಿಯಾಗಿ ಅಂಗಡಿಗೆ ತಲುಪಿದೆ (+₹30)' : '✔ ಡೆಲಿವರಿ ಯಶಸ್ವಿಯಾಗಿದೆ (+₹50)'}
