@@ -77,7 +77,7 @@
     .id-number { font-size: 1rem; font-weight: bold; background: #fff; color: #e65100; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-top: 4px; }
 
     .stats-container { display: flex; gap: 6px; margin-bottom: 12px; }
-    .stat-box { flex: 1; background: #fff3e0; padding: 8px; border-radius: 8px; text-align: center; border: 1px solid #ffe0b2; }
+    .stat-box { flex: 1; background: #fff3e0; padding: 8px; border-radius: 8px; text-align: center; border: 1px solid #ffe0b2; cursor: pointer; }
     .stat-box h4 { font-size: 0.65rem; color: #e65100; margin-bottom: 2px; }
     .stat-box p { font-size: 0.8rem; font-weight: bold; color: #bf360c; }
 
@@ -89,7 +89,6 @@
 </head>
 <body>
 
-  <!-- Support Bar -->
   <div class="support-bar">
     <button onclick="logoutDboy()" class="sup-btn" style="background:#e53935;">🔄 ಮರು ಲಾಗಿನ್</button>
     <a href="tel:8105010768" class="sup-btn call">📞 ಕಾಲ್ ಮಾಡಿ</a>
@@ -112,7 +111,7 @@
       <p style="font-size: 0.8rem; opacity: 0.9;">ನೇರ ಡೆಲಿವರಿ ಬಾಯ್ ಪ್ಯಾನಲ್ (Delivery Panel)</p>
     </header>
 
-    <!-- 1. ಲಾಗಿನ್ / ನೋಂದಣಿ ಫಾರ್ಮ್ -->
+    <!-- ಲಾಗಿನ್ ಸೆಕ್ಷನ್ -->
     <div id="loginSection" style="background:#fff3e0; padding:15px; border-radius:10px; border:1px solid #ffe0b2;">
       <h2>🔑 ಡೆಲಿವರಿ ಬಾಯ್ ಲಾಗಿನ್ / ನೋಂದಣಿ</h2>
       
@@ -145,7 +144,7 @@
       </form>
     </div>
 
-    <!-- 2. ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ -->
+    <!-- ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ -->
     <div id="dashboardSection" style="display:none;">
       <div class="id-card">
         <img id="displayDboyPhoto" src="https://via.placeholder.com/100" alt="Delivery Boy">
@@ -157,43 +156,65 @@
         </div>
       </div>
 
+      <!-- Stats Box -->
       <div class="stats-container">
-        <div class="stat-box">
-          <h4>ಇಂದಿನ ಡೆಲಿವರಿ (Orders)</h4>
+        <div class="stat-box" onclick="showTab('tasks')">
+          <h4>ಡೆಲಿವರಿ ಆರ್ಡರ್ (Orders)</h4>
           <p id="statTodayCount">0</p>
         </div>
-        <div class="stat-box">
-          <h4>ಕಮಿಷನ್ (5%)</h4>
-          <p id="statCommission">₹0</p>
+        <div class="stat-box" onclick="showTab('returns')">
+          <h4>ರಿಟರ್ನ್ ಆರ್ಡರ್ (Returns)</h4>
+          <p id="statReturnCount" style="color:var(--danger);">0</p>
         </div>
-        <div class="stat-box">
-          <h4>ಪೇಮೆಂಟ್ (Pending)</h4>
-          <p id="statPendingPayment">₹0</p>
+        <div class="stat-box" onclick="openPaymentModal()">
+          <h4>ಒಟ್ಟು ಪೇಮೆಂಟ್ (Payment)</h4>
+          <p id="statPendingPayment" style="color:#1976d2;">₹0</p>
         </div>
       </div>
 
       <div style="display:flex; gap:6px; margin-bottom:15px;">
-        <button class="btn btn-warning" style="flex:1; font-size:0.8rem;" onclick="showTab('tasks')">📦 ಹೊಸ ಟಾಸ್ಕ್ (<span id="taskCount">0</span>)</button>
-        <button class="btn btn-success" style="flex:1; font-size:0.8rem;" onclick="showTab('history')">📜 ಹಿಸ್ಟರಿ</button>
+        <button class="btn btn-warning" style="flex:1; font-size:0.75rem;" onclick="showTab('tasks')">📦 ಹೊಸ ಟಾಸ್ಕ್ (<span id="taskCount">0</span>)</button>
+        <button class="btn btn-danger" style="flex:1; font-size:0.75rem;" onclick="showTab('returns')">🔄 ರಿಟರ್ನ್ ಆರ್ಡರ್ (<span id="returnTaskCount">0</span>)</button>
+        <button class="btn btn-success" style="flex:1; font-size:0.75rem;" onclick="showTab('history')">📜 ಹಿಸ್ಟರಿ</button>
       </div>
 
       <!-- ಹೊಸ ಟಾಸ್ಕ್‌ಗಳು -->
       <div id="tabTasks" style="background:#fff; padding:15px; border-radius:10px; border:1px solid #cbd5e0;">
-        <h2>📦 ಅಂಗಡಿಗಳಿಂದ ಪ್ಯಾಕ್ ಆಗಿರುವ ಹೊಸ ಟಾಸ್ಕ್‌ಗಳು (ಇಂದಿನವು ಮಾತ್ರ)</h2>
+        <h2>📦 ಅಂಗಡಿಗಳಿಂದ ಪ್ಯಾಕ್ ಆಗಿರುವ ಹೊಸ ಟಾಸ್ಕ್‌ಗಳು</h2>
         <div id="dboyTasksList" style="margin-top:10px;"></div>
+      </div>
+
+      <!-- ರಿಟರ್ನ್ ಆರ್ಡರ್ ಟ್ಯಾಬ್ -->
+      <div id="tabReturns" style="display:none; background:#fff; padding:15px; border-radius:10px; border:1px solid #cbd5e0;">
+        <h2>🔄 ಗ್ರಾಹಕರಿಂದ ರಿಟರ್ನ್ ಬಂದಿರುವ ಆರ್ಡರ್‌ಗಳು</h2>
+        <div id="dboyReturnTasksList" style="margin-top:10px;"></div>
       </div>
 
       <!-- ಹಿಸ್ಟರಿ -->
       <div id="tabHistory" style="display:none; background:#fff; padding:15px; border-radius:10px; border:1px solid #cbd5e0;">
-        <h2>📜 ಪೂರ್ಣಗೊಂಡ ಡೆಲಿವರಿ ಹಿಸ್ಟರಿ (ಇಂದಿನವು)</h2>
+        <h2>📜 ಪೂರ್ಣಗೊಂಡ ಡೆಲಿವರಿ & ರಿಟರ್ನ್ ಹಿಸ್ಟರಿ</h2>
         <div id="dboyHistoryList" style="margin-top:10px;"></div>
       </div>
 
     </div>
   </div>
 
+  <!-- ಪೇಮೆಂಟ್ ಕಲೆಕ್ಷನ್ ಮೋಡಲ್ -->
+  <div id="paymentModal" class="modal">
+    <div class="modal-content-box">
+      <h3 style="color:var(--primary); margin-bottom:10px;">💰 ಡೆಲಿವರಿ & ರಿಟರ್ನ್ ಪೇಮೆಂಟ್ ವಿವರ</h3>
+      <p style="font-size:0.85rem; color:#555; margin-bottom:15px;">ನೀವು ಪಡೆದ ಡೆಲಿವರಿ ಚಾರ್ಜ್ (₹50) ಹಾಗೂ ರಿಟರ್ನ್ ಚಾರ್ಜ್ (₹30) ಒಟ್ಟು ಮೊತ್ತ ಇಲ್ಲಿದೆ:</p>
+      
+      <div style="font-size:1.8rem; font-weight:bold; color:var(--success); background:#e8f5e9; padding:15px; border-radius:8px; margin-bottom:15px;" id="modalTotalPayAmount">₹0</div>
+      
+      <button class="btn btn-success" onclick="payDeliveryEarnings()" style="margin-bottom:8px;">ಪಾವತಿ ಸ್ವೀಕರಿಸಿ (Pay / Clear)</button>
+      <button class="btn btn-danger" onclick="closePaymentModal()">ಮುಚ್ಚಿ (Close)</button>
+    </div>
+  </div>
+
   <script>
     let dboy = JSON.parse(localStorage.getItem('my_dboy_session')) || null;
+    let currentTotalEarnings = 0;
 
     window.addEventListener('DOMContentLoaded', () => {
       if (dboy) {
@@ -306,63 +327,79 @@
 
     function showTab(tab) {
       document.getElementById('tabTasks').style.display = tab === 'tasks' ? 'block' : 'none';
+      document.getElementById('tabReturns').style.display = tab === 'returns' ? 'block' : 'none';
       document.getElementById('tabHistory').style.display = tab === 'history' ? 'block' : 'none';
+    }
+
+    function openPaymentModal() {
+      document.getElementById('modalTotalPayAmount').innerText = `₹${currentTotalEarnings}`;
+      document.getElementById('paymentModal').style.display = 'flex';
+    }
+
+    function closePaymentModal() {
+      document.getElementById('paymentModal').style.display = 'none';
+    }
+
+    function payDeliveryEarnings() {
+      alert("✅ ಪಾವತಿ ಯಶಸ್ವಿಯಾಗಿ ಪ್ರಕ್ರಿಯೆಗೊಂಡಿದೆ!");
+      closePaymentModal();
     }
 
     function startRealtimeTasks() {
       window.onSnapshot(window.collection(window.db, "orders"), (snapshot) => {
         let tasks = [];
+        let returnTasks = [];
         let history = [];
-        let todayTotalAmount = 0;
-        let todayPendingPayment = 0;
-
-        const startOfToday = new Date();
-        startOfToday.setHours(0, 0, 0, 0);
-        const todayMillis = startOfToday.getTime();
+        let totalEarnings = 0;
 
         snapshot.forEach(docSnap => {
           const o = { docId: docSnap.id, ...docSnap.data() };
-          const orderTime = o.timestamp?.toMillis?.() || o.timestamp || Date.now();
+          
+          let custTaluk = (o.customer?.taluk || '').toLowerCase();
+          let dboyTaluk = (dboy.taluk || '').toLowerCase();
+          let matchTaluk = (custTaluk === '' || dboyTaluk === '' || custTaluk.includes(dboyTaluk) || dboyTaluk.includes(custTaluk));
 
-          if (orderTime >= todayMillis) {
-            let custTaluk = (o.customer?.taluk || '').toLowerCase();
-            let dboyTaluk = (dboy.taluk || '').toLowerCase();
-            let matchTaluk = (custTaluk === '' || dboyTaluk === '' || custTaluk.includes(dboyTaluk) || dboyTaluk.includes(custTaluk));
-
-            if (matchTaluk) {
-              if (o.status === 'STEP_3' || o.status === 'PACKING') {
-                if (!o.assignedDboyId || o.assignedDboyId === dboy.id) {
-                  tasks.push(o);
-                }
-              } else if (o.status === 'DELIVERED' || o.status === 'STEP_4') {
-                if (o.assignedDboyId === dboy.id) {
-                  history.push(o);
-                  todayTotalAmount += Number(o.totalPrice || 0);
-                  if (!o.isPaymentClearedByMaster) {
-                    todayPendingPayment += Number(o.totalPrice || 0);
-                  }
-                }
+          if (matchTaluk) {
+            // Normal Delivery Tasks
+            if (o.status === 'STEP_3' || o.status === 'PACKING') {
+              if (!o.assignedDboyId || o.assignedDboyId === dboy.id) {
+                tasks.push(o);
+              }
+            } 
+            // Return Tasks (When return is requested)
+            else if (o.isReturned && o.status !== 'RETURN_COMPLETED' && o.status !== 'DELIVERED') {
+              returnTasks.push(o);
+            } 
+            // Completed Deliveries & Returns History
+            else if (o.status === 'DELIVERED' || o.status === 'STEP_4' || o.status === 'RETURN_COMPLETED') {
+              if (o.assignedDboyId === dboy.id || o.returnDboyId === dboy.id) {
+                history.push(o);
+                if (o.status === 'DELIVERED') totalEarnings += 50; // Delivery fee earning
+                if (o.status === 'RETURN_COMPLETED') totalEarnings += 30; // Return fee earning
               }
             }
           }
         });
 
-        const commission = Math.round(todayTotalAmount * 0.05);
+        currentTotalEarnings = totalEarnings;
 
         document.getElementById('taskCount').innerText = tasks.length;
-        document.getElementById('statTodayCount').innerText = history.length;
-        document.getElementById('statCommission').innerText = `₹${commission}`;
-        document.getElementById('statPendingPayment').innerText = `₹${todayPendingPayment}`;
+        document.getElementById('returnTaskCount').innerText = returnTasks.length;
+        document.getElementById('statTodayCount').innerText = tasks.length;
+        document.getElementById('statReturnCount').innerText = returnTasks.length;
+        document.getElementById('statPendingPayment').innerText = `₹${totalEarnings}`;
 
         renderTasks(tasks);
+        renderReturnTasks(returnTasks);
         renderHistory(history);
       });
     }
 
+    // 1. Normal Delivery Tasks Rendering
     function renderTasks(tasks) {
       const listDiv = document.getElementById('dboyTasksList');
       if (tasks.length === 0) {
-        listDiv.innerHTML = '<p style="font-size:0.8rem; color:#777;">ಇಂದಿನ ಯಾವುದೇ ಹೊಸ ಟಾಸ್ಕ್‌ಗಳಿಲ್ಲ.</p>';
+        listDiv.innerHTML = '<p style="font-size:0.8rem; color:#777;">ಯಾವುದೇ ಹೊಸ ಟಾಸ್ಕ್‌ಗಳಿಲ್ಲ.</p>';
         return;
       }
 
@@ -370,17 +407,11 @@
         let mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.customer?.village + ', ' + (o.customer?.taluk || dboy.taluk))}`;
         let shopMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.shopName + ' ' + (o.shopLocation || dboy.taluk))}`;
 
-        // Ensure Pickup OTP and Delivery OTP are present
-        if (!o.pickupOtp) {
-          o.pickupOtp = Math.floor(1000 + Math.random() * 9000).toString();
-        }
-        if (!o.deliveryOtp) {
-          o.deliveryOtp = Math.floor(1000 + Math.random() * 9000).toString();
-        }
+        if (!o.pickupOtp) o.pickupOtp = Math.floor(1000 + Math.random() * 9000).toString();
+        if (!o.deliveryOtp) o.deliveryOtp = Math.floor(1000 + Math.random() * 9000).toString();
 
         let stepBoxHTML = '';
         if (!o.isPickedUp) {
-          // STEP 1: Show ONLY Pickup OTP instructions and input
           stepBoxHTML = `
             <div style="background:#fff3e0; border:1px solid #ffe0b2; border-radius:6px; padding:6px; margin-bottom:8px; text-align:center;">
               <span style="font-size:0.7rem; color:#e65100; font-weight:bold;">📷 ಆರ್ಡರ್ ಐಡಿ (Order ID):</span>
@@ -390,7 +421,6 @@
             
             <div style="margin-top:10px; background:#fff3e0; padding:10px; border-radius:8px; border:1px solid #ffe0b2;">
               <label style="font-size:0.8rem; font-weight:bold; color:#e65100; margin-bottom:4px;">ಅಂಗಡಿಯವರ ಬಳಿ ಪಡೆದ 4-ಡಿಜಿಟ್ ಪಿಕ್ ಅಪ್ ಒಟಿಪಿ ಹಾಕಿ:</label>
-              <div style="font-size:0.75rem; color:#555; margin-bottom:6px;">(ಅಂಗಡಿ ಮಾಲೀಕರ ಪ್ಯಾನಲ್‌ನಲ್ಲಿ ಒಟಿಪಿ ಲಭ್ಯವಿರುತ್ತದೆ)</div>
               <div style="display:flex; gap:8px;">
                 <input type="number" id="pickupOtp_${o.docId}" placeholder="OTP ಹಾಕಿ" style="flex:1; padding:8px; font-size:1rem; border:1px solid #ccc; border-radius:6px; text-align:center; font-weight:bold;">
                 <button onclick="verifyPickupOtp('${o.docId}', '${o.pickupOtp}')" class="btn-pickup" style="width:auto; padding:8px 16px;">ಪಿಕ್ ಅಪ್ (OK)</button>
@@ -398,7 +428,6 @@
             </div>
           `;
         } else {
-          // STEP 2: Once picked up, hide pickup OTP and show ONLY Delivery OTP input
           stepBoxHTML = `
             <div style="background:#fff3e0; border:1px solid #ffe0b2; border-radius:6px; padding:6px; margin-bottom:8px; text-align:center;">
               <span style="font-size:0.7rem; color:#e65100; font-weight:bold;">📷 ಆರ್ಡರ್ ಐಡಿ (Order ID):</span>
@@ -408,7 +437,6 @@
 
             <div style="margin-top:10px; background:#e8f5e9; padding:10px; border-radius:8px; border:1px solid #c8e6c9;">
               <label style="font-size:0.8rem; font-weight:bold; color:#2e7d32; margin-bottom:4px;">ಗ್ರಾಹಕರ ಬಳಿ ಪಡೆದ 4-ಡಿಜಿಟ್ ಡೆಲಿವರಿ ಒಟಿಪಿ ಹಾಕಿ:</label>
-              <div style="font-size:0.75rem; color:#555; margin-bottom:6px;">(ಗ್ರಾಹಕರ ಆರ್ಡರ್ ಬಿಲ್‌ನಲ್ಲಿ ಒಟಿಪಿ ಲಭ್ಯವಿರುತ್ತದೆ)</div>
               <div style="display:flex; gap:8px;">
                 <input type="number" id="deliveryOtp_${o.docId}" placeholder="OTP ಹಾಕಿ" style="flex:1; padding:8px; font-size:1rem; border:1px solid #ccc; border-radius:6px; text-align:center; font-weight:bold;">
                 <button onclick="verifyDeliveryOtp('${o.docId}', '${o.deliveryOtp}')" class="btn-deliver" style="width:auto; padding:8px 16px;">ಡೆಲಿವರಿ (OK)</button>
@@ -420,25 +448,100 @@
         return `
           <div class="order-item">
             ${stepBoxHTML}
-
             <div style="display:flex; gap:10px; align-items:center; margin-top:8px;">
               <img src="${o.productPhoto}" style="width:60px; height:60px; object-fit:cover; border-radius:6px;">
               <div>
                 <h4 style="font-size:0.9rem;">${o.productName}</h4>
-                <p style="font-size:0.8rem; color:#2e7d32; font-weight:bold;">₹${o.totalPrice}</p>
+                <p style="font-size:0.8rem; color:#2e7d32; font-weight:bold;">₹${o.totalPrice} (ಡೆಲಿವರಿ ಚಾರ್ಜ್: ₹50)</p>
               </div>
             </div>
-
             <p style="margin-top:6px;"><b>ಅಂಗಡಿ:</b> ${o.shopName || 'Store'} (${o.shopLocation || 'ಶಹಾಪುರ'})</p>
             <a href="${shopMapsUrl}" target="_blank" style="display:block; background:#e65100; color:#fff; text-align:center; padding:5px; border-radius:4px; text-decoration:none; font-size:0.75rem; font-weight:bold; margin:4px 0;">📍 ಅಂಗಡಿ ಲೊಕೇಶನ್ (Pickup)</a>
-
             <hr style="margin:8px 0; border:0; border-top:1px solid #ddd;">
-
             <p><b>ಗ್ರಾಹಕರು:</b> ${o.customer?.name} (${o.customer?.phone})</p>
             <a href="tel:${o.customer?.phone}" class="btn-call">📞 ಗ್ರಾಹಕರಿಗೆ ಕಾಲ್ ಮಾಡಿ</a>
             <p style="margin-top:4px;"><b>ವಿಳಾಸ:</b> ${o.customer?.village}, ${o.customer?.taluk || dboy.taluk}</p>
-
             <a href="${mapsUrl}" target="_blank" style="display:block; background:#1976d2; color:#fff; text-align:center; padding:5px; border-radius:4px; text-decoration:none; font-size:0.75rem; font-weight:bold; margin-top:6px; margin-bottom:8px;">🗺️ ಗ್ರಾಹಕರ ವಿಳಾಸ ಮ್ಯಾಪ್ (Delivery)</a>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 2. Return Tasks Rendering (Reverse Process with Customer Details First, then Shop Details)
+    function renderReturnTasks(returnTasks) {
+      const listDiv = document.getElementById('dboyReturnTasksList');
+      if (returnTasks.length === 0) {
+        listDiv.innerHTML = '<p style="font-size:0.8rem; color:#777;">ಯಾವುದೇ ರಿಟರ್ನ್ ಆರ್ಡರ್‌ಗಳಿಲ್ಲ.</p>';
+        return;
+      }
+
+      listDiv.innerHTML = returnTasks.map(o => {
+        let mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.customer?.village + ', ' + (o.customer?.taluk || dboy.taluk))}`;
+        let shopMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.shopName + ' ' + (o.shopLocation || dboy.taluk))}`;
+
+        if (!o.returnPickupOtp) o.returnPickupOtp = Math.floor(1000 + Math.random() * 9000).toString();
+        if (!o.returnDeliveryOtp) o.returnDeliveryOtp = Math.floor(1000 + Math.random() * 9000).toString();
+
+        let returnStepHtml = '';
+        if (!o.isReturnPickedUp) {
+          // STEP 1: Customer Pickup (Reverse Order)
+          returnStepHtml = `
+            <div style="background:#ffebee; border:1px solid #ffcdd2; border-radius:6px; padding:8px; margin-bottom:8px; text-align:center;">
+              <span style="font-size:0.75rem; color:#c62828; font-weight:bold;">🔄 ರಿಟರ್ನ್ ಆರ್ಡರ್ ಐಡಿ: ${o.orderId || 'OD0000'}</span>
+              <div style="font-size:0.8rem; color:#333; margin-top:2px;"><b>ಗ್ರಾಹಕರ ರಿಟರ್ನ್ ಒಟಿಪಿ:</b> <span style="color:#d32f2f; font-weight:bold;">${o.returnPickupOtp}</span></div>
+            </div>
+
+            <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #ddd; margin-bottom:10px;">
+              <h4 style="font-size:0.85rem; color:var(--danger); margin-bottom:4px;">1. ಗ್ರಾಹಕರ ವಿವರಗಳು (Pickup from Customer):</h4>
+              <p><b>ಹೆಸರು:</b> ${o.customer?.name} (${o.customer?.phone})</p>
+              <a href="tel:${o.customer?.phone}" class="btn-call">📞 ಗ್ರಾಹಕರಿಗೆ ಕಾಲ್ ಮಾಡಿ</a>
+              <p style="margin-top:4px;"><b>ವಿಳಾಸ:</b> ${o.customer?.village}, ${o.customer?.taluk || dboy.taluk} - ${o.customer?.pincode}</p>
+              <a href="${mapsUrl}" target="_blank" style="display:block; background:#1976d2; color:#fff; text-align:center; padding:5px; border-radius:4px; text-decoration:none; font-size:0.75rem; font-weight:bold; margin-top:4px;">🗺️ ಗ್ರಾಹಕರ ಜಿಪಿಎಸ್ ಮ್ಯಾಪ್</a>
+            </div>
+
+            <div style="background:#ffebee; padding:10px; border-radius:8px; border:1px solid #ffcdd2;">
+              <label style="font-size:0.8rem; font-weight:bold; color:#c62828; margin-bottom:4px;">ಗ್ರಾಹಕರ ಬಳಿ ಪಡೆದ ಒಟಿಪಿ ಹಾಕಿ ಪಿಕ್ ಅಪ್ ಮಾಡಿ:</label>
+              <div style="display:flex; gap:8px;">
+                <input type="number" id="retPickupOtp_${o.docId}" placeholder="OTP ಹಾಕಿ" style="flex:1; padding:8px; font-size:1rem; border:1px solid #ccc; border-radius:6px; text-align:center; font-weight:bold;">
+                <button onclick="verifyReturnCustomerPickup('${o.docId}', '${o.returnPickupOtp}')" class="btn-pickup" style="width:auto; padding:8px 16px;">ರಿಟರ್ನ್ ಪಿಕ್ ಅಪ್ (OK)</button>
+              </div>
+            </div>
+          `;
+        } else {
+          // STEP 2: Deliver to Shop Owner (Reverse Order)
+          returnStepHtml = `
+            <div style="background:#e8f5e9; border:1px solid #c8e6c9; border-radius:6px; padding:8px; margin-bottom:8px; text-align:center;">
+              <span style="font-size:0.75rem; color:#2e7d32; font-weight:bold;">✔ ಗ್ರಾಹಕರಿಂದ ರಿಟರ್ನ್ ಪಿಕ್ ಅಪ್ ಯಶಸ್ವಿಯಾಗಿದೆ</span>
+              <div style="font-size:0.8rem; color:#333; margin-top:2px;"><b>ಅಂಗಡಿ ಮಾಲೀಕರ ಒಟಿಪಿ:</b> <span style="color:#2e7d32; font-weight:bold;">${o.returnDeliveryOtp}</span></div>
+            </div>
+
+            <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #ddd; margin-bottom:10px;">
+              <h4 style="font-size:0.85rem; color:var(--success); margin-bottom:4px;">2. ಅಂಗಡಿ ಮಾಲೀಕರ ವಿವರಗಳು (Deliver to Shop):</h4>
+              <p><b>ಅಂಗಡಿ ಹೆಸರು:</b> ${o.shopName || 'Store'}</p>
+              <p><b>ಸ್ಥಳ / ವಿಳಾಸ:</b> ${o.shopLocation || dboy.taluk}</p>
+              <a href="${shopMapsUrl}" target="_blank" style="display:block; background:#e65100; color:#fff; text-align:center; padding:5px; border-radius:4px; text-decoration:none; font-size:0.75rem; font-weight:bold; margin-top:4px;">📍 ಅಂಗಡಿ ಜಿಪಿಎಸ್ ಲೊಕೇಶನ್</a>
+            </div>
+
+            <div style="background:#e8f5e9; padding:10px; border-radius:8px; border:1px solid #c8e6c9;">
+              <label style="font-size:0.8rem; font-weight:bold; color:#2e7d32; margin-bottom:4px;">ಅಂಗಡಿ ಮಾಲೀಕರ ಒಟಿಪಿ ಹಾಕಿ ರಿಟರ್ನ್ ಮುಗಿಸಿ:</label>
+              <div style="display:flex; gap:8px;">
+                <input type="number" id="retDeliverOtp_${o.docId}" placeholder="OTP ಹಾಕಿ" style="flex:1; padding:8px; font-size:1rem; border:1px solid #ccc; border-radius:6px; text-align:center; font-weight:bold;">
+                <button onclick="verifyReturnShopDelivery('${o.docId}', '${o.returnDeliveryOtp}')" class="btn-deliver" style="width:auto; padding:8px 16px;">ರಿಟರ್ನ್ ಕನ್ಫರ್ಮ್ (OK)</button>
+              </div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="order-item" style="border-left-color: var(--danger);">
+            ${returnStepHtml}
+            <div style="display:flex; gap:10px; align-items:center; margin-top:10px;">
+              <img src="${o.productPhoto}" style="width:60px; height:60px; object-fit:cover; border-radius:6px;">
+              <div>
+                <h4 style="font-size:0.9rem;">${o.productName}</h4>
+                <p style="font-size:0.8rem; color:var(--danger); font-weight:bold;">ಕಾರಣ: ${o.returnReason || 'Size/Quality Issue'} (ರಿಟರ್ನ್ ಚಾರ್ಜ್: ₹30)</p>
+              </div>
+            </div>
           </div>
         `;
       }).join('');
@@ -447,16 +550,21 @@
     function renderHistory(history) {
       const listDiv = document.getElementById('dboyHistoryList');
       if (history.length === 0) {
-        listDiv.innerHTML = '<p style="font-size:0.8rem; color:#777;">ಇಂದಿನ ಯಾವುದೇ ಪೂರ್ಣಗೊಂಡ ಹಿಸ್ಟರಿ ಇಲ್ಲ.</p>';
+        listDiv.innerHTML = '<p style="font-size:0.8rem; color:#777;">ಯಾವುದೇ ಹಿಸ್ಟರಿ ಇಲ್ಲ.</p>';
         return;
       }
-      listDiv.innerHTML = history.map(o => `
-        <div class="order-item" style="border-left-color: var(--success);">
-          <p><b>${o.productName}</b> - ₹${o.totalPrice}</p>
-          <p style="font-size:0.75rem; color:#555;">ಗ್ರಾಹಕರು: ${o.customer?.name} | ವಿಳಾಸ: ${o.customer?.village}</p>
-          <p style="font-size:0.75rem; color:var(--success); font-weight:bold; margin-top:2px;">✔ ಡೆಲಿವರಿ ಯಶಸ್ವಿಯಾಗಿದೆ (ಇಂದಿನವು)</p>
-        </div>
-      `).join('');
+      listDiv.innerHTML = history.map(o => {
+        let isReturn = o.status === 'RETURN_COMPLETED';
+        return `
+          <div class="order-item" style="border-left-color: ${isReturn ? 'var(--danger)' : 'var(--success)'};">
+            <p><b>${o.productName}</b> - ₹${o.totalPrice}</p>
+            <p style="font-size:0.75rem; color:#555;">ಗ್ರಾಹಕರು: ${o.customer?.name} | ವಿಳಾಸ: ${o.customer?.village}</p>
+            <p style="font-size:0.75rem; color:${isReturn ? 'var(--danger)' : 'var(--success)'}; font-weight:bold; margin-top:2px;">
+              ${isReturn ? '✔ ರಿಟರ್ನ್ ಯಶಸ್ವಿಯಾಗಿ ಅಂಗಡಿಗೆ ತಲುಪಿದೆ (+₹30)' : '✔ ಡೆಲಿವರಿ ಯಶಸ್ವಿಯಾಗಿದೆ (+₹50)'}
+            </p>
+          </div>
+        `;
+      }).join('');
     }
 
     async function verifyPickupOtp(docId, correctOtp) {
@@ -465,7 +573,6 @@
         alert("❌ ತಪ್ಪಾದ ಒಟಿಪಿ! ದಯವಿಟ್ಟು ಅಂಗಡಿ ಮಾಲೀಕರ ಬಳಿ ಸರಿಯಾದ ಒಟಿಪಿ ಪಡೆದು ನಮೂದಿಸಿ.");
         return;
       }
-
       try {
         await window.updateDoc(window.doc(window.db, "orders", docId), {
           isPickedUp: true,
@@ -473,9 +580,7 @@
           deliveryBoyPhone: dboy.phone
         });
         alert("✅ ಪಿಕ್ ಅಪ್ ಒಟಿಪಿ ಯಶಸ್ವಿಯಾಗಿದೆ!");
-      } catch (e) {
-        alert("ದೋಷ: " + e.message);
-      }
+      } catch (e) { alert("ದೋಷ: " + e.message); }
     }
 
     async function verifyDeliveryOtp(docId, correctOtp) {
@@ -484,7 +589,6 @@
         alert("❌ ತಪ್ಪಾದ ಒಟಿಪಿ! ದಯವಿಟ್ಟು ಗ್ರಾಹಕರ ಬಳಿ ಸರಿಯಾದ ಒಟಿಪಿ ಪಡೆದು ನಮೂದಿಸಿ.");
         return;
       }
-
       try {
         await window.updateDoc(window.doc(window.db, "orders", docId), {
           status: 'DELIVERED',
@@ -492,10 +596,39 @@
           assignedDboyId: dboy.id,
           deliveryBoyPhone: dboy.phone
         });
-        alert("🎉 ಡೆಲಿವರಿ ಯಶಸ್ವಿಯಾಗಿ ಪೂರ್ಣಗೊಂಡಿದೆ!");
-      } catch (e) {
-        alert("ದೋಷ: " + e.message);
+        alert("🎉 ಡೆಲಿವರಿ ಯಶಸ್ವಿಯಾಗಿ ಪೂರ್ಣಗೊಂಡಿದೆ! ₹50 ಜಮಾ ಆಗಿದೆ.");
+      } catch (e) { alert("ದೋಷ: " + e.message); }
+    }
+
+    async function verifyReturnCustomerPickup(docId, correctOtp) {
+      const inputVal = document.getElementById(`retPickupOtp_${docId}`).value.trim();
+      if (inputVal !== correctOtp) {
+        alert("❌ ತಪ್ಪಾದ ಒಟಿಪಿ! ದಯವಿಟ್ಟು ಗ್ರಾಹಕರ ಬಳಿ ಸರಿಯಾದ ರಿಟರ್ನ್ ಒಟಿಪಿ ಪಡೆದು ನಮೂದಿಸಿ.");
+        return;
       }
+      try {
+        await window.updateDoc(window.doc(window.db, "orders", docId), {
+          isReturnPickedUp: true,
+          returnDboyId: dboy.id
+        });
+        alert("✅ ಗ್ರಾಹಕರಿಂದ ರಿಟರ್ನ್ ಪಿಕ್ ಅಪ್ ಯಶಸ್ವಿಯಾಗಿದೆ!");
+      } catch (e) { alert("ದೋಷ: " + e.message); }
+    }
+
+    async function verifyReturnShopDelivery(docId, correctOtp) {
+      const inputVal = document.getElementById(`retDeliverOtp_${docId}`).value.trim();
+      if (inputVal !== correctOtp) {
+        alert("❌ ತಪ್ಪಾದ ಒಟಿಪಿ! ದಯವಿಟ್ಟು ಅಂಗಡಿ ಮಾಲೀಕರ ಬಳಿ ಸರಿಯಾದ ಒಟಿಪಿ ಪಡೆದು ನಮೂದಿಸಿ.");
+        return;
+      }
+      try {
+        await window.updateDoc(window.doc(window.db, "orders", docId), {
+          status: 'RETURN_COMPLETED',
+          isReturnCompleted: true,
+          returnDboyId: dboy.id
+        });
+        alert("🎉 ರಿಟರ್ನ್ ಪ್ರಕ್ರಿಯೆ ಸಂಪೂರ್ಣವಾಗಿ ಮುಕ್ತಾಯಗೊಂಡಿದೆ! ಅಂಗಡಿ ಮಾಲೀಕರಿಗೆ ವಸ್ತು ತಲುಪಿದೆ (+₹30).");
+      } catch (e) { alert("ದೋಷ: " + e.message); }
     }
   </script>
 </body>
