@@ -90,9 +90,21 @@
 
     .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); text-align: center; padding: 20px; overflow-y: auto; justify-content: center; align-items: center; }
     .modal-content-box { background: #fff; max-width: 380px; margin: auto; padding: 25px; border-radius: 14px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
+
+    /* Server Down / Maintenance Overlay */
+    #serverDownOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 99999; display: none; justify-content: center; align-items: center; padding: 20px; text-align: center; color: white; }
   </style>
 </head>
 <body>
+
+  <!-- Server Down / Maintenance Overlay -->
+  <div id="serverDownOverlay">
+    <div style="background:#fff; color:#333; padding:25px; border-radius:12px; max-width:350px; width:100%;">
+      <div style="font-size:3rem; margin-bottom:10px;">⚠️</div>
+      <h3 style="color:#d32f2f; margin-bottom:8px;">ಸರ್ವರ್ ತಾತ್ಕಾಲಿಕವಾಗಿ ಬಂದ್ ಆಗಿದೆ</h3>
+      <p style="font-size:0.85rem; color:#666; line-height:1.4;" id="serverDownMsg">ಮಾಸ್ಟರ್ ಪ್ಯಾನಲ್‌ನಿಂದ ಸಿಸ್ಟಮ್ ಆಫ್ ಮಾಡಲಾಗಿದೆ ಅಥವಾ ನಿಮ್ಮ ಖಾತೆಯನ್ನು ತೆಗೆದುಹಾಕಲಾಗಿದೆ. ದಯವಿಟ್ಟು ಮಾಸ್ಟರ್ ಅನ್ನು ಸಂಪರ್ಕಿಸಿ.</p>
+    </div>
+  </div>
 
   <div class="support-bar">
     <button onclick="logoutDboy()" class="sup-btn" style="background:#e53935;">🔄 ಮರು ಲಾಗಿನ್</button>
@@ -222,11 +234,9 @@
     let currentTotalEarnings = 0;
 
     window.addEventListener('DOMContentLoaded', () => {
+      checkAppLiveStatus();
       if (dboy) {
-        renderIDCard();
-        document.getElementById('loginSection').style.display = 'none';
-        document.getElementById('dashboardSection').style.display = 'block';
-        startRealtimeTasks();
+        verifyDboyExistsInFirebase();
       }
 
       window.history.pushState({ page: 'home' }, '', '');
@@ -234,6 +244,49 @@
         window.history.pushState({ page: 'home' }, '', '');
       });
     });
+
+    // 1. ಮಾಸ್ಟರ್ ಪ್ಯಾನಲ್ ಆನ್/ಆಫ್ ಸ್ಟೇಟಸ್ ಚೆಕ್ ಮಾಡುವುದು
+    function checkAppLiveStatus() {
+      window.onSnapshot(window.doc(window.db, "settings", "instapp_control"), (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.isOnline === false) {
+            document.getElementById('serverDownMsg').innerText = "ಮಾಸ್ಟರ್ ಪ್ಯಾನಲ್‌ನಿಂದ ಇನ್‌ಸ್ಟಾಪ್ ಸಿಸ್ಟಮ್ ಅನ್ನು ಬಂದ್ (OFF) ಮಾಡಲಾಗಿದೆ. ದಯವಿಟ್ಟು ನಂತರ ಪ್ರಯತ್ನಿಸಿ.";
+            document.getElementById('serverDownOverlay').style.display = 'flex';
+          } else {
+            document.getElementById('serverDownOverlay').style.display = 'none';
+          }
+        }
+      });
+    }
+
+    // 2. ಮಾಸ್ಟರ್ ಪ್ಯಾನಲ್‌ನಲ್ಲಿ ಡಿಲೀಟ್ ಮಾಡಿದ್ದರೆ ಲಾಗಿನ್ ಆಗದಂತೆ ತಡೆಯುವುದು
+    async function verifyDboyExistsInFirebase() {
+      if (!dboy || !dboy.id) return;
+      try {
+        // ಡಿಲೀಟ್ ಮಾಡಲಾದ ಐಡಿಗಳ ಲಿಸ್ಟ್‌ನಲ್ಲಿ ಇದೆಯೇ ಎಂದು ಚೆಕ್ ಮಾಡುವುದು
+        const deletedDoc = await window.getDoc(window.doc(window.db, "deleted_dboys", dboy.id));
+        if (deletedDoc.exists()) {
+          localStorage.removeItem('my_dboy_session');
+          document.getElementById('serverDownMsg').innerText = "ನಿಮ್ಮ ಡೆಲಿವರಿ ಬಾಯ್ ಐಡಿಯನ್ನು ಮಾಸ್ಟರ್ ಪ್ಯಾನಲ್‌ನಿಂದ ಸಂಪೂರ್ಣವಾಗಿ ಡಿಲೀಟ್ ಮಾಡಲಾಗಿದೆ. ನೀವು ಹೊಸದಾಗಿ ನೋಂದಣಿ ಮಾಡಿಕೊಳ್ಳಿ.";
+          document.getElementById('serverDownOverlay').style.display = 'flex';
+          return;
+        }
+
+        const q = window.query(window.collection(window.db, "delivery_boys"), window.where("id", "==", String(dboy.id)));
+        const snap = await window.getDocs(q);
+        if (snap.empty) {
+          localStorage.removeItem('my_dboy_session');
+          document.getElementById('serverDownMsg').innerText = "ನಿಮ್ಮ ಖಾತೆಯನ್ನು ಮಾಸ್ಟರ್ ಪ್ಯಾನಲ್‌ನಿಂದ ತೆಗೆದುಹಾಕಲಾಗಿದೆ.";
+          document.getElementById('serverDownOverlay').style.display = 'flex';
+        } else {
+          renderIDCard();
+          document.getElementById('loginSection').style.display = 'none';
+          document.getElementById('dashboardSection').style.display = 'block';
+          startRealtimeTasks();
+        }
+      } catch(e) { console.log(e); }
+    }
 
     function logoutDboy() {
       if (confirm("ಮರು ಲಾಗಿನ್ ಮಾಡಲು ಬಯಸುವಿರಾ?")) {
@@ -280,7 +333,7 @@
       };
 
       try {
-        await window.addDoc(window.collection(window.db, "delivery_boys"), dboy);
+        await window.setDoc(window.doc(window.db, "delivery_boys", fourDigitId), dboy);
         localStorage.setItem('my_dboy_session', JSON.stringify(dboy));
         document.getElementById('popup-id').innerText = fourDigitId;
         document.getElementById('successModal').style.display = 'flex';
@@ -295,6 +348,13 @@
       }
 
       try {
+        // ಡಿಲೀಟ್ ಲಿಸ್ಟ್‌ನಲ್ಲಿ ಇದೆಯೇ ಎಂದು ಚೆಕ್ ಮಾಡುವುದು
+        const deletedDoc = await window.getDoc(window.doc(window.db, "deleted_dboys", idVal));
+        if (deletedDoc.exists()) {
+          alert("❌ ಈ ಐಡಿಯನ್ನು ಮಾಸ್ಟರ್ ಪ್ಯಾನಲ್‌ನಿಂದ ಡಿಲೀಟ್ ಮಾಡಲಾಗಿದೆ. ಇದು ಕಾರ್ಯನಿರ್ವಹಿಸುವುದಿಲ್ಲ.");
+          return;
+        }
+
         const q = window.query(window.collection(window.db, "delivery_boys"), window.where("id", "==", String(idVal)));
         const snap = await window.getDocs(q);
 
@@ -365,18 +425,13 @@
           let matchTaluk = (custTaluk === '' || dboyTaluk === '' || custTaluk.includes(dboyTaluk) || dboyTaluk.includes(custTaluk));
 
           if (matchTaluk) {
-            // 1. Normal Delivery Tasks
             if (o.status === 'STEP_3' || o.status === 'PACKING') {
               if (!o.assignedDboyId || o.assignedDboyId === dboy.id) {
                 tasks.push(o);
               }
-            } 
-            // 2. Return Tasks
-            else if (o.isReturned && o.status !== 'RETURN_COMPLETED' && o.status !== 'DELIVERED') {
+            } else if (o.isReturned && o.status !== 'RETURN_COMPLETED' && o.status !== 'DELIVERED') {
               returnTasks.push(o);
-            } 
-            // 3. Completed Deliveries & Returns History
-            else if (o.status === 'DELIVERED' || o.status === 'STEP_4' || o.status === 'RETURN_COMPLETED') {
+            } else if (o.status === 'DELIVERED' || o.status === 'STEP_4' || o.status === 'RETURN_COMPLETED') {
               if (o.assignedDboyId === dboy.id || o.returnDboyId === dboy.id) {
                 history.push(o);
                 if (o.status === 'DELIVERED') totalEarnings += 50;
@@ -400,7 +455,6 @@
       });
     }
 
-    // 1. Normal Delivery Tasks Rendering
     function renderTasks(tasks) {
       const listDiv = document.getElementById('dboyTasksList');
       if (tasks.length === 0) {
@@ -491,7 +545,6 @@
       }).join('');
     }
 
-    // 2. Return Tasks Rendering with Shop Owner Call Button & Payment Mode
     function renderReturnTasks(returnTasks) {
       const listDiv = document.getElementById('dboyReturnTasksList');
       if (returnTasks.length === 0) {
@@ -513,7 +566,6 @@
 
         let returnStepHtml = '';
         if (!o.isReturnPickedUp) {
-          // STEP 1: Customer Pickup
           returnStepHtml = `
             <div style="background:#ffebee; border:1px solid #ffcdd2; border-radius:6px; padding:8px; margin-bottom:8px; text-align:center;">
               <span style="font-size:0.75rem; color:#c62828; font-weight:bold;">🔄 ರಿಟರ್ನ್ ಆರ್ಡರ್ ಐಡಿ: ${o.orderId || 'OD0000'}</span>
@@ -538,7 +590,6 @@
             </div>
           `;
         } else {
-          // STEP 2: Deliver to Shop Owner with CALL & GPS BUTTON
           returnStepHtml = `
             <div style="background:#e8f5e9; border:1px solid #c8e6c9; border-radius:6px; padding:8px; margin-bottom:8px; text-align:center;">
               <span style="font-size:0.75rem; color:#2e7d32; font-weight:bold;">✔ ಗ್ರಾಹಕರಿಂದ ರಿಟರ್ನ್ ಪಿಕ್ ಅಪ್ ಯಶಸ್ವಿಯಾಗಿದೆ</span>
