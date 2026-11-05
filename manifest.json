@@ -1,10 +1,10 @@
 {
-  "name": "Delivery Panel",
-  "short_name": "Delivery",
-  "start_url": "index.html",
+  "name": "ನಮ್ಮ ಊರು ಶಾಪಿಂಗ್ ಶಾಪುರ",
+  "short_name": "ಶಾಪುರ ಶಾಪಿಂಗ್",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ff5722",
+  "background_color": "#e65100",
+  "theme_color": "#e65100",
   "icons": [
     {
       "src": "logo.png",
