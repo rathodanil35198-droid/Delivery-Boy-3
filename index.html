@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-  <title id="pageTitle">ನಮ್ಮ ಶಾಪುರ್ - ಡೆಲಿವರಿ ಬಾಯ್ ಪ್ಯಾನಲ್ | Delivery Panel</title>
+  <title id="pageTitle">ನಮ್ಮ ಊರು ಶಾಪಿಂಗ್ ಡೆಲಿವರಿ ಬಾಯ್</title>
   <link rel="icon" type="image/png" sizes="192x192" href="logo.png">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#e65100">
@@ -142,7 +142,7 @@
   <!-- ದೊಡ್ಡ ಲೋಗೋ ಜೊತೆಗಿನ ಸ್ಪ್ಲಾಶ್ ಸ್ಕ್ರೀನ್ -->
   <div id="splashScreen">
     <img src="logo.png" alt="Logo" class="splash-logo" onerror="this.src='logo.png'">
-    <h2 class="splash-title" style="color:white; border:none;">🚚 ನಮ್ಮ ಶಾಪುರ್</h2>
+    <h2 class="splash-title" style="color:white; border:none;">🚚 ನಮ್ಮ ಊರು ಶಾಪಿಂಗ್</h2>
     <p class="splash-sub">ಡೆಲಿವರಿ ಬಾಯ್ ಪ್ಯಾನಲ್ ಲೋಡ್ ಆಗುತ್ತಿದೆ...</p>
   </div>
 
@@ -178,8 +178,8 @@
     <header>
       <img src="logo.png" alt="Logo" class="logo-img" onerror="this.src='logo.png'">
       <div>
-        <h1 style="font-size: 1.2rem;">🚚 ನಮ್ಮ ಶಾಪುರ್</h1>
-        <p style="font-size: 0.75rem; opacity: 0.9;">ನೇರ ಡೆಲಿವರಿ ಬಾಯ್ ಪ್ಯಾನಲ್ (Delivery Panel)</p>
+        <h1 style="font-size: 1.1rem;">ನಮ್ಮ ಊರು ಶಾಪಿಂಗ್ ಡೆಲಿವರಿ ಬಾಯ್</h1>
+        <p style="font-size: 0.7rem; opacity: 0.9;">Delivery Panel</p>
       </div>
     </header>
 
@@ -190,7 +190,7 @@
       <div style="margin-bottom: 15px; background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #ffe0b2;">
         <label style="font-size:0.85rem; color:#e65100; font-weight:bold; margin-bottom:6px;">ನಿಮ್ಮ 4-ಡಿಜಿಟ್ ಐಡಿ ಹಾಕಿ ಲಾಗಿನ್ ಮಾಡಿ:</label>
         <div style="display:flex; gap:8px;">
-          <input type="number" id="existingIdInput" placeholder="ಉದಾ: 8010" style="flex:1; padding:14px; font-size:1.4rem; font-weight:bold; text-align:center; border:2px solid #e65100; border-radius:8px; letter-spacing: 2px;">
+          <input type="tel" inputmode="numeric" id="existingIdInput" placeholder="ಉದಾ: 8010" style="flex:1; padding:12px; font-size:1.3rem; font-weight:bold; text-align:center; border:2px solid #e65100; border-radius:8px; letter-spacing: 3px; background:#fff;">
           <button type="button" class="btn btn-warning" style="padding:10px 18px; font-size:0.95rem; font-weight:bold;" onclick="loginWithExistingId()">ಲಾಗಿನ್</button>
         </div>
       </div>
@@ -211,6 +211,16 @@
         <div style="display:flex; gap:10px;">
           <div class="form-group" style="flex:1;"><label>ಊರು:</label><input type="text" id="village" required placeholder="ನಿಮ್ಮ ಊರು"></div>
           <div class="form-group" style="flex:1;"><label>ಪಿನ್ ಕೋಡ್:</label><input type="number" id="pincode" required placeholder="ಪಿನ್ ಕೋಡ್"></div>
+        </div>
+
+        <!-- UPI ID ಹಾಗೂ UPI PIN ಸೆಟ್ಟಿಂಗ್ -->
+        <div class="form-group">
+          <label>ಯುಪಿಐ ಐಡಿ (UPI ID for Payment):</label>
+          <input type="text" id="upiIdInput" required placeholder="ಉದಾ: yourname@paytm ಅಥವಾ gpay number">
+        </div>
+        <div class="form-group">
+          <label>ಯುಪಿಐ ಪಿನ್ (UPI PIN / Passcode):</label>
+          <input type="password" id="upiPinInput" required placeholder="ಪಾವತಿ ಪಾಸ್‌ಕೋಡ್ ಸಂಖ್ಯೆ">
         </div>
 
         <div class="form-group">
@@ -349,8 +359,7 @@
         }
         deferredPrompt = null;
       } else {
-        // ಬ್ರೌಸರ್ ಪ್ರಾಂಪ್ಟ್ ಲಭ್ಯವಿಲ್ಲದಿದ್ದರೆ ಯಾವುದೇ ಅಲರ್ಟ್ ತೋರಿಸದೆ ನೇರವಾಗಿ ಕ್ರೋಮ್ ಮೆನು ಟ್ರಿಗರ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸುವುದು ಅಥವಾ ಸೈಲೆಂಟ್ ಆಗಿ ಇನ್‌ಸ್ಟಾಲ್ ಗೈಡ್ ಅಥವಾ ರಿಫ್ರೆಶ್ ಸೂಚಿಸುವುದು
-        alert("ಆಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ಸಿದ್ಧವಾಗಿದೆ. ಒಂದು ವೇಳೆ ಪ್ರಾಂಪ್ಟ್ ಬರದಿದ್ದರೆ ಬ್ರೌಸರ್‌ನ ಮೇಲಿನ ಮೂರು ಚುಕ್ಕೆಗಳ (⋮) ಮೆನು ಕ್ಲಿಕ್ ಮಾಡಿ 'Install app' ಆಯ್ಕೆಮಾಡಿ.");
+        alert("ಆಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ಸಿದ್ಧವಾಗಿದೆ. ಬ್ರೌಸರ್ ಮೆನು (⋮) ಬಳಸಿ ಅಥವಾ ಪುಟವನ್ನು ರಿಫ್ರೆಶ್ ಮಾಡಿ.");
       }
     }
 
@@ -375,8 +384,8 @@
     function shareApp() {
       if (navigator.share) {
         navigator.share({
-          title: 'ನಮ್ಮ ಶಾಪುರ್ - ಡೆಲಿವರಿ ಬಾಯ್ ಪ್ಯಾನಲ್',
-          text: 'ನಮ್ಮ ಶಾಪುರ್ ಡೆಲಿವರಿ ಬಾಯ್ ಆಪ್ ಅನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ:',
+          title: 'ನಮ್ಮ ಊರು ಶಾಪಿಂಗ್ ಡೆಲಿವರಿ ಬಾಯ್',
+          text: 'ನಮ್ಮ ಊರು ಶಾಪಿಂಗ್ ಡೆಲಿವರಿ ಬಾಯ್ ಆಪ್ ಅನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ:',
           url: window.location.href,
         }).catch(console.error);
       } else {
@@ -474,6 +483,8 @@
         taluk: document.getElementById('taluk').value.trim(),
         village: document.getElementById('village').value.trim(),
         pincode: document.getElementById('pincode').value.trim(),
+        upiId: document.getElementById('upiIdInput').value.trim(),
+        upiPin: document.getElementById('upiPinInput').value.trim(),
         photo: photoBase64 || 'https://via.placeholder.com/100',
         aadhaarFront: frontBase64 || '',
         aadhaarBack: backBase64 || '',
@@ -835,9 +846,9 @@
       } catch (e) { alert("ದೋಷ: " + e.message); }
     }
 
-    async function verifyReturnCustomerPickup(docId, correctOpp) {
+    async function verifyReturnCustomerPickup(docId, correctOtp) {
       const inputVal = document.getElementById(`retPickupOtp_${docId}`).value.trim();
-      if (inputVal !== correctOpp) {
+      if (inputVal !== correctOtp) {
         alert("❌ ತಪ್ಪಾದ ಒಟಿಪಿ! ದಯವಿಟ್ಟು ಗ್ರಾಹಕರ ಬಳಿ ಸರಿಯಾದ ರಿಟರ್ನ್ ಒಟಿಪಿ ಪಡೆದು ನಮೂದಿಸಿ.");
         return;
       }
