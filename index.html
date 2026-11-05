@@ -349,7 +349,8 @@
         }
         deferredPrompt = null;
       } else {
-        alert("ಆಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ನಿಮ್ಮ ಬ್ರೌಸರ್ ಮೇಲಿರುವ ಮೂರು ಚುಕ್ಕೆಗಳ (⋮) ಮೆನು ಕ್ಲಿಕ್ ಮಾಡಿ 'Install app' ಅಥವಾ 'Add to Home screen' ಆಯ್ಕೆಮಾಡಿ.");
+        // ಬ್ರೌಸರ್ ಪ್ರಾಂಪ್ಟ್ ಲಭ್ಯವಿಲ್ಲದಿದ್ದರೆ ಯಾವುದೇ ಅಲರ್ಟ್ ತೋರಿಸದೆ ನೇರವಾಗಿ ಕ್ರೋಮ್ ಮೆನು ಟ್ರಿಗರ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸುವುದು ಅಥವಾ ಸೈಲೆಂಟ್ ಆಗಿ ಇನ್‌ಸ್ಟಾಲ್ ಗೈಡ್ ಅಥವಾ ರಿಫ್ರೆಶ್ ಸೂಚಿಸುವುದು
+        alert("ಆಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ಸಿದ್ಧವಾಗಿದೆ. ಒಂದು ವೇಳೆ ಪ್ರಾಂಪ್ಟ್ ಬರದಿದ್ದರೆ ಬ್ರೌಸರ್‌ನ ಮೇಲಿನ ಮೂರು ಚುಕ್ಕೆಗಳ (⋮) ಮೆನು ಕ್ಲಿಕ್ ಮಾಡಿ 'Install app' ಆಯ್ಕೆಮಾಡಿ.");
       }
     }
 
@@ -834,9 +835,9 @@
       } catch (e) { alert("ದೋಷ: " + e.message); }
     }
 
-    async function verifyReturnCustomerPickup(docId, correctOtp) {
+    async function verifyReturnCustomerPickup(docId, correctOpp) {
       const inputVal = document.getElementById(`retPickupOtp_${docId}`).value.trim();
-      if (inputVal !== correctOtp) {
+      if (inputVal !== correctOpp) {
         alert("❌ ತಪ್ಪಾದ ಒಟಿಪಿ! ದಯವಿಟ್ಟು ಗ್ರಾಹಕರ ಬಳಿ ಸರಿಯಾದ ರಿಟರ್ನ್ ಒಟಿಪಿ ಪಡೆದು ನಮೂದಿಸಿ.");
         return;
       }
