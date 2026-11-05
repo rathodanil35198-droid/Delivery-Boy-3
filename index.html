@@ -87,7 +87,12 @@
     .sup-btn.call { background: #ff9800; }
     .sup-btn.share { background: #4caf50; }
     .sup-btn.logout { background: #e53935; }
-    .sup-btn.install-top { background: #2e7d32; }
+    .sup-btn.install-top { background: #2e7d32; display: inline-flex; animation: pulseInstall 1.5s infinite; }
+    @keyframes pulseInstall {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.7); }
+      70% { transform: scale(1.03); box-shadow: 0 0 0 6px rgba(46, 125, 50, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(46, 125, 50, 0); }
+    }
 
     h2 { font-size: 1rem; margin-bottom: 10px; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 5px; }
     
@@ -150,9 +155,9 @@
     </div>
   </div>
 
-  <!-- ಮೇಲ್ಭಾಗದ ಸಪೋರ್ಟ್ ಬಾರ್‌ನಲ್ಲಿ ಯಾವಾಗಲೂ ಕಾಣಿಸುವ '📲 ಇನ್‌ಸ್ಟಾಲ್' ಬಟನ್ -->
+  <!-- ಮೇಲ್ಭಾಗದ ಸಪೋರ್ಟ್ ಬಾರ್ (ಇನ್‌ಸ್ಟಾಲ್ ಆಗಿಲ್ಲದಿದ್ದರೆ '📲 ಇನ್‌ಸ್ಟಾಲ್' ಬಟನ್ ಕಾಣಿಸುತ್ತದೆ, ಇನ್‌ಸ್ಟಾಲ್ ಆದ ಕೂಡಲೇ ಆಟೋಮ್ಯಾಟಿಕ್ ಮರೆಯಾಗುತ್ತದೆ) -->
   <div class="support-bar">
-    <button onclick="triggerInstallApp()" class="sup-btn install-top">📲 ಇನ್‌ಸ್ಟಾಲ್</button>
+    <button id="topInstallBtn" onclick="triggerInstallApp()" class="sup-btn install-top">📲 ಇನ್‌ಸ್ಟಾಲ್</button>
     <button onclick="logoutDboy()" class="sup-btn logout">🔄 ಮರು ಲಾಗಿನ್</button>
     <a href="tel:8105010768" class="sup-btn call">📞 ಕಾಲ್ ಮಾಡಿ</a>
     <a href="https://wa.me/918105010768?text=ನಮಸ್ಕಾರ,%20ನನಗೆ%20ಡೆಲಿವರಿ%20ಆಪ್‌ನಲ್ಲಿ%20ಸಹಾಯ%20ಬೇಕಿದೆ." target="_blank" class="sup-btn">💬 WhatsApp</a>
@@ -310,9 +315,27 @@
       }, 2000);
     });
 
+    // ಆಪ್ ಈಗಾಗಲೇ ಇನ್‌ಸ್ಟಾಲ್ ಆಗಿದೆಯೇ ಅಥವಾ ಸ್ಟ್ಯಾಂಡ್‌ಅಲೋನ್ ಮೋಡ್‌ನಲ್ಲಿದೆಯೇ ಪರಿಶೀಲಿಸಿ ಬಟನ್ ಮರೆಮಾಡುವುದು
+    function checkInstallStatus() {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+      const isInstalledFlag = localStorage.getItem('dboy_app_installed_status') === 'true';
+
+      if (isStandalone || isInstalledFlag) {
+        const installBtn = document.getElementById('topInstallBtn');
+        if (installBtn) installBtn.style.display = 'none';
+      }
+    }
+
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
+      checkInstallStatus();
+    });
+
+    window.addEventListener('appinstalled', () => {
+      localStorage.setItem('dboy_app_installed_status', 'true');
+      const installBtn = document.getElementById('topInstallBtn');
+      if (installBtn) installBtn.style.display = 'none';
     });
 
     async function triggerInstallApp() {
@@ -320,7 +343,9 @@
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
         if (outcome === 'accepted') {
-          console.log('User accepted the install prompt');
+          localStorage.setItem('dboy_app_installed_status', 'true');
+          const installBtn = document.getElementById('topInstallBtn');
+          if (installBtn) installBtn.style.display = 'none';
         }
         deferredPrompt = null;
       } else {
@@ -330,6 +355,7 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       checkAppLiveStatus();
+      checkInstallStatus();
 
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js').catch(err => console.log("SW fail", err));
@@ -808,9 +834,9 @@
       } catch (e) { alert("ದೋಷ: " + e.message); }
     }
 
-    async function verifyReturnCustomerPickup(docId, correctOtp) {
+    async function verifyReturnCustomerPickup(docId, correctOpt) {
       const inputVal = document.getElementById(`retPickupOtp_${docId}`).value.trim();
-      if (inputVal !== correctOtp) {
+      if (inputVal !== correctOpt) {
         alert("❌ ತಪ್ಪಾದ ಒಟಿಪಿ! ದಯವಿಟ್ಟು ಗ್ರಾಹಕರ ಬಳಿ ಸರಿಯಾದ ರಿಟರ್ನ್ ಒಟಿಪಿ ಪಡೆದು ನಮೂದಿಸಿ.");
         return;
       }
