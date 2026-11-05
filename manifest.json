@@ -1,9 +1,9 @@
 {
-  "name": "ನಮ್ಮ ಶಾಪುರ್ ಡೆಲಿವರಿ ಬಾಯ್ ಪ್ಯಾನಲ್",
+  "name": "ನಮ್ಮ ಶಾಪುರ್ - ಡೆಲಿವರಿ ಬಾಯ್ ಪ್ಯಾನಲ್",
   "short_name": "Delivery Panel",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#e65100",
+  "background_color": "#f4f7f6",
   "theme_color": "#e65100",
   "icons": [
     {
