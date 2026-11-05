@@ -6,6 +6,10 @@
 
   <title id="pageTitle">ನಮ್ಮ ಶಾಪುರ್ - ಡೆಲಿವರಿ ಬಾಯ್ ಪ್ಯಾನಲ್ | Delivery Panel</title>
   <link rel="icon" type="image/png" sizes="192x192" href="AR_Taxi_Booking_Go_Fast_512x512.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#e65100">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <!-- Firebase SDKs -->
   <script type="module">
@@ -128,6 +132,12 @@
       <p style="font-size: 0.8rem; opacity: 0.9;">ನೇರ ಡೆಲಿವರಿ ಬಾಯ್ ಪ್ಯಾನಲ್ (Delivery Panel)</p>
     </header>
 
+    <!-- ಆಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಬ್ಯಾನರ್ -->
+    <div id="installAppContainer" style="display:none; background:#e8f5e9; border:1px solid #c8e6c9; padding:12px; border-radius:8px; margin-bottom:15px; text-align:center;">
+      <p style="font-size:0.85rem; color:#2e7d32; font-weight:bold; margin-bottom:8px;">📱 ನಿಮ್ಮ ಮೊಬೈಲ್ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ಈ ಆಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ:</p>
+      <button id="installAppBtn" class="btn btn-success" style="padding:10px; font-weight:bold;">📲 ಆಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ (Install App)</button>
+    </div>
+
     <!-- ಲಾಗಿನ್ ಸೆಕ್ಷನ್ -->
     <div id="loginSection" style="background:#fff3e0; padding:15px; border-radius:10px; border:1px solid #ffe0b2;">
       <h2>🔑 ಡೆಲಿವರಿ ಬಾಯ್ ಲಾಗಿನ್ / ನೋಂದಣಿ</h2>
@@ -232,9 +242,38 @@
   <script>
     let dboy = JSON.parse(localStorage.getItem('my_dboy_session')) || null;
     let currentTotalEarnings = 0;
+    let deferredPrompt = null;
 
     window.addEventListener('DOMContentLoaded', () => {
       checkAppLiveStatus();
+
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log("SW fail", err));
+      }
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        const installContainer = document.getElementById('installAppContainer');
+        if (installContainer) installContainer.style.display = 'block';
+      });
+
+      const installBtn = document.getElementById('installAppBtn');
+      if (installBtn) {
+        installBtn.addEventListener('click', async () => {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+              document.getElementById('installAppContainer').style.display = 'none';
+            }
+            deferredPrompt = null;
+          } else {
+            alert("ಬ್ರೌಸರ್ ಮೆನು (ಮೂರು ಚುಕ್ಕೆಗಳು ⋮) ಕ್ಲಿಕ್ ಮಾಡಿ 'Add to Home screen' ಅಥವಾ 'Install App' ಆಯ್ಕೆಮಾಡಿ.");
+          }
+        });
+      }
+
       if (dboy) {
         verifyDboyExistsInFirebase();
       }
@@ -245,7 +284,6 @@
       });
     });
 
-    // 1. ಮಾಸ್ಟರ್ ಪ್ಯಾನಲ್ ಆನ್/ಆಫ್ ಸ್ಟೇಟಸ್ ಚೆಕ್ ಮಾಡುವುದು
     function checkAppLiveStatus() {
       window.onSnapshot(window.doc(window.db, "settings", "instapp_control"), (docSnap) => {
         if (docSnap.exists()) {
@@ -260,7 +298,6 @@
       });
     }
 
-    // 2. ಮಾಸ್ಟರ್ ಪ್ಯಾನಲ್‌ನಲ್ಲಿ ಡಿಲೀಟ್ ಮಾಡಿದ್ದರೆ ಲಾಗಿನ್ ಆಗದಂತೆ ತಡೆಯುವುದು
     async function verifyDboyExistsInFirebase() {
       if (!dboy || !dboy.id) return;
       try {
@@ -408,7 +445,6 @@
       closePaymentModal();
     }
 
-    // 3. ತಾಲೂಕು ಮಟ್ಟದ ಆರ್ಡರ್‌ಗಳು ಮಾತ್ರ ಫಿಲ್ಟರ್ ಮಾಡಿ ತೋರಿಸುವುದು
     function startRealtimeTasks() {
       window.onSnapshot(window.collection(window.db, "orders"), (snapshot) => {
         let tasks = [];
@@ -422,7 +458,6 @@
           let custTaluk = (o.customer?.taluk || '').toLowerCase().trim();
           let dboyTaluk = (dboy.taluk || '').toLowerCase().trim();
           
-          // ಕೇವಲ ಲಾಗಿನ್ ಆಗಿರುವ ಡೆಲಿವರಿ ಬಾಯ್‌ನ ತಾಲೂಕಿಗೆ ಮಾತ್ರ ಅನ್ವಯಿಸುವುದು
           let matchTaluk = (custTaluk === '' || dboyTaluk === '' || custTaluk === dboyTaluk || custTaluk.includes(dboyTaluk) || dboyTaluk.includes(custTaluk));
 
           if (matchTaluk) {
