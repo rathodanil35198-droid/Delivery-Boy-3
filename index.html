@@ -104,11 +104,11 @@
     .btn-pickup { background: #2874f0; color: #fff; border: none; padding: 10px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; width: 100%; }
     .btn-deliver { background: #388e3c; color: #fff; border: none; padding: 10px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; width: 100%; }
 
-    /* ಇನ್‌ಸ್ಟಾಲ್ ಬ್ಯಾನರ್ ಡಿಸೈನ್ */
+    /* ಇನ್‌ಸ್ಟಾಲ್ ಬ್ಯಾನರ್ ಡಿಸೈನ್ (ಡೀಫಾಲ್ಟ್ ಆಗಿ ಮರೆಮಾಡಲಾಗಿದೆ, ಹೊಸ ಮೊಬೈಲ್‌ಗೆ ಮಾತ್ರ ಕಾಣಿಸುತ್ತದೆ) */
     .install-banner {
       background: linear-gradient(135deg, #e65100, #f57c00);
       color: white; border-radius: 12px; padding: 12px 15px; margin-bottom: 15px;
-      display: flex; align-items: center; justify-content: space-between;
+      display: none; align-items: center; justify-content: space-between;
       box-shadow: 0 4px 10px rgba(230, 81, 0, 0.3); border: 1px solid #ffe0b2;
     }
     .install-banner-left { display: flex; align-items: center; gap: 10px; }
@@ -195,7 +195,7 @@
     <!-- ಲಾಗಿನ್ ಸೆಕ್ಷನ್ -->
     <div id="loginSection" style="background:#fff3e0; padding:15px; border-radius:10px; border:1px solid #ffe0b2;">
       
-      <!-- ಇನ್‌ಸ್ಟಾಲ್ ಬ್ಯಾನರ್ -->
+      <!-- ಇನ್‌ಸ್ಟಾಲ್ ಬ್ಯಾನರ್ (ಹೊಸ ಮೊಬೈಲ್‌ಗೆ ಮಾತ್ರ ಕಾಣಿಸುತ್ತದೆ) -->
       <div id="installBannerContainer" class="install-banner">
         <div class="install-banner-left">
           <img src="logo.png" alt="App Icon" onerror="this.src='logo.png'">
@@ -338,23 +338,43 @@
       }, 2000);
     });
 
+    // ಆಪ್ ಈಗಾಗಲೇ ಇನ್‌ಸ್ಟಾಲ್ ಆಗಿದೆಯೇ ಎಂದು ಪರಿಶೀಲಿಸಿ ಬ್ಯಾನರ್ ಮರೆಮಾಡುವುದು
+    function checkIsAppInstalled() {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+      const isAlreadyInstalled = localStorage.getItem('dboy_app_installed_status') === 'true';
+
+      if (isStandalone || isAlreadyInstalled) {
+        const banner = document.getElementById('installBannerContainer');
+        if (banner) banner.style.display = 'none';
+      }
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+      const isAlreadyInstalled = localStorage.getItem('dboy_app_installed_status') === 'true';
+
+      if (!isStandalone && !isAlreadyInstalled) {
+        const banner = document.getElementById('installBannerContainer');
+        if (banner) banner.style.display = 'flex';
+      }
+    });
+
+    window.addEventListener('appinstalled', () => {
+      localStorage.setItem('dboy_app_installed_status', 'true');
+      const banner = document.getElementById('installBannerContainer');
+      if (banner) banner.style.display = 'none';
+    });
+
     window.addEventListener('DOMContentLoaded', () => {
       checkAppLiveStatus();
+      checkIsAppInstalled();
 
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js').catch(err => console.log("SW fail", err));
       }
-
-      const isAlreadyInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-      if (isAlreadyInstalled) {
-        const banner = document.getElementById('installBannerContainer');
-        if (banner) banner.style.display = 'none';
-      }
-
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-      });
 
       const installBtn = document.getElementById('installAppBtn');
       if (installBtn) {
@@ -363,7 +383,7 @@
             deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
             if (outcome === 'accepted') {
-              console.log('App installed successfully');
+              localStorage.setItem('dboy_app_installed_status', 'true');
               document.getElementById('installBannerContainer').style.display = 'none';
             }
             deferredPrompt = null;
