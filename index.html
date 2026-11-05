@@ -264,7 +264,6 @@
     async function verifyDboyExistsInFirebase() {
       if (!dboy || !dboy.id) return;
       try {
-        // ಡಿಲೀಟ್ ಮಾಡಲಾದ ಐಡಿಗಳ ಲಿಸ್ಟ್‌ನಲ್ಲಿ ಇದೆಯೇ ಎಂದು ಚೆಕ್ ಮಾಡುವುದು
         const deletedDoc = await window.getDoc(window.doc(window.db, "deleted_dboys", dboy.id));
         if (deletedDoc.exists()) {
           localStorage.removeItem('my_dboy_session');
@@ -348,7 +347,6 @@
       }
 
       try {
-        // ಡಿಲೀಟ್ ಲಿಸ್ಟ್‌ನಲ್ಲಿ ಇದೆಯೇ ಎಂದು ಚೆಕ್ ಮಾಡುವುದು
         const deletedDoc = await window.getDoc(window.doc(window.db, "deleted_dboys", idVal));
         if (deletedDoc.exists()) {
           alert("❌ ಈ ಐಡಿಯನ್ನು ಮಾಸ್ಟರ್ ಪ್ಯಾನಲ್‌ನಿಂದ ಡಿಲೀಟ್ ಮಾಡಲಾಗಿದೆ. ಇದು ಕಾರ್ಯನಿರ್ವಹಿಸುವುದಿಲ್ಲ.");
@@ -410,6 +408,7 @@
       closePaymentModal();
     }
 
+    // 3. ತಾಲೂಕು ಮಟ್ಟದ ಆರ್ಡರ್‌ಗಳು ಮಾತ್ರ ಫಿಲ್ಟರ್ ಮಾಡಿ ತೋರಿಸುವುದು
     function startRealtimeTasks() {
       window.onSnapshot(window.collection(window.db, "orders"), (snapshot) => {
         let tasks = [];
@@ -420,9 +419,11 @@
         snapshot.forEach(docSnap => {
           const o = { docId: docSnap.id, ...docSnap.data() };
           
-          let custTaluk = (o.customer?.taluk || '').toLowerCase();
-          let dboyTaluk = (dboy.taluk || '').toLowerCase();
-          let matchTaluk = (custTaluk === '' || dboyTaluk === '' || custTaluk.includes(dboyTaluk) || dboyTaluk.includes(custTaluk));
+          let custTaluk = (o.customer?.taluk || '').toLowerCase().trim();
+          let dboyTaluk = (dboy.taluk || '').toLowerCase().trim();
+          
+          // ಕೇವಲ ಲಾಗಿನ್ ಆಗಿರುವ ಡೆಲಿವರಿ ಬಾಯ್‌ನ ತಾಲೂಕಿಗೆ ಮಾತ್ರ ಅನ್ವಯಿಸುವುದು
+          let matchTaluk = (custTaluk === '' || dboyTaluk === '' || custTaluk === dboyTaluk || custTaluk.includes(dboyTaluk) || dboyTaluk.includes(custTaluk));
 
           if (matchTaluk) {
             if (o.status === 'STEP_3' || o.status === 'PACKING') {
