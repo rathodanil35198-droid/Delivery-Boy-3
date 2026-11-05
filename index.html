@@ -49,7 +49,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; touch-action: manipulation; }
     html, body { width: 100%; height: 100%; overflow-x: hidden; background-color: var(--bg); color: var(--text); padding: 8px; }
     
-    /* 2 ಸೆಕೆಂಡ್ ಬರುವ ಕಲರ್‌ಫುಲ್ ಸ್ಪ್ಲಾಶ್ ಸ್ಕ್ರೀನ್ ಅನಿಮೇಷನ್ */
+    /* ದೊಡ್ಡದಾದ ಮತ್ತು ಆಕರ್ಷಕವಾದ ಲೋಗೋ ಇರುವ ಸ್ಪ್ಲಾಶ್ ಸ್ಕ್ರೀನ್ */
     #splashScreen {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: linear-gradient(135deg, #e65100, #ff9800, #2e7d32);
@@ -65,18 +65,18 @@
       100% { background-position: 0% 50%; }
     }
     .splash-logo {
-      width: 90px; height: 90px; border-radius: 50%; object-fit: cover;
-      border: 3px solid white; box-shadow: 0 0 25px rgba(255,255,255,0.8);
+      width: 150px; height: 150px; border-radius: 50%; object-fit: cover;
+      border: 4px solid white; box-shadow: 0 0 35px rgba(255,255,255,0.9);
       animation: pulseLogo 1.5s infinite;
-      background: #fff; margin-bottom: 15px;
+      background: #fff; margin-bottom: 20px;
     }
     @keyframes pulseLogo {
-      0% { transform: scale(0.9); box-shadow: 0 0 15px rgba(255,255,255,0.5); }
-      50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(255,255,255,0.9); }
-      100% { transform: scale(0.9); box-shadow: 0 0 15px rgba(255,255,255,0.5); }
+      0% { transform: scale(0.95); box-shadow: 0 0 20px rgba(255,255,255,0.6); }
+      50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(255,255,255,1); }
+      100% { transform: scale(0.95); box-shadow: 0 0 20px rgba(255,255,255,0.6); }
     }
-    .splash-title { font-size: 1.5rem; font-weight: bold; text-shadow: 1px 2px 4px rgba(0,0,0,0.3); }
-    .splash-sub { font-size: 0.85rem; opacity: 0.9; margin-top: 5px; }
+    .splash-title { font-size: 1.8rem; font-weight: bold; text-shadow: 1px 2px 5px rgba(0,0,0,0.4); }
+    .splash-sub { font-size: 0.9rem; opacity: 0.95; margin-top: 8px; font-weight: 500; }
 
     .container { width: 100%; max-width: 480px; margin: 0 auto; background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 30px; }
 
@@ -150,7 +150,7 @@
 </head>
 <body>
 
-  <!-- ಆಪ್ ಓಪನ್ ಆದಾಗ ಬರುವ 2 ಸೆಕೆಂಡ್ ಕಲರ್‌ಫುಲ್ ಸ್ಪ್ಲಾಶ್ ಸ್ಕ್ರೀನ್ (ಮಿಂಚಿನ ಅನಿಮೇಷನ್ ಜೊತೆ) -->
+  <!-- ದೊಡ್ಡ ಲೋಗೋ ಜೊತೆಗಿನ ಸ್ಪ್ಲಾಶ್ ಸ್ಕ್ರೀನ್ -->
   <div id="splashScreen">
     <img src="logo.png" alt="Logo" class="splash-logo" onerror="this.src='logo.png'">
     <h2 class="splash-title" style="color:white; border:none;">🚚 ನಮ್ಮ ಶಾಪುರ್</h2>
@@ -327,7 +327,7 @@
     let currentTotalEarnings = 0;
     let deferredPrompt = null;
 
-    // 2 ಸೆಕೆಂಡ್‌ಗಳ ಕಾಲ ಸ್ಪ್ಲಾಶ್ ಸ್ಕ್ರೀನ್ ತೋರಿಸಿ ನಂತರ ಮರೆಮಾಡುವುದು
+    // ಸ್ಪ್ಲಾಶ್ ಸ್ಕ್ರೀನ್ 2 ಸೆಕೆಂಡ್‌ಗಳ ಬಳಿಕ ಮರೆಯಾಗುವುದು
     window.addEventListener('load', () => {
       setTimeout(() => {
         const splash = document.getElementById('splashScreen');
