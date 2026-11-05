@@ -312,7 +312,7 @@
             }
             deferredPrompt = null;
           } else {
-            alert("ಬ್ರೌಸರ್ ಮೇಲಿರುವ ಮೂರು ಚುಕ್ಕೆಗಳ (⋮) ಮೆನು ಕ್ಲಿಕ್ ಮಾಡಿ 'Add to Home screen' ಅಥವಾ 'Install app' ಆಯ್ಕೆಮಾಡಿ.");
+            alert("ಆಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ಬ್ರೌಸರ್ ಮೇಲಿರುವ ಮೂರು ಚುಕ್ಕೆಗಳ (⋮) ಮೆನು ಕ್ಲಿಕ್ ಮಾಡಿ 'Install app' ಅಥವಾ 'Add to Home screen' ಆಯ್ಕೆಮಾಡಿ.");
           }
         });
       }
@@ -525,14 +525,9 @@
           let custTaluk = (o.customer?.taluk || '').toLowerCase().trim();
           let dboyTaluk = (dboy.taluk || '').toLowerCase().trim();
           
-          // ಕೇವಲ ಲಾಗಿನ್ ಆದ ನಂತರದ ಹೊಸ ಆರ್ಡರ್‌ಗಳು ಅಥವಾ ಇವರ ತಾಲೂಕಿಗೆ ಸೇರಿದ ಆರ್ಡರ್‌ಗಳು ಮಾತ್ರ ফিল্টার ಮಾಡುವುದು
           let matchTaluk = (custTaluk === '' || dboyTaluk === '' || custTaluk === dboyTaluk || custTaluk.includes(dboyTaluk) || dboyTaluk.includes(custTaluk));
 
           if (matchTaluk) {
-            // ಲಾಗಿನ್ ಆದ ನಂತರ ಅಥವಾ ಅಸೈನ್ ಆದ ಆರ್ಡರ್‌ಗಳು ಮಾತ್ರ ಪರಿಗಣಿಸಲು ಸಮಯದ ಪರಿಶೀಲನೆ (ಖಾತೆ ಸೃಷ್ಟಿಯಾದ ನಂತರದ ಆರ್ಡರ್‌ಗಳು)
-            let orderTime = o.createdAt?.toMillis ? o.createdAt.toMillis() : (Date.now());
-            let dboyRegTime = dboy.createdAt?.toMillis ? dboy.createdAt.toMillis() : 0;
-
             if (o.status === 'STEP_3' || o.status === 'PACKING') {
               if (!o.assignedDboyId || o.assignedDboyId === dboy.id) {
                 tasks.push(o);
