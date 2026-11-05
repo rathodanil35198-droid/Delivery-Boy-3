@@ -132,8 +132,8 @@
       <p style="font-size: 0.8rem; opacity: 0.9;">ನೇರ ಡೆಲಿವರಿ ಬಾಯ್ ಪ್ಯಾನಲ್ (Delivery Panel)</p>
     </header>
 
-    <!-- ಆಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಬ್ಯಾನರ್ -->
-    <div id="installAppContainer" style="display:none; background:#e8f5e9; border:1px solid #c8e6c9; padding:12px; border-radius:8px; margin-bottom:15px; text-align:center;">
+    <!-- ಸದಾ ಕಾಣುವ ಆಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಬಟನ್ -->
+    <div id="installAppContainer" style="background:#e8f5e9; border:1px solid #c8e6c9; padding:12px; border-radius:8px; margin-bottom:15px; text-align:center;">
       <p style="font-size:0.85rem; color:#2e7d32; font-weight:bold; margin-bottom:8px;">📱 ನಿಮ್ಮ ಮೊಬೈಲ್ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ಈ ಆಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ:</p>
       <button id="installAppBtn" class="btn btn-success" style="padding:10px; font-weight:bold;">📲 ಆಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ (Install App)</button>
     </div>
@@ -254,8 +254,6 @@
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        const installContainer = document.getElementById('installAppContainer');
-        if (installContainer) installContainer.style.display = 'block';
       });
 
       const installBtn = document.getElementById('installAppBtn');
@@ -269,7 +267,7 @@
             }
             deferredPrompt = null;
           } else {
-            alert("ಬ್ರೌಸರ್ ಮೆನು (ಮೂರು ಚುಕ್ಕೆಗಳು ⋮) ಕ್ಲಿಕ್ ಮಾಡಿ 'Add to Home screen' ಅಥವಾ 'Install App' ಆಯ್ಕೆಮಾಡಿ.");
+            alert("ಮೊಬೈಲ್ ಬ್ರೌಸರ್ ಮೆನು (ಮೇಲೆ ಅಥವಾ ಕೆಳಗೆ ಇರುವ ಮೂರು ಚುಕ್ಕೆಗಳು ⋮) ಕ್ಲಿಕ್ ಮಾಡಿ 'Add to Home screen' ಅಥವಾ 'Install app' ಆಯ್ಕೆಮಾಡಿ.");
           }
         });
       }
