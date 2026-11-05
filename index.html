@@ -313,6 +313,7 @@
           setTimeout(() => splash.style.display = 'none', 500);
         }
       }, 2000);
+      checkInstallStatus();
     });
 
     function checkInstallStatus() {
@@ -348,15 +349,7 @@
         }
         deferredPrompt = null;
       } else {
-        // ಗೂ글ಲ್ ಕ್ರೋಮ್ ಸ್ಟ್ಯಾಂಡರ್ಡ್ ಇನ್‌ಸ್ಟಾಲ್ ಪ್ರಾಂಪ್ಟ್ ಸಿಗದಿದ್ದರೆ ಬ್ರೌಸರ್ ಮೆನು ಅಥವಾ ನೇರ ಇನ್‌ಸ್ಟಾಲ್ ಟ್ರಿಗರ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸುವುದು
-        if ('getInstalledRelatedApps' in navigator) {
-          navigator.getInstalledRelatedApps().then(apps => {
-            if (apps.length > 0) {
-              alert("ಆಪ್ ಈಗಾಗಲೇ ಇನ್‌ಸ್ಟಾಲ್ ಆಗಿದೆ.");
-            }
-          });
-        }
-        alert("ಆಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ನಿಮ್ಮ ಬ್ರೌಸರ್ ಮೆನು (⋮) ಬಳಸಿ ಅಥವಾ ಪುಟವನ್ನು ಒಮ್ಮೆ ರಿಫ್ರೆಶ್ ಮಾಡಿ.");
+        alert("ಆಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ನಿಮ್ಮ ಬ್ರೌಸರ್ ಮೇಲಿರುವ ಮೂರು ಚುಕ್ಕೆಗಳ (⋮) ಮೆನು ಕ್ಲಿಕ್ ಮಾಡಿ 'Install app' ಅಥವಾ 'Add to Home screen' ಆಯ್ಕೆಮಾಡಿ.");
       }
     }
 
