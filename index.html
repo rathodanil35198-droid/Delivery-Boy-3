@@ -74,7 +74,7 @@
     .btn-pickup { background: #2874f0; color: #fff; border: none; padding: 10px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; width: 100%; }
     .btn-deliver { background: #388e3c; color: #fff; border: none; padding: 10px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; width: 100%; }
 
-    /* ನೇರ ಇನ್‌ಸ್ಟಾಲ್ ಬಟನ್ ಬಾಕ್ಸ್ (ಲಾಗಿನ್ ಪೇಜ್‌ನಲ್ಲಿ ಮಾತ್ರ ಕಾಣಿಸಲು) */
+    /* ನೇರ ಇನ್‌ಸ್ಟಾಲ್ ಬಟನ್ ಬಾಕ್ಸ್ */
     .install-banner {
       background: linear-gradient(135deg, #e65100, #f57c00);
       color: white; border-radius: 12px; padding: 12px 15px; margin-bottom: 15px;
@@ -158,7 +158,7 @@
     <!-- ಲಾಗಿನ್ ಸೆಕ್ಷನ್ (ಇಲ್ಲಿ ಮಾತ್ರ ಇನ್‌ಸ್ಟಾಲ್ ಬ್ಯಾನರ್ ಇರುತ್ತದೆ) -->
     <div id="loginSection" style="background:#fff3e0; padding:15px; border-radius:10px; border:1px solid #ffe0b2;">
       
-      <!-- ನೇರ ಇನ್‌ಸ್ಟಾಲ್ ಬ್ಯಾನರ್ (ಲಾಗಿನ್ ಪೇಜ್‌ನಲ್ಲಿ ಮಾತ್ರ ಕಾಣಿಸುತ್ತದೆ) -->
+      <!-- ನೇರ ಇನ್‌ಸ್ಟಾಲ್ ಬ್ಯಾನರ್ -->
       <div id="installBannerContainer" class="install-banner" style="display:none;">
         <div class="install-banner-left">
           <img src="logo.png" alt="App Icon" onerror="this.src='logo.png'">
@@ -217,7 +217,7 @@
       </form>
     </div>
 
-    <!-- ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ (ಲಾಗಿನ್ ಆದ ಮೇಲೆ ಇಲ್ಲಿ ಇನ್‌ಸ್ಟಾಲ್ ಬಟನ್ ಕಾಣಿಸುವುದಿಲ್ಲ) -->
+    <!-- ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ -->
     <div id="dashboardSection" style="display:none;">
       <div class="id-card">
         <img id="displayDboyPhoto" src="https://via.placeholder.com/100" alt="Delivery Boy">
@@ -297,16 +297,17 @@
         navigator.serviceWorker.register('./sw.js').catch(err => console.log("SW fail", err));
       }
 
-      // ಆಪ್ ಈಗಾಗಲೇ ಇನ್‌ಸ್ಟಾಲ್ ಆಗಿದ್ದರೆ ಅಥವಾ ಸ್ಟಾಂಡ್‌ಅಲೋನ್ ಮೋಡ್‌ನಲ್ಲಿದ್ದರೆ ಇನ್‌ಸ್ಟಾಲ್ ಬಟನ್ ತೋರಿಸಬೇಡಿ
+      // ಆಪ್ ಈಗಾಗಲೇ ಇನ್‌ಸ್ಟಾಲ್ ಆಗಿದೆಯಾ ಅಥವಾ ಸ್ಟಾಂಡ್‌ಅಲೋನ್ ಮೋಡ್‌ನಲ್ಲಿದೆಯಾ ಪರಿಶೀಲಿಸಿ
       const isAlreadyInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
         
-        // ಲಾಗಿನ್ ಪೇಜ್‌ನಲ್ಲಿ ಮಾತ್ರ ಮತ್ತು ಆಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಆಗಿಲ್ಲದಿದ್ದರೆ ಮಾತ್ರ ಬ್ಯಾನರ್ ತೋರಿಸಿ
+        // ಲಾಗಿನ್ ಆಗಿಲ್ಲದಿದ್ದರೆ ಮತ್ತು ಇನ್‌ಸ್ಟಾಲ್ ಆಗಿರದಿದ್ದರೆ ಮಾತ್ರ ಬ್ಯಾನರ್ ತೋರಿಸಿ
         if (!dboy && !isAlreadyInstalled) {
-          document.getElementById('installBannerContainer').style.display = 'flex';
+          const banner = document.getElementById('installBannerContainer');
+          if (banner) banner.style.display = 'flex';
         }
       });
 
@@ -314,15 +315,16 @@
       if (installBtn) {
         installBtn.addEventListener('click', async () => {
           if (deferredPrompt) {
+            // ನೇರವಾಗಿ ಸಿಸ್ಟಮ್ ಇನ್‌ಸ್ಟಾಲ್ ಪಾಪ್‌ಅಪ್ ಪ್ರಾಂಪ್ಟ್ ತೋರಿಸುವುದು
             deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
             if (outcome === 'accepted') {
-              console.log('App installed');
+              console.log('App installed successfully');
               document.getElementById('installBannerContainer').style.display = 'none';
             }
             deferredPrompt = null;
           } else {
-            alert("ಆಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ಬ್ರೌಸರ್ ಮೇಲಿರುವ ಮೂರು ಚುಕ್ಕೆಗಳ (⋮) ಮೆನು ಕ್ಲಿಕ್ ಮಾಡಿ 'Install app' ಅಥವಾ 'Add to Home screen' ಆಯ್ಕೆಮಾಡಿ.");
+            alert("ಆಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಪ್ರಾಂಪ್ಟ್ ಸಿದ್ಧವಾಗುತ್ತಿದೆ. ದಯವಿಟ್ಟು ಪುಟವನ್ನು ಒಮ್ಮೆ ರಿಫ್ರೆಶ್ ಮಾಡಿರಿ.");
           }
         });
       }
