@@ -1,9 +1,19 @@
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .then((reg) => { console.log('Service Worker registered', reg); })
-        .catch((err) => { console.log('Service Worker registration failed', err); });
-    });
-  }
-</script>
+self.addEventListener('install', (e) => {
+  e.waitUntil(
+    caches.open('delivery-v1').then((cache) => {
+      return cache.addAll([
+        './index.html',
+        './manifest.json',
+        './logo.png'
+      ]);
+    })
+  );
+});
+
+self.addEventListener('fetch', (e) => {
+  e.respondWith(
+    caches.match(e.request).then((response) => {
+      return response || fetch(e.request);
+    })
+  );
+});
