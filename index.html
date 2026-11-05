@@ -51,7 +51,7 @@
     .container { width: 100%; max-width: 480px; margin: 0 auto; background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 30px; }
 
     header { background-color: var(--primary); color: white; padding: 12px 15px; text-align: center; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); position: relative; display: flex; align-items: center; justify-content: center; gap: 10px; }
-    header img.logo-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid white; background: #fff; }
+    header img.logo-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid white; background: #fff; }
     
     .support-bar { display: flex; justify-content: flex-end; gap: 6px; margin-bottom: 8px; }
     .sup-btn { background: #25d366; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
@@ -150,7 +150,7 @@
       </div>
     </header>
 
-    <!-- ಅಂಗಡಿ ಮಾಲೀಕರ ಆಪ್ ಶೈಲಿಯ ಇನ್‌ಸ್ಟಾಲ್ ಬಾಕ್ಸ್ -->
+    <!-- ಇನ್‌ಸ್ಟಾಲ್ ಬಾಕ್ಸ್ -->
     <div class="install-box">
       <p>📱 "ಡೆಲಿವರಿ ಬಾಯ್ ಪ್ಯಾನಲ್" ಆಪ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ!</p>
       <button id="installAppBtn" class="install-action-btn">ಇನ್‌ಸ್ಟಾಲ್</button>
@@ -163,7 +163,7 @@
       <div style="margin-bottom: 15px; background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #ffe0b2;">
         <label style="font-size:0.85rem; color:#e65100; font-weight:bold; margin-bottom:6px;">ನಿಮ್ಮ 4-ಡಿಜಿಟ್ ಐಡಿ ಹಾಕಿ ಲಾಗಿನ್ ಮಾಡಿ:</label>
         <div style="display:flex; gap:8px;">
-          <input type="number" id="existingIdInput" placeholder="ಉದಾ: 8010" style="flex:1; padding:12px; font-size:1.2rem; font-weight:bold; text-align:center; border:2px solid #e65100; border-radius:8px;">
+          <input type="number" id="existingIdInput" placeholder="ಉದಾ: 8010" style="flex:1; padding:14px; font-size:1.4rem; font-weight:bold; text-align:center; border:2px solid #e65100; border-radius:8px; letter-spacing: 2px;">
           <button type="button" class="btn btn-warning" style="padding:10px 18px; font-size:0.95rem; font-weight:bold;" onclick="loginWithExistingId()">ಲಾಗಿನ್</button>
         </div>
       </div>
@@ -173,6 +173,7 @@
       <h2 style="font-size:0.95rem;">📝 ಹೊಸ ಡೆಲಿವರಿ ಬಾಯ್ ನೋಂದಣಿ</h2>
       <form onsubmit="registerDboy(event)">
         <div class="form-group"><label>ನಿಮ್ಮ ಹೆಸರು:</label><input type="text" id="dboyName" required placeholder="ನಿಮ್ಮ ಹೆಸರು"></div>
+        <div class="form-group"><label>ತಂದೆಯ ಹೆಸರು:</label><input type="text" id="dboyFatherName" required placeholder="ತಂದೆಯ ಹೆಸರು"></div>
         <div class="form-group"><label>ಮೊಬೈಲ್ ನಂಬರ್:</label><input type="tel" id="dboyPhone" required placeholder="ಮೊಬೈಲ್ ಸಂಖ್ಯೆ"></div>
         
         <div style="display:flex; gap:10px;">
@@ -180,9 +181,24 @@
           <div class="form-group" style="flex:1;"><label>ತಾಲೂಕು:</label><input type="text" id="taluk" value="ಶಹಾಪುರ" required></div>
         </div>
 
+        <div style="display:flex; gap:10px;">
+          <div class="form-group" style="flex:1;"><label>ಊರು:</label><input type="text" id="village" required placeholder="ನಿಮ್ಮ ಊರು"></div>
+          <div class="form-group" style="flex:1;"><label>ಪಿನ್ ಕೋಡ್:</label><input type="number" id="pincode" required placeholder="ಪಿನ್ ಕೋಡ್"></div>
+        </div>
+
         <div class="form-group">
-          <label>ನಿಮ್ಮ ಫೋಟೋ:</label>
-          <input type="file" accept="image/*" id="dboyPhotoFile">
+          <label>ಆಧಾರ್ ಕಾರ್ಡ್ ಮುಂಭಾಗದ ಫೋಟೋ (Front):</label>
+          <input type="file" accept="image/*" capture="environment" id="aadhaarFrontFile" required>
+        </div>
+
+        <div class="form-group">
+          <label>ಆಧಾರ್ ಕಾರ್ಡ್ ಹಿಂಭಾಗದ ಫೋಟೋ (Back):</label>
+          <input type="file" accept="image/*" capture="environment" id="aadhaarBackFile" required>
+        </div>
+
+        <div class="form-group">
+          <label>ನಿಮ್ಮ ಸೆಲ್ಫಿ ಫೋಟೋ (Selfie):</label>
+          <input type="file" accept="image/*" capture="user" id="dboyPhotoFile" required>
         </div>
 
         <button type="submit" class="btn btn-success">ಖಾತೆ ಪಡೆದುಕೊಳ್ಳಿ</button>
@@ -285,7 +301,6 @@
             }
             deferredPrompt = null;
           } else {
-            // ಅಲರ್ಟ್ ಬಾಕ್ಸ್ ಬರುವ ಬದಲು ನೇರವಾಗಿ ಕ್ರೋಮ್ ಮೆನು ಶೇರ್ ಅಥವಾ ಇನ್‌ಸ್ಟಾಲ್ ಪ್ರಾಂಪ್ಟ್ ತೋರಿಸಲು
             if (navigator.share) {
               navigator.share({
                 title: 'ನಮ್ಮ ಶಾಪುರ್ - ಡೆಲಿವರಿ ಬಾಯ್ ಪ್ಯಾನಲ್',
@@ -326,7 +341,7 @@
         if (docSnap.exists()) {
           const data = docSnap.data();
           if (data.isOnline === false) {
-            document.getElementById('serverDownMsg').innerText = "ಮಾಸ್ಟರ್ ಪ್ಯಾನಲ್‌ನಿಂದ ಇನ್‌ಸ್ಟಾಪ್ ಸಿಸ್ಟಮ್ ಅನ್ನು ಬಂದ್ (OFF) ಮಾಡಲಾಗಿದೆ. ದಯವಿಟ್ಟು ನಂತರ ಪ್ರಯತ್ನಿಸಿ.";
+            document.getElementById('serverDownMsg').innerText = "ಮಾಸ್ಟರ್ ಪ್ಯಾನಲ್‌ನಿಂದ ಸಿಸ್ಟಮ್ ಅನ್ನು ಬಂದ್ (OFF) ಮಾಡಲಾಗಿದೆ. ದಯವಿಟ್ಟು ನಂತರ ಪ್ರಯತ್ನಿಸಿ.";
             document.getElementById('serverDownOverlay').style.display = 'flex';
           } else {
             document.getElementById('serverDownOverlay').style.display = 'none';
@@ -341,7 +356,7 @@
         const deletedDoc = await window.getDoc(window.doc(window.db, "deleted_dboys", dboy.id));
         if (deletedDoc.exists()) {
           localStorage.removeItem('my_dboy_session');
-          document.getElementById('serverDownMsg').innerText = "ನಿಮ್ಮ ಡೆಲಿವರಿ ಬಾಯ್ ಐಡಿಯನ್ನು ಮಾಸ್ಟರ್ ಪ್ಯಾನಲ್‌ನಿಂದ ಸಂಪೂರ್ಣವಾಗಿ ಡಿಲೀಟ್ ಮಾಡಲಾಗಿದೆ. ನೀವು ಹೊಸದಾಗಿ ನೋಂದಣಿ ಮಾಡಿಕೊಳ್ಳಿ.";
+          document.getElementById('serverDownMsg').innerText = "ನಿಮ್ಮ ಡೆಲಿವರಿ ಬಾಯ್ ಐಡಿಯನ್ನು ಮಾಸ್ಟರ್ ಪ್ಯಾನಲ್‌ನಿಂದ ಸಂಪೂರ್ಣವಾಗಿ ಡಿಲೀಟ್ ಮಾಡಲಾಗಿದೆ. ಇದು ಕಾರ್ಯನಿರ್ವಹಿಸುವುದಿಲ್ಲ.";
           document.getElementById('serverDownOverlay').style.display = 'flex';
           return;
         }
@@ -393,16 +408,27 @@
     async function registerDboy(e) {
       e.preventDefault();
       const photoFile = document.getElementById('dboyPhotoFile').files[0];
+      const frontFile = document.getElementById('aadhaarFrontFile').files[0];
+      const backFile = document.getElementById('aadhaarBackFile').files[0];
+
       const photoBase64 = await convertFileToBase64(photoFile);
+      const frontBase64 = await convertFileToBase64(frontFile);
+      const backBase64 = await convertFileToBase64(backFile);
+
       const fourDigitId = Math.floor(1000 + Math.random() * 9000).toString();
 
       dboy = {
         id: fourDigitId,
         name: document.getElementById('dboyName').value.trim(),
+        fatherName: document.getElementById('dboyFatherName').value.trim(),
         phone: document.getElementById('dboyPhone').value.trim(),
         district: document.getElementById('district').value.trim(),
         taluk: document.getElementById('taluk').value.trim(),
-        photo: photoBase64 || 'https://via.placeholder.com/100'
+        village: document.getElementById('village').value.trim(),
+        pincode: document.getElementById('pincode').value.trim(),
+        photo: photoBase64 || 'https://via.placeholder.com/100',
+        aadhaarFront: frontBase64 || '',
+        aadhaarBack: backBase64 || ''
       };
 
       try {
@@ -441,7 +467,7 @@
             alert("🎉 ನಿಮ್ಮ ಐಡಿ ಯಶಸ್ವಿಯಾಗಿ ಲಾಗಿನ್ ಆಗಿದೆ!");
           });
         } else {
-          alert("ಈ ಐಡಿಗೆ ಸಂಬಂಧಿಸಿದ ಯಾವುದೇ ಡೆಲಿವರಿ ಬಾಯ್ ಕಂಡುಬಂದಿಲ್ಲ.");
+          alert("ಈ ಐಡಿಗೆ ಸಂಬಂಧಿಸಿದ ಯಾವುದೇ ಡೆಲಿವರಿ ಬಾಯ್ ಕಂಡುಬಂದಿಲ್ಲ. ಮಾಸ್ಟರ್ ಪ್ಯಾನಲ್‌ನಲ್ಲಿ ರಿಜಿಸ್ಟರ್ ಆಗಿರುವುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ.");
         }
       } catch (err) { alert("ಲಾಗಿನ್ ದೋಷ: " + err.message); }
     }
@@ -457,7 +483,7 @@
     function renderIDCard() {
       document.getElementById('displayDboyName').innerText = dboy.name;
       document.getElementById('displayDboyPhone').innerText = dboy.phone;
-      document.getElementById('displayLocation').innerText = `${dboy.taluk}, ${dboy.district}`;
+      document.getElementById('displayLocation').innerText = `${dboy.village || ''}, ${dboy.taluk}, ${dboy.district}`;
       document.getElementById('displayId').innerText = dboy.id;
       if (dboy.photo) document.getElementById('displayDboyPhoto').src = dboy.photo;
     }
