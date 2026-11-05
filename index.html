@@ -133,10 +133,6 @@
     .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); text-align: center; padding: 20px; overflow-y: auto; justify-content: center; align-items: center; }
     .modal-content-box { background: #fff; max-width: 380px; margin: auto; padding: 25px; border-radius: 14px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
 
-    /* Custom Install Guide Modal */
-    #installGuideModal { display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; padding: 20px; }
-    #installGuideBox { background: #fff; padding: 20px; border-radius: 12px; max-width: 350px; width: 100%; text-align: center; color: #333; }
-
     /* Server Down / Maintenance Overlay */
     #serverDownOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 99999; display: none; justify-content: center; align-items: center; padding: 20px; text-align: center; color: white; }
   </style>
@@ -159,21 +155,7 @@
     </div>
   </div>
 
-  <!-- ಕಸ್ಟಮ್ ಇನ್‌ಸ್ಟಾಲ್ ಗೈಡ್ ಮೋಡಲ್ -->
-  <div id="installGuideModal">
-    <div id="installGuideBox">
-      <div style="font-size:2.5rem; margin-bottom:8px;">📲</div>
-      <h3 style="color:#e65100; margin-bottom:8px; font-size:1.1rem;">ಆಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡುವುದು ಹೇಗೆ?</h3>
-      <p style="font-size:0.85rem; color:#555; line-height:1.5; margin-bottom:15px; text-align:left;">
-        1. ನಿಮ್ಮ ಬ್ರೌಸರ್‌ನ ಮೇಲಿರುವ ಮೂರು ಚುಕ್ಕೆಗಳ <b>(⋮)</b> ಮೆನು ಕ್ಲಿಕ್ ಮಾಡಿ.<br>
-        2. ನಂತರ <b>'Install app'</b> ಅಥವಾ <b>'Add to Home screen'</b> ಆಯ್ಕೆಮಾಡಿ.<br>
-        3. ಈಗ ನಿಮ್ಮ ಮೊಬೈಲ್ ಹೋಮ್ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ಆಪ್ ಬರುತ್ತದೆ!
-      </p>
-      <button class="btn btn-success" onclick="closeInstallGuide()" style="padding:10px;">ಸರಿ (OK)</button>
-    </div>
-  </div>
-
-  <!-- ಮೇಲ್ಭಾಗದ ಸಪೋರ್ಟ್ ಬಾರ್ (ಇನ್‌ಸ್ಟಾಲ್ ಆಗಿಲ್ಲದಿದ್ದರೆ '📲 ಇನ್‌ಸ್ಟಾಲ್' ಬಟನ್ ಕಾಣಿಸುತ್ತದೆ, ಇನ್‌ಸ್ಟಾಲ್ ಆದ ಕೂಡಲೇ ಆಟೋಮ್ಯಾಟಿಕ್ ಮರೆಯಾಗುತ್ತದೆ) -->
+  <!-- ಮೇಲ್ಭಾಗದ ಸಪೋರ್ಟ್ ಬಾರ್ -->
   <div class="support-bar">
     <button id="topInstallBtn" onclick="triggerInstallApp()" class="sup-btn install-top">📲 ಇನ್‌ಸ್ಟಾಲ್</button>
     <button onclick="logoutDboy()" class="sup-btn logout">🔄 ಮರು ಲಾಗಿನ್</button>
@@ -366,13 +348,16 @@
         }
         deferredPrompt = null;
       } else {
-        // ಬ್ರೌಸರ್ ನೇರ ಪ್ರಾಂಪ್ಟ್ ನೀಡದಿದ್ದರೆ ಸುಲಭವಾದ ಗೈಡ್ ಪಾಪ್ಅಪ್ ತೋರಿಸುವುದು (ಯಾವುದೇ ಅಲರ್ಟ್ ಇಲ್ಲ)
-        document.getElementById('installGuideModal').style.display = 'flex';
+        // ಗೂ글ಲ್ ಕ್ರೋಮ್ ಸ್ಟ್ಯಾಂಡರ್ಡ್ ಇನ್‌ಸ್ಟಾಲ್ ಪ್ರಾಂಪ್ಟ್ ಸಿಗದಿದ್ದರೆ ಬ್ರೌಸರ್ ಮೆನು ಅಥವಾ ನೇರ ಇನ್‌ಸ್ಟಾಲ್ ಟ್ರಿಗರ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸುವುದು
+        if ('getInstalledRelatedApps' in navigator) {
+          navigator.getInstalledRelatedApps().then(apps => {
+            if (apps.length > 0) {
+              alert("ಆಪ್ ಈಗಾಗಲೇ ಇನ್‌ಸ್ಟಾಲ್ ಆಗಿದೆ.");
+            }
+          });
+        }
+        alert("ಆಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ನಿಮ್ಮ ಬ್ರೌಸರ್ ಮೆನು (⋮) ಬಳಸಿ ಅಥವಾ ಪುಟವನ್ನು ಒಮ್ಮೆ ರಿಫ್ರೆಶ್ ಮಾಡಿ.");
       }
-    }
-
-    function closeInstallGuide() {
-      document.getElementById('installGuideModal').style.display = 'none';
     }
 
     window.addEventListener('DOMContentLoaded', () => {
