@@ -133,6 +133,10 @@
     .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); text-align: center; padding: 20px; overflow-y: auto; justify-content: center; align-items: center; }
     .modal-content-box { background: #fff; max-width: 380px; margin: auto; padding: 25px; border-radius: 14px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
 
+    /* Custom Install Guide Modal */
+    #installGuideModal { display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; padding: 20px; }
+    #installGuideBox { background: #fff; padding: 20px; border-radius: 12px; max-width: 350px; width: 100%; text-align: center; color: #333; }
+
     /* Server Down / Maintenance Overlay */
     #serverDownOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 99999; display: none; justify-content: center; align-items: center; padding: 20px; text-align: center; color: white; }
   </style>
@@ -152,6 +156,20 @@
       <div style="font-size:3rem; margin-bottom:10px;">⚠️</div>
       <h3 style="color:#d32f2f; margin-bottom:8px;">ಸರ್ವರ್ ತಾತ್ಕಾಲಿಕವಾಗಿ ಬಂದ್ ಆಗಿದೆ</h3>
       <p style="font-size:0.85rem; color:#666; line-height:1.4;" id="serverDownMsg">ಮಾಸ್ಟರ್ ಪ್ಯಾನಲ್‌ನಿಂದ ಸಿಸ್ಟಮ್ ಆಫ್ ಮಾಡಲಾಗಿದೆ ಅಥವಾ ನಿಮ್ಮ ಖಾತೆಯನ್ನು ತೆಗೆದುಹಾಕಲಾಗಿದೆ. ದಯವಿಟ್ಟು ಮಾಸ್ಟರ್ ಅನ್ನು ಸಂಪರ್ಕಿಸಿ.</p>
+    </div>
+  </div>
+
+  <!-- ಕಸ್ಟಮ್ ಇನ್‌ಸ್ಟಾಲ್ ಗೈಡ್ ಮೋಡಲ್ -->
+  <div id="installGuideModal">
+    <div id="installGuideBox">
+      <div style="font-size:2.5rem; margin-bottom:8px;">📲</div>
+      <h3 style="color:#e65100; margin-bottom:8px; font-size:1.1rem;">ಆಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡುವುದು ಹೇಗೆ?</h3>
+      <p style="font-size:0.85rem; color:#555; line-height:1.5; margin-bottom:15px; text-align:left;">
+        1. ನಿಮ್ಮ ಬ್ರೌಸರ್‌ನ ಮೇಲಿರುವ ಮೂರು ಚುಕ್ಕೆಗಳ <b>(⋮)</b> ಮೆನು ಕ್ಲಿಕ್ ಮಾಡಿ.<br>
+        2. ನಂತರ <b>'Install app'</b> ಅಥವಾ <b>'Add to Home screen'</b> ಆಯ್ಕೆಮಾಡಿ.<br>
+        3. ಈಗ ನಿಮ್ಮ ಮೊಬೈಲ್ ಹೋಮ್ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ಆಪ್ ಬರುತ್ತದೆ!
+      </p>
+      <button class="btn btn-success" onclick="closeInstallGuide()" style="padding:10px;">ಸರಿ (OK)</button>
     </div>
   </div>
 
@@ -315,7 +333,6 @@
       }, 2000);
     });
 
-    // ಆಪ್ ಈಗಾಗಲೇ ಇನ್‌ಸ್ಟಾಲ್ ಆಗಿದೆಯೇ ಅಥವಾ ಸ್ಟ್ಯಾಂಡ್‌ಅಲೋನ್ ಮೋಡ್‌ನಲ್ಲಿದೆಯೇ ಪರಿಶೀಲಿಸಿ ಬಟನ್ ಮರೆಮಾಡುವುದು
     function checkInstallStatus() {
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
       const isInstalledFlag = localStorage.getItem('dboy_app_installed_status') === 'true';
@@ -349,8 +366,13 @@
         }
         deferredPrompt = null;
       } else {
-        alert("ಆಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ನಿಮ್ಮ ಬ್ರೌಸರ್ ಮೇಲಿರುವ ಮೂರು ಚುಕ್ಕೆಗಳ (⋮) ಮೆನು ಕ್ಲಿಕ್ ಮಾಡಿ 'Install app' ಅಥವಾ 'Add to Home screen' ಆಯ್ಕೆಮಾಡಿ.");
+        // ಬ್ರೌಸರ್ ನೇರ ಪ್ರಾಂಪ್ಟ್ ನೀಡದಿದ್ದರೆ ಸುಲಭವಾದ ಗೈಡ್ ಪಾಪ್ಅಪ್ ತೋರಿಸುವುದು (ಯಾವುದೇ ಅಲರ್ಟ್ ಇಲ್ಲ)
+        document.getElementById('installGuideModal').style.display = 'flex';
       }
+    }
+
+    function closeInstallGuide() {
+      document.getElementById('installGuideModal').style.display = 'none';
     }
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -834,9 +856,9 @@
       } catch (e) { alert("ದೋಷ: " + e.message); }
     }
 
-    async function verifyReturnCustomerPickup(docId, correctOpt) {
+    async function verifyReturnCustomerPickup(docId, correctOtp) {
       const inputVal = document.getElementById(`retPickupOtp_${docId}`).value.trim();
-      if (inputVal !== correctOpt) {
+      if (inputVal !== correctOtp) {
         alert("❌ ತಪ್ಪಾದ ಒಟಿಪಿ! ದಯವಿಟ್ಟು ಗ್ರಾಹಕರ ಬಳಿ ಸರಿಯಾದ ರಿಟರ್ನ್ ಒಟಿಪಿ ಪಡೆದು ನಮೂದಿಸಿ.");
         return;
       }
