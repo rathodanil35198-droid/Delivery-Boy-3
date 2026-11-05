@@ -48,6 +48,36 @@
     :root { --primary: #e65100; --secondary: #2e7d32; --bg: #f4f7f6; --text: #333; --success: #4caf50; --danger: #e53935; --warning: #fb8c00; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; touch-action: manipulation; }
     html, body { width: 100%; height: 100%; overflow-x: hidden; background-color: var(--bg); color: var(--text); padding: 8px; }
+    
+    /* 2 ಸೆಕೆಂಡ್ ಬರುವ ಕಲರ್‌ಫುಲ್ ಸ್ಪ್ಲಾಶ್ ಸ್ಕ್ರೀನ್ ಅನಿಮೇಷನ್ */
+    #splashScreen {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(135deg, #e65100, #ff9800, #2e7d32);
+      background-size: 300% 300%;
+      animation: gradientBG 2s ease infinite;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 999999; color: white; text-align: center;
+      transition: opacity 0.5s ease;
+    }
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .splash-logo {
+      width: 90px; height: 90px; border-radius: 50%; object-fit: cover;
+      border: 3px solid white; box-shadow: 0 0 25px rgba(255,255,255,0.8);
+      animation: pulseLogo 1.5s infinite;
+      background: #fff; margin-bottom: 15px;
+    }
+    @keyframes pulseLogo {
+      0% { transform: scale(0.9); box-shadow: 0 0 15px rgba(255,255,255,0.5); }
+      50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(255,255,255,0.9); }
+      100% { transform: scale(0.9); box-shadow: 0 0 15px rgba(255,255,255,0.5); }
+    }
+    .splash-title { font-size: 1.5rem; font-weight: bold; text-shadow: 1px 2px 4px rgba(0,0,0,0.3); }
+    .splash-sub { font-size: 0.85rem; opacity: 0.9; margin-top: 5px; }
+
     .container { width: 100%; max-width: 480px; margin: 0 auto; background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 30px; }
 
     header { background-color: var(--primary); color: white; padding: 12px 15px; text-align: center; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); position: relative; display: flex; align-items: center; justify-content: center; gap: 10px; }
@@ -74,7 +104,7 @@
     .btn-pickup { background: #2874f0; color: #fff; border: none; padding: 10px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; width: 100%; }
     .btn-deliver { background: #388e3c; color: #fff; border: none; padding: 10px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; width: 100%; }
 
-    /* ಸದಾ ಗೋಚರಿಸುವ ಇನ್‌ಸ್ಟಾಲ್ ಬ್ಯಾನರ್ */
+    /* ಇನ್‌ಸ್ಟಾಲ್ ಬ್ಯಾನರ್ ಡಿಸೈನ್ */
     .install-banner {
       background: linear-gradient(135deg, #e65100, #f57c00);
       color: white; border-radius: 12px; padding: 12px 15px; margin-bottom: 15px;
@@ -120,6 +150,13 @@
 </head>
 <body>
 
+  <!-- ಆಪ್ ಓಪನ್ ಆದಾಗ ಬರುವ 2 ಸೆಕೆಂಡ್ ಕಲರ್‌ಫುಲ್ ಸ್ಪ್ಲಾಶ್ ಸ್ಕ್ರೀನ್ (ಮಿಂಚಿನ ಅನಿಮೇಷನ್ ಜೊತೆ) -->
+  <div id="splashScreen">
+    <img src="logo.png" alt="Logo" class="splash-logo" onerror="this.src='logo.png'">
+    <h2 class="splash-title" style="color:white; border:none;">🚚 ನಮ್ಮ ಶಾಪುರ್</h2>
+    <p class="splash-sub">ಡೆಲಿವರಿ ಬಾಯ್ ಪ್ಯಾನಲ್ ಲೋಡ್ ಆಗುತ್ತಿದೆ...</p>
+  </div>
+
   <!-- Server Down / Maintenance Overlay -->
   <div id="serverDownOverlay">
     <div style="background:#fff; color:#333; padding:25px; border-radius:12px; max-width:350px; width:100%;">
@@ -155,10 +192,10 @@
       </div>
     </header>
 
-    <!-- ಲಾಗಿನ್ ಸೆಕ್ಷನ್ (ಇಲ್ಲಿ ಇನ್‌ಸ್ಟಾಲ್ ಬ್ಯಾನರ್ ಸದಾ ಗೋಚರಿಸುವಂತೆ ಸರಿಪಡಿಸಲಾಗಿದೆ) -->
+    <!-- ಲಾಗಿನ್ ಸೆಕ್ಷನ್ -->
     <div id="loginSection" style="background:#fff3e0; padding:15px; border-radius:10px; border:1px solid #ffe0b2;">
       
-      <!-- ಸದಾ ಗೋಚರಿಸುವ ಇನ್‌ಸ್ಟಾಲ್ ಬ್ಯಾನರ್ -->
+      <!-- ಇನ್‌ಸ್ಟಾಲ್ ಬ್ಯಾನರ್ -->
       <div id="installBannerContainer" class="install-banner">
         <div class="install-banner-left">
           <img src="logo.png" alt="App Icon" onerror="this.src='logo.png'">
@@ -290,6 +327,17 @@
     let currentTotalEarnings = 0;
     let deferredPrompt = null;
 
+    // 2 ಸೆಕೆಂಡ್‌ಗಳ ಕಾಲ ಸ್ಪ್ಲಾಶ್ ಸ್ಕ್ರೀನ್ ತೋರಿಸಿ ನಂತರ ಮರೆಮಾಡುವುದು
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const splash = document.getElementById('splashScreen');
+        if (splash) {
+          splash.style.opacity = '0';
+          setTimeout(() => splash.style.display = 'none', 500);
+        }
+      }, 2000);
+    });
+
     window.addEventListener('DOMContentLoaded', () => {
       checkAppLiveStatus();
 
@@ -297,7 +345,6 @@
         navigator.serviceWorker.register('./sw.js').catch(err => console.log("SW fail", err));
       }
 
-      // ಆಪ್ ಈಗಾಗಲೇ ಇನ್‌ಸ್ಟಾಲ್ ಆಗಿದೆಯಾ ಪರಿಶೀಲಿಸಿ
       const isAlreadyInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
       if (isAlreadyInstalled) {
         const banner = document.getElementById('installBannerContainer');
@@ -321,7 +368,6 @@
             }
             deferredPrompt = null;
           } else {
-            // ಸಿಸ್ಟಮ್ ಪ್ರಾಂಪ್ಟ್ ಸಿಗದಿದ್ದರೆ ಬ್ರೌಸರ್ ಮೆನು ಅಥವಾ ಆಲ್ಟರ್ನೇಟಿವ್ ಗೈಡ್ ತೋರಿಸುವುದು
             alert("ಆಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ನಿಮ್ಮ ಬ್ರೌಸರ್ ಮೇಲಿರುವ ಮೂರು ಚುಕ್ಕೆಗಳ (⋮) ಮೆನು ಕ್ಲಿಕ್ ಮಾಡಿ 'Install app' ಅಥವಾ 'Add to Home screen' ಆಯ್ಕೆಮಾಡಿ.");
           }
         });
