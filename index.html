@@ -113,11 +113,16 @@
       background: linear-gradient(135deg, #e65100, #ef6c00);
       color: white; border-radius: 10px; padding: 15px; margin-bottom: 15px;
       display: flex; gap: 15px; align-items: center; box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      position: relative;
     }
     .id-card img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; }
     .id-card-details h3 { font-size: 1rem; margin-bottom: 3px; }
     .id-card-details p { font-size: 0.75rem; opacity: 0.9; }
     .id-number { font-size: 1rem; font-weight: bold; background: #fff; color: #e65100; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-top: 4px; }
+
+    .qr-badge-btn {
+      position: absolute; top: 10px; right: 10px; background: #fff; color: #e65100; border: none; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 3px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
 
     .stats-container { display: flex; gap: 6px; margin-bottom: 12px; }
     .stat-box { flex: 1; background: #fff3e0; padding: 8px; border-radius: 8px; text-align: center; border: 1px solid #ffe0b2; cursor: pointer; }
@@ -174,6 +179,25 @@
     </div>
   </div>
 
+  <!-- QR ಕೋಡ್ ವೀಕ್ಷಿಸುವ/ಬದಲಾಯಿಸುವ ಮೋಡಲ್ -->
+  <div id="qrModal" class="modal">
+    <div class="modal-content-box">
+      <h3 style="color: var(--primary); margin-bottom: 10px;">📷 ಮಾಸ್ಟರ್ QR ಕೋಡ್</h3>
+      <p style="font-size: 0.8rem; color: #555; margin-bottom: 10px;">ಮಾಸ್ಟರ್ ಪ್ಯಾನಲ್‌ನಿಂದ ಅಪ್ರೂವ್ ಆಗಿರುವ ಅಧಿಕೃತ ಕ್ಯೂಆರ್ ಕೋಡ್ ಇಲ್ಲಿದೆ[span_2](start_span)[span_2](end_span):</p>
+      
+      <div id="masterQrContainer" style="margin-bottom: 12px; background: #f9f9f9; padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
+        <img id="masterQrImageTag" src="https://via.placeholder.com/200?text=Master+QR" style="width: 180px; height: 180px; object-fit: contain; background: #fff; border: 1px solid #ccc; border-radius: 6px;">
+      </div>
+
+      <div style="margin-bottom: 12px; text-align: left;">
+        <label style="font-size: 0.78rem; font-weight: bold; color: #444;">ಹೊಸ ಕ್ಯೂಆರ್ ಕೋಡ್ ಅಪ್ಲೋಡ್ ಮಾಡಿ ಬದಲಾಯಿಸಿ:</label>
+        <input type="file" id="changeQrFileInput" accept="image/*" style="width: 100%; margin-top: 4px; font-size: 0.8rem;" onchange="uploadNewMasterQr(event)">
+      </div>
+
+      <button class="btn btn-danger" onclick="closeQrModal()">ಮುಚ್ಚಿ (Close)</button>
+    </div>
+  </div>
+
   <div class="container">
     <header>
       <img src="logo.png" alt="Logo" class="logo-img" onerror="this.src='logo.png'">
@@ -213,7 +237,15 @@
           <div class="form-group" style="flex:1;"><label>ಪಿನ್ ಕೋಡ್:</label><input type="number" id="pincode" required placeholder="ಪಿನ್ ಕೋಡ್"></div>
         </div>
 
-        <!-- ಕೇವಲ ಒಂದೇ ಒಂದು ಸರಿಯಾದ UPI ID ಬಾಕ್ಸ್ -->
+        <!-- GPS ಆಟೋಮ್ಯಾಟಿಕ್ ಲೊಕೇಶನ್ ಬಟನ್ ಸೇರಿಸಲಾಗಿದೆ -->
+        <div class="form-group">
+          <label>ಸ್ಥಳ / GPS ಲೊಕೇಶನ್:</label>
+          <div style="display:flex; gap:6px;">
+            <input type="text" id="gpsLocationInput" placeholder="GPS ಲೊಕೇಶನ್ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ" required style="flex:1;">
+            <button type="button" onclick="fetchDboyGpsLocation()" style="background:#1976d2; color:#fff; border:none; border-radius:6px; padding:0 10px; font-size:0.8rem; font-weight:bold; cursor:pointer;">📍 GPS</button>
+          </div>
+        </div>
+
         <div class="form-group">
           <label>ಯುಪಿಐ ಐಡಿ (UPI ID for Payment):</label>
           <input type="text" id="upiIdInput" required placeholder="ಉದಾ: yourname@paytm ಅಥವಾ gpay number">
@@ -241,6 +273,7 @@
     <!-- ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ -->
     <div id="dashboardSection" style="display:none;">
       <div class="id-card">
+        <button class="qr-badge-btn" onclick="openQrModal()">📷 QR ಕೋಡ್</button>
         <img id="displayDboyPhoto" src="https://via.placeholder.com/100" alt="Delivery Boy">
         <div class="id-card-details">
           <h3 id="displayDboyName">ಹೆಸರು</h3>
@@ -371,11 +404,66 @@
         verifyDboyExistsInFirebase();
       }
 
+      // ಮೊಬೈಲ್ ಬ್ಯಾಕ್ ಬಟನ್ ಒತ್ತಿದಾಗ ಆಪ್ ಮುಚ್ಚಿಹೋಗದೆ ಹಿಂದಿನ ಸ್ಕ್ರೀನ್‌ಗೆ ಬರುವುದು
       window.history.pushState({ page: 'home' }, '', '');
-      window.addEventListener('popstate', () => {
-        window.history.pushState({ page: 'home' }, '', '');
+      window.addEventListener('popstate', (e) => {
+        e.preventDefault();
+        const tabTasks = document.getElementById('tabTasks');
+        const tabReturns = document.getElementById('tabReturns');
+        const tabHistory = document.getElementById('tabHistory');
+        
+        if (tabReturns.style.display === 'block' || tabHistory.style.display === 'block') {
+          showTab('tasks');
+        } else {
+          window.history.pushState({ page: 'home' }, '', '');
+        }
       });
     });
+
+    function fetchDboyGpsLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            document.getElementById('gpsLocationInput').value = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
+            alert("📍 ನಿಮ್ಮ GPS ಲೊಕೇಶನ್ ಆಟೋಮ್ಯಾಟಿಕ್ ಆಗಿ ಕ್ಯಾಪ್ಚರ್ ಆಗಿದೆ!");
+          },
+          (error) => {
+            alert("ಜಿಪಿಎಸ್ ಲೊಕೇಶನ್ ಪಡೆಯಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ. ದಯವಿಟ್ಟು ಜಿಪಿಎಸ್ ಆನ್ ಮಾಡಿ.");
+          }
+        );
+      } else {
+        alert("ನಿಮ್ಮ ಬ್ರೌಸರ್‌ನಲ್ಲಿ ಜಿಪಿಎಸ್ ಸೌಲಭ್ಯವಿಲ್ಲ.");
+      }
+    }
+
+    function openQrModal() {
+      if (dboy && dboy.customQrPhoto) {
+        document.getElementById('masterQrImageTag').src = dboy.customQrPhoto;
+      }
+      document.getElementById('qrModal').style.display = 'flex';
+    }
+
+    function closeQrModal() {
+      document.getElementById('qrModal').style.display = 'none';
+    }
+
+    async function uploadNewMasterQr(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const base64Qr = await convertFileToBase64(file);
+        dboy.customQrPhoto = base64Qr;
+        document.getElementById('masterQrImageTag').src = base64Qr;
+        localStorage.setItem('my_dboy_session', JSON.stringify(dboy));
+        try {
+          await window.updateDoc(window.doc(window.db, "delivery_boys", String(dboy.id)), {
+            customQrPhoto: base64Qr
+          });
+          alert("✅ ಹೊಸ ಕ್ಯೂಆರ್ ಕೋಡ್ ಯಶಸ್ವಿಯಾಗಿ ಅಪ್‌ಡೇಟ್ ಮಾಡಲಾಗಿದೆ!");
+        } catch(e) { alert("Error: " + e.message); }
+      }
+    }
 
     function shareApp() {
       if (navigator.share) {
@@ -479,11 +567,13 @@
         taluk: document.getElementById('taluk').value.trim(),
         village: document.getElementById('village').value.trim(),
         pincode: document.getElementById('pincode').value.trim(),
+        gpsLocation: document.getElementById('gpsLocationInput').value.trim(),
         upiId: document.getElementById('upiIdInput').value.trim(),
         upiPin: '',
         photo: photoBase64 || 'https://via.placeholder.com/100',
         aadhaarFront: frontBase64 || '',
         aadhaarBack: backBase64 || '',
+        customQrPhoto: '',
         createdAt: serverTimestamp()
       };
 
@@ -542,6 +632,7 @@
       document.getElementById('displayLocation').innerText = `${dboy.village || ''}, ${dboy.taluk}, ${dboy.district}`;
       document.getElementById('displayId').innerText = dboy.id;
       if (dboy.photo) document.getElementById('displayDboyPhoto').src = dboy.photo;
+      if (dboy.customQrPhoto) document.getElementById('masterQrImageTag').src = dboy.customQrPhoto;
     }
 
     function showTab(tab) {
@@ -565,15 +656,25 @@
     }
 
     function startRealtimeTasks() {
-      window.onSnapshot(window.collection(window.db, "orders"), (snapshot) => {
+      window.onSnapshot(window.collection(window.db, "orders"), async (snapshot) => {
         let tasks = [];
         let returnTasks = [];
         let history = [];
         let totalEarnings = 0;
+        let nowTimestamp = Date.now();
+        let oneMonthMs = 30 * 24 * 60 * 60 * 1000;
 
-        snapshot.forEach(docSnap => {
+        for (const docSnap of snapshot.docs) {
           const o = { docId: docSnap.id, ...docSnap.data() };
           
+          // 1 ತಿಂಗಳ ನಂತರ ಹಳೆಯ ಆರ್ಡರ್‌ಗಳು ಆಟೋಮ್ಯಾಟಿಕ್ ಆಗಿ ಡಿಲೀಟ್ ಆಗುವುದು
+          if (o.timestamp && (nowTimestamp - o.timestamp > oneMonthMs)) {
+            try {
+              await window.deleteDoc(window.doc(window.db, "orders", docSnap.id));
+            } catch(e) {}
+            continue;
+          }
+
           let custTaluk = (o.customer?.taluk || '').toLowerCase().trim();
           let dboyTaluk = (dboy.taluk || '').toLowerCase().trim();
           
@@ -594,7 +695,7 @@
               }
             }
           }
-        });
+        }
 
         currentTotalEarnings = totalEarnings;
 
@@ -622,8 +723,9 @@
         let shopMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.shopName + ' ' + (o.shopLocation || dboy.taluk))}`;
         let shopPhone = o.shopPhone || '8105010768';
 
+        // ಸಿಒಡಿ ಕನ್ನಡ ಹೆಸರನ್ನು 'ಕ್ಯಾಶ್ ಆನ್ ಡೆಲಿವರಿ' ಎಂದು ಬದಲಾಯಿಸಲಾಗಿದೆ
         let payBadge = o.paymentMode === 'COD' ? 
-          `<span class="pay-badge pay-cod">💵 COD (Cash on Delivery - ₹${o.totalPrice} ಪಡೆಯಿರಿ)</span>` : 
+          `<span class="pay-badge pay-cod">💵 ಕ್ಯಾಶ್ ಆನ್ ಡೆಲಿವರಿ (Cash on Delivery - ₹${o.totalPrice} ಪಡೆಯಿರಿ)</span>` : 
           `<span class="pay-badge pay-upi">✔ UPI Online Paid (ದುಡ್ಡು ಪಡೆಯಬೇಡಿ)</span>`;
 
         if (!o.pickupOtp) o.pickupOtp = Math.floor(1000 + Math.random() * 9000).toString();
@@ -646,11 +748,28 @@
             </div>
           `;
         } else {
+          // ಪಿಕ್ ಅಪ್ ಆದ ತಕ್ಷಣ ಗ್ರಾಹಕರ ಸಂಪೂರ್ಣ ವಿವರಗಳು ಮತ್ತು ಜಿಪಿಎಸ್ ಮ್ಯಾಪ್ ಸ್ಪಷ್ಟವಾಗಿ ಕಾಣಿಸುವುದು[span_3](start_span)[span_3](end_span)
           stepBoxHTML = `
             <div style="background:#fff3e0; border:1px solid #ffe0b2; border-radius:6px; padding:6px; margin-bottom:8px; text-align:center;">
               <span style="font-size:0.7rem; color:#e65100; font-weight:bold;">📷 ಆರ್ಡರ್ ಐಡಿ (Order ID):</span>
               <div style="font-size:0.95rem; font-weight:bold; color:#bf360c; letter-spacing:1px;">${o.orderId || 'OD000000'}</div>
               <div style="font-size:0.75rem; color:var(--success); font-weight:bold; margin-top:2px;">✔ ಅಂಗಡಿಯಿಂದ ಪಿಕ್ ಅಪ್ ಯಶಸ್ವಿಯಾಗಿದೆ</div>
+            </div>
+
+            <div style="background:#f0f4ff; border:1px solid #b3e5fc; border-radius:8px; padding:10px; margin-bottom:10px;">
+              <h4 style="font-size:0.85rem; color:#0277bd; margin-bottom:4px;">📍 ಗ್ರಾಹಕರ ಸಂಪೂರ್ಣ ವಿವರಗಳು & ಜಿಪಿಎಸ್[span_4](start_span)[span_4](end_span):</h4>
+              <p><b>ಗ್ರಾಹಕರ ಹೆಸರು:</b> ${o.customer?.name}</p>
+              <p><b>ಮೊಬೈಲ್ ನಂಬರ್:</b> ${o.customer?.phone}</p>
+              <p><b>ಜಿಲ್ಲೆಯ ಹೆಸರು:</b> ${o.customer?.district || dboy.district}</p>
+              <p><b>ತಾಲೂಕು ಹೆಸರು:</b> ${o.customer?.taluk || dboy.taluk}</p>
+              <p><b>ಊರ ಹೆಸರು:</b> ${o.customer?.village}</p>
+              <p><b>ಪಿನ್ ಕೋಡ್:</b> ${o.customer?.pincode}</p>
+              <p style="color:#d84315; font-weight:bold; margin-top:4px;">📏 GPS ದೂರ: ${o.distanceKm || '3.5 ಕಿ.ಮೀ.'}</p>
+
+              <div style="display:flex; gap:6px; margin-top:6px;">
+                <a href="tel:${o.customer?.phone}" class="btn-call">📞 ಕಾಲ್ ಮಾಡಿ</a>
+                <a href="${mapsUrl}" target="_blank" style="flex:1; background:#1976d2; color:#fff; text-align:center; padding:6px; border-radius:4px; text-decoration:none; font-size:0.75rem; font-weight:bold;">🗺️ ಗೂಗಲ್ ಜಿಪಿಎಸ್ ಲೊಕೇಶನ್</a>
+              </div>
             </div>
 
             <div style="margin-top:10px; background:#e8f5e9; padding:10px; border-radius:8px; border:1px solid #c8e6c9;">
@@ -684,17 +803,6 @@
                 <a href="${shopMapsUrl}" target="_blank" style="flex:1; background:#e65100; color:#fff; text-align:center; padding:6px; border-radius:4px; text-decoration:none; font-size:0.75rem; font-weight:bold;">📍 ಅಂಗಡಿ ಲೊಕೇಶನ್</a>
               </div>
             </div>
-
-            <hr style="margin:8px 0; border:0; border-top:1px solid #ddd;">
-
-            <div style="background:#fff; padding:8px; border-radius:6px; border:1px solid #ddd;">
-              <p><b>ಗ್ರಾಹಕರು:</b> ${o.customer?.name} (${o.customer?.phone})</p>
-              <p style="margin-top:2px;"><b>ವಿಳಾಸ:</b> ${o.customer?.village}, ${o.customer?.taluk || dboy.taluk}</p>
-              <div style="display:flex; gap:6px; margin-top:4px;">
-                <a href="tel:${o.customer?.phone}" class="btn-call">📞 ಗ್ರಾಹಕರಿಗೆ ಕಾಲ್ ಮಾಡಿ</a>
-                <a href="${mapsUrl}" target="_blank" style="flex:1; background:#1976d2; color:#fff; text-align:center; padding:6px; border-radius:4px; text-decoration:none; font-size:0.75rem; font-weight:bold;">🗺️ ಗ್ರಾಹಕರ ಮ್ಯಾಪ್</a>
-              </div>
-            </div>
           </div>
         `;
       }).join('');
@@ -713,7 +821,7 @@
         let shopPhone = o.shopPhone || '8105010768';
 
         let payBadge = o.paymentMode === 'COD' ? 
-          `<span class="pay-badge pay-cod">💵 COD Order Return</span>` : 
+          `<span class="pay-badge pay-cod">💵 ಕ್ಯಾಶ್ ಆನ್ ಡೆಲಿವರಿ Order Return</span>` : 
           `<span class="pay-badge pay-upi">✔ UPI Online Return</span>`;
 
         if (!o.returnPickupOtp) o.returnPickupOtp = Math.floor(1000 + Math.random() * 9000).toString();
@@ -737,7 +845,7 @@
             </div>
 
             <div style="background:#ffebee; padding:10px; border-radius:8px; border:1px solid #ffcdd2;">
-              <label style="font-size:0.8rem; font-weight:bold; color:#c62828; margin-bottom:4px;">ಗ್ರಾಹಕರ ಬಳಿ ಪಡೆದ ಒಟಿಪಿ ಹಾಕಿ ಪಿಕ್ ಅಪ್ ಮಾಡಿ:</label>
+              <label style="font-size:0.8rem; font-weight:bold; color:#c62828; margin-bottom:4px;">ಗ್ರಾಹಕರ ಬಳಿ ಪಡೆದ 4-ಡಿಜಿಟ್ ಒಟಿಪಿ ಹಾಕಿ ಪಿಕ್ ಅಪ್ ಮಾಡಿ:</label>
               <div style="display:flex; gap:8px;">
                 <input type="number" id="retPickupOtp_${o.docId}" placeholder="OTP ಹಾಕಿ" style="flex:1; padding:8px; font-size:1rem; border:1px solid #ccc; border-radius:6px; text-align:center; font-weight:bold;">
                 <button onclick="verifyReturnCustomerPickup('${o.docId}', '${o.returnPickupOtp}')" class="btn-pickup" style="width:auto; padding:8px 16px;">ರಿಟರ್ನ್ ಪಿಕ್ ಅಪ್ (OK)</button>
@@ -763,7 +871,7 @@
             </div>
 
             <div style="background:#e8f5e9; padding:10px; border-radius:8px; border:1px solid #c8e6c9;">
-              <label style="font-size:0.8rem; font-weight:bold; color:#2e7d32; margin-bottom:4px;">ಅಂಗಡಿ ಮಾಲೀಕರ ಒಟಿಪಿ ಹಾಕಿ ರಿಟರ್ನ್ ಮುಗಿಸಿ:</label>
+              <label style="font-size:0.8rem; font-weight:bold; color:#2e7d32; margin-bottom:4px;">ಅಂಗಡಿ ಮಾಲೀಕರ 4-ಡಿಜಿಟ್ ಒಟಿಪಿ ಹಾಕಿ ರಿಟರ್ನ್ ಮುಗಿಸಿ:</label>
               <div style="display:flex; gap:8px;">
                 <input type="number" id="retDeliverOtp_${o.docId}" placeholder="OTP ಹಾಕಿ" style="flex:1; padding:8px; font-size:1rem; border:1px solid #ccc; border-radius:6px; text-align:center; font-weight:bold;">
                 <button onclick="verifyReturnShopDelivery('${o.docId}', '${o.returnDeliveryOtp}')" class="btn-deliver" style="width:auto; padding:8px 16px;">ರಿಟರ್ನ್ ಕನ್ಫರ್ಮ್ (OK)</button>
@@ -796,7 +904,7 @@
       }
       listDiv.innerHTML = history.map(o => {
         let isReturn = o.status === 'RETURN_COMPLETED';
-        let payBadge = o.paymentMode === 'COD' ? `(COD Order)` : `(UPI Paid)`;
+        let payBadge = o.paymentMode === 'COD' ? `(ಕ್ಯಾಶ್ ಆನ್ ಡೆಲಿವರಿ Order)` : `(UPI Paid)`;
         return `
           <div class="order-item" style="border-left-color: ${isReturn ? 'var(--danger)' : 'var(--success)'};">
             <p><b>${o.productName}</b> - ₹${o.totalPrice} <span style="font-size:0.75rem; color:#666;">${payBadge}</span></p>
